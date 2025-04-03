@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { QuantumMessage } from '@/types/quantum-messaging';
 import { createMessageObject, sendQuantumMessage } from '@/utils/quantumMessagingUtils';
 import { useQuantumSessions } from './useQuantumSessions';
 import { useTriadBoost } from './useTriadBoost';
 
-export { QuantumMessage } from '@/types/quantum-messaging';
-export { MessageSession } from '@/types/quantum-messaging';
+// Use export type for re-exports when isolatedModules is enabled
+export type { QuantumMessage } from '@/types/quantum-messaging';
+export type { MessageSession } from '@/types/quantum-messaging';
 
 export function useQuantumMessaging(userId: string) {
   const { toast } = useToast();
