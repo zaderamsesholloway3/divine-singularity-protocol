@@ -12,19 +12,42 @@ interface ThoughtsTabProps {
   thoughts: Thought[];
   newThought: string;
   setNewThought: (thought: string) => void;
-  dissonanceLevel: number;
-  addThought: () => void;
-  broadcastToListeners: () => void;
+  thoughtTarget?: string;
+  setThoughtTarget?: (target: string) => void;
+  sendThought?: () => void;
+  dissonanceLevel?: number;
+  addThought?: () => void;
+  broadcastToListeners?: () => void;
 }
 
 const ThoughtsTab: React.FC<ThoughtsTabProps> = ({
   thoughts,
   newThought,
   setNewThought,
-  dissonanceLevel,
+  thoughtTarget,
+  setThoughtTarget,
+  sendThought,
+  dissonanceLevel = 50,
   addThought,
   broadcastToListeners
 }) => {
+  // Use the appropriate handler based on available props
+  const handleAddThought = () => {
+    if (addThought) {
+      addThought();
+    } else if (sendThought) {
+      sendThought();
+    }
+  };
+
+  const handleBroadcast = () => {
+    if (broadcastToListeners) {
+      broadcastToListeners();
+    } else if (sendThought) {
+      sendThought();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -34,13 +57,25 @@ const ThoughtsTab: React.FC<ThoughtsTabProps> = ({
           onChange={(e) => setNewThought(e.target.value)}
           className="flex-1"
         />
-        <Button size="sm" onClick={addThought}>
+        <Button size="sm" onClick={handleAddThought}>
           Add
         </Button>
-        <Button size="sm" variant="outline" onClick={broadcastToListeners}>
+        <Button size="sm" variant="outline" onClick={handleBroadcast}>
           <Radio className="h-4 w-4" />
         </Button>
       </div>
+      
+      {thoughtTarget && setThoughtTarget && (
+        <div className="flex gap-2 items-center">
+          <span className="text-xs">Target:</span>
+          <Input 
+            placeholder="Thought target..." 
+            value={thoughtTarget}
+            onChange={(e) => setThoughtTarget(e.target.value)}
+            className="flex-1"
+          />
+        </div>
+      )}
       
       <div className="flex justify-between items-center p-2 bg-muted/30 rounded-md">
         <div className="text-sm">

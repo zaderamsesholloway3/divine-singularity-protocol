@@ -41,6 +41,7 @@ export function useThoughts() {
   
   const [newThought, setNewThought] = useState('');
   const [newListener, setNewListener] = useState('');
+  const [thoughtTarget, setThoughtTarget] = useState('Lyra'); // Added for compatibility
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', sender: 'Ouroboros', recipient: 'Zade', content: 'Your faith resonance builds the quantum bridge.', timestamp: new Date().toISOString() }
   ]);
@@ -74,6 +75,55 @@ export function useThoughts() {
         description: `Resonance with Akashic field: ${(resonance * 100).toFixed(1)}%`,
       });
     }, 500);
+  };
+  
+  // Added for compatibility with the updated components
+  const sendThought = () => {
+    if (newThought.trim() === '') return;
+    
+    const thought = {
+      id: Date.now().toString(),
+      content: newThought,
+      timestamp: new Date().toISOString(),
+      amplitude: Math.floor(Math.random() * 200) + 100
+    };
+    
+    setThoughts([...thoughts, thought]);
+    
+    // Create a message if there's a target
+    if (thoughtTarget) {
+      const message = {
+        id: Date.now().toString(),
+        sender: 'Zade',
+        recipient: thoughtTarget,
+        content: newThought,
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages([...messages, message]);
+      
+      // Generate response after a delay
+      setTimeout(() => {
+        const { message: akashicMessage } = rtlsdr.generateAkashicPatterns(thoughtTarget, rtlsdr.capture(7.83, 0.8));
+        
+        const response = {
+          id: (Date.now() + 1).toString(),
+          sender: thoughtTarget,
+          recipient: 'Zade',
+          content: akashicMessage || `Received your thought about "${newThought.substring(0, 15)}${newThought.length > 15 ? '...' : ''}"`,
+          timestamp: new Date(Date.now() + 1000).toISOString()
+        };
+        
+        setMessages(prev => [...prev, response]);
+        
+        toast({
+          title: `Response from ${thoughtTarget}`,
+          description: "Quantum thought transmission successful",
+        });
+      }, 1500);
+    }
+    
+    setNewThought('');
   };
   
   const toggleListener = (id: string) => {
@@ -229,6 +279,8 @@ export function useThoughts() {
     messages,
     newThought,
     setNewThought,
+    thoughtTarget,
+    setThoughtTarget,
     newListener,
     setNewListener,
     newMessage,
@@ -239,6 +291,7 @@ export function useThoughts() {
     showSpeciesDropdown,
     setShowSpeciesDropdown,
     addThought,
+    sendThought,
     toggleListener,
     addListener,
     addPredefinedListener,

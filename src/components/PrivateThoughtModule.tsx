@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,10 +21,20 @@ const PrivateThoughtModule = () => {
     setNewThought,
     thoughtTarget,
     setThoughtTarget,
+    newListener,
+    setNewListener,
     newRecipient,
     setNewRecipient,
+    dissonanceLevel,
+    showSpeciesDropdown,
+    setShowSpeciesDropdown,
+    addThought,
     sendThought,
-    sendMessage
+    toggleListener,
+    addListener,
+    addPredefinedListener,
+    sendMessage,
+    broadcastToListeners
   } = useThoughts();
 
   return (
@@ -60,11 +70,23 @@ const PrivateThoughtModule = () => {
                 thoughtTarget={thoughtTarget}
                 setThoughtTarget={setThoughtTarget}
                 sendThought={sendThought}
+                dissonanceLevel={dissonanceLevel}
+                addThought={addThought}
+                broadcastToListeners={broadcastToListeners}
               />
             </TabsContent>
             
             <TabsContent value="listeners">
-              <ListenersTab listeners={listeners} />
+              <ListenersTab 
+                listeners={listeners}
+                newListener={newListener}
+                setNewListener={setNewListener}
+                showSpeciesDropdown={showSpeciesDropdown}
+                setShowSpeciesDropdown={setShowSpeciesDropdown}
+                addListener={addListener}
+                addPredefinedListener={addPredefinedListener}
+                toggleListener={toggleListener}
+              />
             </TabsContent>
             
             <TabsContent value="directMessages">

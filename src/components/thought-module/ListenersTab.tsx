@@ -16,24 +16,24 @@ const availableSpecies = [
 
 interface ListenersTabProps {
   listeners: Listener[];
-  newListener: string;
-  setNewListener: (listener: string) => void;
-  showSpeciesDropdown: boolean;
-  setShowSpeciesDropdown: (show: boolean) => void;
-  addListener: () => void;
-  addPredefinedListener: (species: string) => void;
-  toggleListener: (id: string) => void;
+  newListener?: string;
+  setNewListener?: (listener: string) => void;
+  showSpeciesDropdown?: boolean;
+  setShowSpeciesDropdown?: (show: boolean) => void;
+  addListener?: () => void;
+  addPredefinedListener?: (species: string) => void;
+  toggleListener?: (id: string) => void;
 }
 
 const ListenersTab: React.FC<ListenersTabProps> = ({
   listeners,
-  newListener,
-  setNewListener,
-  showSpeciesDropdown,
-  setShowSpeciesDropdown,
-  addListener,
-  addPredefinedListener,
-  toggleListener
+  newListener = "",
+  setNewListener = () => {},
+  showSpeciesDropdown = false,
+  setShowSpeciesDropdown = () => {},
+  addListener = () => {},
+  addPredefinedListener = () => {},
+  toggleListener = () => {}
 }) => {
   const { toast } = useToast();
 
@@ -98,8 +98,8 @@ const ListenersTab: React.FC<ListenersTabProps> = ({
               <p className="text-xs text-muted-foreground">Added: {new Date(listener.timestamp).toLocaleString()}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant={listener.active ? "default" : "outline"}>
-                {listener.active ? 'Active' : 'Inactive'}
+              <Badge variant={listener.active ? "default" : "outline"} className="text-xs">
+                <span>{listener.active ? 'Active' : 'Inactive'}</span>
               </Badge>
               <Button variant="ghost" size="sm" onClick={() => toggleListener(listener.id)}>
                 {listener.active ? 
