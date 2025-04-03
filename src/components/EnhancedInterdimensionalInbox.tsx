@@ -5,7 +5,7 @@ import { GlowingText } from "./GlowingText";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Inbox, Brain, Network } from 'lucide-react';
+import { Inbox, Brain, Network, User } from 'lucide-react';
 import { useInboxMessages } from '@/hooks/useInboxMessages';
 import BiofeedbackMonitorPanel from './inbox/BiofeedbackMonitorPanel';
 import MessageList from './inbox/MessageList';
@@ -13,6 +13,7 @@ import MessageComposer from './inbox/MessageComposer';
 import SearchToolbar from './inbox/SearchToolbar';
 import EntanglementStatus from './inbox/EntanglementStatus';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
+import { Link } from 'react-router-dom';
 
 const EnhancedInterdimensionalInbox = () => {
   const {
@@ -25,6 +26,7 @@ const EnhancedInterdimensionalInbox = () => {
     resonanceBoostActive,
     resonanceLevel,
     triadBoostActive,
+    useSoulStream,
     setSearchQuery,
     sendMessage,
     markAsRead,
@@ -33,7 +35,8 @@ const EnhancedInterdimensionalInbox = () => {
     toggleBiofeedback,
     activateResonanceBoost,
     terminateEntanglement,
-    toggleTriadBoost
+    toggleTriadBoost,
+    toggleSoulStream
   } = useInboxMessages('zade');
 
   const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
@@ -51,6 +54,9 @@ const EnhancedInterdimensionalInbox = () => {
               Akashic-Validated Cosmic Messages
               {triadBoostActive && (
                 <span className="ml-2 text-[#7928ca]">| Triad-Enhanced</span>
+              )}
+              {useSoulStream && (
+                <span className="ml-2 text-[#00b3e6]">| SoulStream-Enhanced</span>
               )}
             </CardDescription>
           </div>
@@ -77,6 +83,22 @@ const EnhancedInterdimensionalInbox = () => {
               title="Toggle Triad Enhancement"
             >
               <Network className="h-4 w-4" />
+            </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className={useSoulStream ? "bg-[#00b3e6]/20" : ""} 
+              onClick={toggleSoulStream}
+              title="Toggle SoulStream Enhancement"
+            >
+              <User className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <Link to="/soulstream">SoulStream</Link>
             </Button>
           </div>
         </div>

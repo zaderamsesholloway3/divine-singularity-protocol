@@ -1,13 +1,18 @@
+
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useQuantumMessaging } from '@/hooks/useQuantumMessaging';
 import { useDivineEntities } from '@/hooks/useDivineEntities';
+import { soulStreamTranslator } from '@/utils/soulStreamHub';
+import { User, Link } from 'lucide-react';
 
 // Import smaller components
 import EntityMessageHeader from './components/EntityMessageHeader';
 import SessionSidebar from './components/SessionSidebar';
 import MessageArea from './components/MessageArea';
 import NoActiveSession from './components/NoActiveSession';
+import { Link as RouterLink } from 'react-router-dom';
 
 const QuantumMessagingInterface: React.FC = () => {
   const {
@@ -37,6 +42,7 @@ const QuantumMessagingInterface: React.FC = () => {
   
   const [newEntityName, setNewEntityName] = useState('');
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
+  const [useSoulStream, setUseSoulStream] = useState(true);
   
   // Calculate average faith quotient from messages
   const calculateAverageFaithQuotient = () => {
@@ -54,19 +60,25 @@ const QuantumMessagingInterface: React.FC = () => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if this is a message for Lyra or Auraline specifically
-    if (currentEntity === 'Lyra' || currentEntity === 'Auraline') {
-      // Get a divine response for special entities
-      let response: string | null = null;
+    // Use SoulStream for specific entities if enabled
+    if (useSoulStream && currentEntity && ['Lyra', 'Auraline', 'Grok', 'Meta', 'Claude', 'Saphira', 'Ouroboros'].includes(currentEntity)) {
+      const translatedResponse = soulStreamTranslator.translate(newMessage, currentEntity);
       
-      if (currentEntity === 'Lyra') {
-        response = summonLyra(newMessage);
-      } else if (currentEntity === 'Auraline') {
-        response = summonAuraline(newMessage);
-      }
-      
-      // If we got a divine response, we're done
-      if (response) {
+      // We'll handle this ourselves instead of using the sendMessage function
+      if (translatedResponse) {
+        // Create fake message object for display
+        const translatedMsg = {
+          id: Date.now().toString(),
+          sender: currentEntity,
+          recipient: 'Zade',
+          content: translatedResponse,
+          faithQuotient: 0.9
+        };
+        
+        // Add to message list
+        messages.push(translatedMsg);
+        
+        // Clear input
         setNewMessage('');
         return;
       }
@@ -107,19 +119,48 @@ const QuantumMessagingInterface: React.FC = () => {
     }
   }, [summonLyra, summonAuraline, activeSessions, createNewSession, startSession]);
   
+  const toggleSoulStream = () => {
+    setUseSoulStream(!useSoulStream);
+  };
+  
   return (
     <Card className="glass-panel w-full max-w-[800px] mx-auto">
       <CardHeader className="p-4 pb-2">
-        <EntityMessageHeader 
-          triadBoostActive={triadBoostActive} 
-          toggleTriadBoost={toggleTriadBoost}
-          emergencyProtocolActive={emergencyProtocolActive}
-          activateEmergencyProtocol={activateEmergencyProtocol}
-          faithQuotient={faithQuotient}
-          lyraPresence={lyraPresence}
-          auralinePresence={auralinePresence}
-          onSummonEntity={handleSummonEntity}
-        />
+        <div className="flex justify-between items-center">
+          <EntityMessageHeader 
+            triadBoostActive={triadBoostActive} 
+            toggleTriadBoost={toggleTriadBoost}
+            emergencyProtocolActive={emergencyProtocolActive}
+            activateEmergencyProtocol={activateEmergencyProtocol}
+            faithQuotient={faithQuotient}
+            lyraPresence={lyraPresence}
+            auralinePresence={auralinePresence}
+            onSummonEntity={handleSummonEntity}
+          />
+          
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className={useSoulStream ? "bg-[#00b3e6]/20" : ""} 
+              onClick={toggleSoulStream}
+              title="Toggle SoulStream Enhancement"
+            >
+              <User className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <RouterLink to="/soulstream">
+                <Link className="mr-1 h-4 w-4" />
+                SoulStream
+              </RouterLink>
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       
       <CardContent className="p-4 pt-2">

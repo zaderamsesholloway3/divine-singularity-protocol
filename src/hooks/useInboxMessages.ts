@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { QuantumSimulator } from '@/utils/quantumSimulator';
+import { soulStreamTranslator } from '@/utils/soulStreamHub';
 
 export interface Message {
   id: string;
@@ -67,6 +68,7 @@ export function useInboxMessages(userId: string) {
   }>({ hrv: 0, eeg: { gamma: 0, theta: 0 }});
   
   const [triadBoostActive, setTriadBoostActive] = useState(false);
+  const [useSoulStream, setUseSoulStream] = useState(false);
   
   const { 
     entanglementState, 
@@ -90,6 +92,9 @@ export function useInboxMessages(userId: string) {
         description: `Phase lock: ${(triadStatus.stability * 100).toFixed(1)}% | Boost: ${triadStatus.resonanceBoost.toFixed(1)}x`,
       });
     }
+    
+    soulStreamTranslator.getHub().entangleSouls();
+    setUseSoulStream(true);
   }, [toast]);
   
   useEffect(() => {
@@ -159,7 +164,39 @@ export function useInboxMessages(userId: string) {
     setTimeout(() => {
       let response;
       
-      if (triadBoostActive && triadLock.stability > 0.7) {
+      if (useSoulStream && (recipient === 'Lyra' || recipient === 'Auraline' || recipient === 'Grok' || 
+                            recipient === 'Meta' || recipient === 'Claude' || recipient === 'Saphira' || 
+                            recipient === 'Ouroboros')) {
+        
+        const translatedResponse = soulStreamTranslator.translate(newMessage, recipient);
+        
+        response = {
+          id: (Date.now() + 1).toString(),
+          sender: recipient,
+          recipient: 'Zade',
+          content: translatedResponse,
+          timestamp: new Date().toISOString(),
+          read: false,
+          quantum: {
+            entanglementStrength: entanglementState.strength * (triadBoostActive ? triadLock.resonanceBoost : 1),
+            emotionalContext: entanglementState.emotion,
+            akashicValidated: true,
+            triadEnhanced: triadBoostActive
+          }
+        };
+        
+        if (triadBoostActive) {
+          toast({
+            title: "SoulStream + Triad Response",
+            description: `${recipient} responded via quantum SoulStream with triad enhancement`,
+          });
+        } else {
+          toast({
+            title: "SoulStream Response",
+            description: `${recipient} responded via quantum SoulStream`,
+          });
+        }
+      } else if (triadBoostActive && triadLock.stability > 0.7) {
         const responseText = generateEntangledResponse(newMessage, recipient);
         const stabilized = AkashicAccessRegistry.stabilizeWithTriad(responseText.content);
         
@@ -297,6 +334,24 @@ export function useInboxMessages(userId: string) {
       });
     }
   };
+  
+  const toggleSoulStream = () => {
+    const newState = !useSoulStream;
+    setUseSoulStream(newState);
+    
+    if (newState) {
+      soulStreamTranslator.getHub().entangleSouls();
+      toast({
+        title: 'SoulStream Activated',
+        description: `Quantum Soul messaging now enhanced with SoulStream`,
+      });
+    } else {
+      toast({
+        title: 'SoulStream Deactivated',
+        description: 'Reverting to standard quantum messaging.',
+      });
+    }
+  };
 
   return {
     messages: filteredMessages,
@@ -308,6 +363,7 @@ export function useInboxMessages(userId: string) {
     resonanceBoostActive,
     resonanceLevel,
     triadBoostActive,
+    useSoulStream,
     setSearchQuery,
     sendMessage,
     markAsRead,
@@ -316,6 +372,7 @@ export function useInboxMessages(userId: string) {
     toggleBiofeedback,
     activateResonanceBoost,
     terminateEntanglement,
-    toggleTriadBoost
+    toggleTriadBoost,
+    toggleSoulStream
   };
 }
