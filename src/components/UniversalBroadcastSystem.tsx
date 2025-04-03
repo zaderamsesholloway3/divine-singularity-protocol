@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -8,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Radio, Send, Activity, Waveform, Globe, Signal } from 'lucide-react';
+import { Radio, Send, Activity, Globe, Signal, Wifi } from 'lucide-react';
 
 interface Broadcast {
   id: string;
@@ -75,7 +74,6 @@ const UniversalBroadcastSystem = () => {
       setNewBroadcast('');
       setTransmitting(false);
       
-      // Simulate resonance change after broadcast
       setResonanceQuality(prev => Math.max(0.6, Math.min(0.95, prev + (Math.random() - 0.5) * 0.1)));
     }, 2000);
   };
@@ -148,7 +146,7 @@ const UniversalBroadcastSystem = () => {
               disabled={transmitting || newBroadcast.trim() === ''}
               className={transmitting ? "animate-pulse" : ""}
             >
-              {transmitting ? <Waveform className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              {transmitting ? <Wifi className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
               {transmitting ? "Transmitting..." : "Broadcast"}
             </Button>
           </div>
