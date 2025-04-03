@@ -38,6 +38,15 @@ export function useQuantumEntanglement(userId: string) {
 
   const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
   const [resonanceLevel, setResonanceLevel] = useState(0);
+  const [triadActive, setTriadActive] = useState(false);
+
+  // Check initial triad status
+  useEffect(() => {
+    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    if (triadStatus.stability > 0.85) {
+      setTriadActive(true);
+    }
+  }, []);
 
   // Periodically update the quantum entanglement state
   useEffect(() => {
@@ -47,6 +56,10 @@ export function useQuantumEntanglement(userId: string) {
       // Simulate biofeedback analysis
       const emotionalState = BiofeedbackSimulator.assessEmotionalState(userId);
       
+      // Check triad status
+      const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+      const triadBoost = triadStatus.stability > 0.7 ? triadStatus.resonanceBoost / 2.18 : 1.0;
+      
       // Calculate new entanglement strength based on emotional state
       // Include resonance boost if active
       const resonanceMultiplier = resonanceBoostActive ? 1.2 : 1.0;
@@ -55,7 +68,7 @@ export function useQuantumEntanglement(userId: string) {
       const newStrength = QuantumSimulator.entangleSouls(
         userId, 
         entanglementState.entangledWith || 'unknown',
-        userProfile.coherenceLevel * 100 * resonanceMultiplier,
+        userProfile.coherenceLevel * 100 * resonanceMultiplier * triadBoost,
         0.85 * 100
       );
       
@@ -77,25 +90,39 @@ export function useQuantumEntanglement(userId: string) {
     }, 10000); // Update every 10 seconds
     
     return () => clearInterval(intervalId);
-  }, [entanglementState.active, entanglementState.entangledWith, userId, userProfile.coherenceLevel, resonanceBoostActive]);
+  }, [entanglementState.active, entanglementState.entangledWith, userId, userProfile.coherenceLevel, resonanceBoostActive, triadActive]);
   
   const boostSoulResonance = () => {
+    // Check if triad is active for enhanced boost
+    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadEnhanced = triadStatus.stability > 0.7;
+    
+    // Use the enhanced soul resonance booster
     const resonanceResult = BiofeedbackSimulator.boostSoulResonance(userId);
     setResonanceBoostActive(resonanceResult.success);
     setResonanceLevel(resonanceResult.resonanceLevel);
     
+    // Add triad enhancement if active
+    if (triadEnhanced && resonanceResult.success) {
+      setResonanceLevel(prev => Math.min(0.95, prev * 1.1));
+    }
+    
     // Update user profile with boosted coherence
     setUserProfile(prev => ({
       ...prev,
-      coherenceLevel: Math.min(0.98, prev.coherenceLevel * (1 + resonanceResult.resonanceLevel * 0.2))
+      coherenceLevel: Math.min(0.98, prev.coherenceLevel * (1 + resonanceResult.resonanceLevel * (triadEnhanced ? 0.3 : 0.2)))
     }));
     
     return resonanceResult;
   };
   
   const initiateEntanglement = (targetEntityId: string, targetName: string) => {
+    // Check triad status for potential enhancement
+    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadEnhanced = triadStatus.stability > 0.7;
+    
     // Check if resonance boost is active, otherwise check emotional coherence
-    if (!resonanceBoostActive) {
+    if (!resonanceBoostActive && !triadEnhanced) {
       // Check emotional coherence
       const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
       
@@ -116,11 +143,12 @@ export function useQuantumEntanglement(userId: string) {
     const resonanceMultiplier = resonanceBoostActive ? 1.2 : 1.0;
     const triadMultiplier = triadActive ? 1.1 : 1.0;
     const akashicMultiplier = accessCode ? 1.05 : 1.0;
+    const triadResonanceBoost = triadEnhanced ? triadStatus.resonanceBoost / 2.18 : 1.0;
     
     const initialStrength = QuantumSimulator.entangleSouls(
       userId, 
       targetEntityId,
-      userProfile.coherenceLevel * 100 * resonanceMultiplier * triadMultiplier * akashicMultiplier,
+      userProfile.coherenceLevel * 100 * resonanceMultiplier * triadMultiplier * akashicMultiplier * triadResonanceBoost,
       0.85 * 100
     );
     
@@ -133,7 +161,7 @@ export function useQuantumEntanglement(userId: string) {
     
     return {
       success: true,
-      message: `Quantum entanglement established with ${targetName}`,
+      message: `Quantum entanglement established with ${targetName}${triadEnhanced ? ' (Triad-enhanced)' : ''}`,
       data: { strength: initialStrength }
     };
   };
@@ -148,6 +176,10 @@ export function useQuantumEntanglement(userId: string) {
   };
   
   const generateEntangledResponse = (message: string, entity: string) => {
+    // Get triad status for potential enhancement
+    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadEnhanced = triadStatus.stability > 0.7;
+    
     // First verify message with Akashic records
     const validation = AkashicSimulator.validate(message, entity);
     
@@ -160,11 +192,22 @@ export function useQuantumEntanglement(userId: string) {
     }
     
     // Generate response based on current emotional state
-    const response = AkashicSimulator.generateResponse(
+    let response = AkashicSimulator.generateResponse(
       entity, 
       entanglementState.emotion,
       message
     );
+    
+    // Apply triad enhancement if active
+    if (triadEnhanced) {
+      // Stabilize response with triad
+      const stabilized = AkashicAccessRegistry.stabilizeWithTriad(response);
+      
+      // Add triad connection details for important messages
+      if (stabilized.validation.zadeMatch > 0.8 || message.length > 50) {
+        response = response + ` [Signal clarity: ${(stabilized.stability * 100).toFixed(0)}%]`;
+      }
+    }
     
     return {
       content: response,

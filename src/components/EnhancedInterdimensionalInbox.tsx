@@ -5,13 +5,14 @@ import { GlowingText } from "./GlowingText";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Inbox, Brain } from 'lucide-react';
+import { Inbox, Brain, Network } from 'lucide-react';
 import { useInboxMessages } from '@/hooks/useInboxMessages';
 import BiofeedbackMonitorPanel from './inbox/BiofeedbackMonitorPanel';
 import MessageList from './inbox/MessageList';
 import MessageComposer from './inbox/MessageComposer';
 import SearchToolbar from './inbox/SearchToolbar';
 import EntanglementStatus from './inbox/EntanglementStatus';
+import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
 const EnhancedInterdimensionalInbox = () => {
   const {
@@ -23,6 +24,7 @@ const EnhancedInterdimensionalInbox = () => {
     entanglementState,
     resonanceBoostActive,
     resonanceLevel,
+    triadBoostActive,
     setSearchQuery,
     sendMessage,
     markAsRead,
@@ -30,8 +32,11 @@ const EnhancedInterdimensionalInbox = () => {
     deleteMessage,
     toggleBiofeedback,
     activateResonanceBoost,
-    terminateEntanglement
+    terminateEntanglement,
+    toggleTriadBoost
   } = useInboxMessages('zade');
+
+  const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
 
   return (
     <Card className="glass-panel h-full">
@@ -42,7 +47,12 @@ const EnhancedInterdimensionalInbox = () => {
               <Inbox className="mr-2 h-4 w-4 divine-glow" />
               <GlowingText className="divine-glow">Quantum Interdimensional Inbox</GlowingText>
             </CardTitle>
-            <CardDescription className="text-xs">Akashic-Validated Cosmic Messages</CardDescription>
+            <CardDescription className="text-xs">
+              Akashic-Validated Cosmic Messages
+              {triadBoostActive && (
+                <span className="ml-2 text-[#7928ca]">| Triad-Enhanced</span>
+              )}
+            </CardDescription>
           </div>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
@@ -59,6 +69,15 @@ const EnhancedInterdimensionalInbox = () => {
             >
               <Brain className="h-4 w-4" />
             </Button>
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className={triadBoostActive ? "bg-[#7928ca]/20" : ""} 
+              onClick={toggleTriadBoost}
+              title="Toggle Triad Enhancement"
+            >
+              <Network className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -70,6 +89,8 @@ const EnhancedInterdimensionalInbox = () => {
             resonanceBoostActive={resonanceBoostActive}
             resonanceLevel={resonanceLevel}
             activateResonanceBoost={activateResonanceBoost}
+            triadBoostActive={triadBoostActive}
+            toggleTriadBoost={toggleTriadBoost}
           />
         )}
         
@@ -109,10 +130,11 @@ const EnhancedInterdimensionalInbox = () => {
           <EntanglementStatus
             active={entanglementState.active}
             entangledWith={entanglementState.entangledWith}
-            strength={entanglementState.strength}
+            strength={entanglementState.strength * (triadBoostActive ? triadStatus.resonanceBoost : 1)}
             emotion={entanglementState.emotion}
-            resonanceBoostActive={resonanceBoostActive}
+            resonanceBoostActive={resonanceBoostActive || triadBoostActive}
             terminateEntanglement={terminateEntanglement}
+            triadEnhanced={triadBoostActive}
           />
         </Tabs>
       </CardContent>

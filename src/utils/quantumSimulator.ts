@@ -27,10 +27,14 @@ export class QuantumSimulator {
     
     // Apply triad connection boost if the triad is complete
     const triadBoost = AkashicAccessRegistry.verifyTriadConnection() ? 0.1 : 0;
+    const triadResonance = AkashicAccessRegistry.getTriadResonanceStrength();
+    
+    // Apply the triad resonance boost (up to 118% additional boost)
+    const triadResonanceBoost = triadResonance * 1.18;
     
     // Simulate Bell state probability with enhancements
     const bellStateProbability = Math.min(0.98, 
-      (coherenceA * coherenceB) / 100 + akashicBoost + triadBoost
+      (coherenceA * coherenceB) / 100 + akashicBoost + triadBoost + triadResonanceBoost
     );
     
     console.log(`Quantum entanglement: ${entityA}-${entityB}, probability: ${bellStateProbability.toFixed(3)}`);
@@ -46,6 +50,8 @@ export class QuantumSimulator {
   } {
     // Get triad resonance strength for enhanced accuracy
     const triadResonance = AkashicAccessRegistry.getTriadResonanceStrength();
+    const triadLock = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadMultiplier = triadLock.stability > 0.7 ? 1.5 : 1.0;
     
     // Adjust distances based on species
     const speciesData: Record<string, { distance: number, origin: string }> = {
@@ -74,7 +80,7 @@ export class QuantumSimulator {
     const data = speciesData[species.toLowerCase()] || defaultData;
     
     // Improve accuracy based on triad resonance - reduces variance
-    const varianceFactor = Math.max(0.01, 0.05 - (triadResonance * 0.04));
+    const varianceFactor = Math.max(0.01, 0.05 - (triadResonance * 0.04 * triadMultiplier));
     const variance = Math.random() * varianceFactor * data.distance;
     const correctedDistance = Math.max(0, data.distance + (Math.random() > 0.5 ? variance : -variance));
     
@@ -89,10 +95,12 @@ export class QuantumSimulator {
    */
   static identifySignalSource(frequency: number, modulation: string): {
     entity: string,
-    fidelity: number
+    fidelity: number,
+    triadValidated: boolean
   } {
     // Enhance with Akashic data for better entity identification
     const triadResonance = AkashicAccessRegistry.getTriadResonanceStrength();
+    const triadLock = AkashicAccessRegistry.getTriadPhaseLockStatus();
     
     const knownEntities: Record<string, {freq: number, modulation: string}> = {
       "CIA": { freq: 7.83, modulation: "PSK" },
@@ -120,9 +128,12 @@ export class QuantumSimulator {
     // Combine known entities with Akashic entities
     const combinedEntities = { ...knownEntities, ...akashicEntityDetails };
     
+    // Apply triad enhancement if active
+    const triadBoost = triadLock.stability > 0.7 ? triadLock.resonanceBoost : 1.0;
+    
     Object.entries(combinedEntities).forEach(([entity, params]) => {
       // Enhanced comparison algorithm with triad resonance factored in
-      const freqSimilarity = 1 - Math.min(1, Math.abs(params.freq - frequency) / (10 - triadResonance * 5));
+      const freqSimilarity = 1 - Math.min(1, Math.abs(params.freq - frequency) / (10 - triadResonance * 5 * triadBoost));
       const modSimilarity = params.modulation === modulation ? 1 : 0.3;
       const fidelity = (freqSimilarity * 0.7) + (modSimilarity * 0.3);
       
@@ -132,7 +143,11 @@ export class QuantumSimulator {
       }
     });
     
-    return { entity: bestMatch, fidelity: highestFidelity };
+    return { 
+      entity: bestMatch, 
+      fidelity: highestFidelity,
+      triadValidated: triadLock.stability > 0.7 && highestFidelity > 0.8
+    };
   }
 
   /**
@@ -142,14 +157,20 @@ export class QuantumSimulator {
     entityDetected: boolean,
     entityName?: string,
     dimension?: number,
-    confidence: number
+    confidence: number,
+    triadEnhanced: boolean
   } {
     // Get triad resonance for enhanced detection
     const triadResonance = AkashicAccessRegistry.getTriadResonanceStrength();
+    const triadLock = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadEnhanced = triadLock.stability > 0.7;
+    
+    // Enhanced detection probability with triad
+    const triadBoost = triadEnhanced ? triadLock.resonanceBoost : 1.0;
     
     // Simulate phase estimation result (1 = detected, 0 = not detected)
     // Higher triad resonance improves detection probability
-    const detectionThreshold = 0.5 - (triadResonance * 0.2);
+    const detectionThreshold = 0.5 - (triadResonance * 0.2 * triadBoost);
     const phaseResult = Math.random();
     const entityDetected = phaseResult > detectionThreshold;
     
@@ -190,16 +211,59 @@ export class QuantumSimulator {
     }
     
     // Confidence based on distance and triad resonance
-    const maxAllowedDistance = 20 + (triadResonance * 30); // Max distance in degrees
+    const maxAllowedDistance = 20 + (triadResonance * 30 * triadBoost); // Max distance in degrees
     const confidence = entityDetected && closestSite && minDistance < maxAllowedDistance
-      ? Math.max(0, 1 - minDistance / maxAllowedDistance) * (0.7 + triadResonance * 0.3)
+      ? Math.max(0, 1 - minDistance / maxAllowedDistance) * (0.7 + triadResonance * 0.3 * triadBoost)
       : 0;
     
     return {
       entityDetected: entityDetected && confidence > 0.3,
       entityName: confidence > 0.3 ? closestSite?.name : undefined,
       dimension: confidence > 0.3 ? closestSite?.dimension : undefined,
-      confidence
+      confidence,
+      triadEnhanced
+    };
+  }
+  
+  /**
+   * Generate a synthetic EEG signature from message content
+   * Allows bypassing hardware requirements using quantum backdoor
+   */
+  static generateSyntheticBiofeedback(message: string, userId: string): {
+    eeg: { gamma: number; theta: number };
+    hrv: number;
+    coherent: boolean;
+  } {
+    // Get user's Akashic access code
+    const userAccess = AkashicAccessRegistry.getAccessCode(userId);
+    
+    // Check if triad is active for enhanced synthetic generation
+    const triadLock = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadBoost = triadLock.stability > 0.7 ? triadLock.resonanceBoost : 1.0;
+    
+    // Hash the message into a number using a simple algorithm
+    const messageHash = [...message].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Calculate synthetic EEG values
+    const baseGamma = 30 + (messageHash % 30); // Range 30-60 Hz
+    const baseTheta = 4 + (messageHash % 4);   // Range 4-8 Hz
+    
+    // Apply Akashic & Triad modifications
+    const clearanceBoost = userAccess ? (userAccess.clearanceLevel / 10) : 0.5;
+    const gamma = Math.min(80, baseGamma * clearanceBoost * triadBoost);
+    const theta = baseTheta * (1 + (clearanceBoost * 0.2));
+    
+    // Calculate synthetic HRV
+    const baseHrv = 50 + (messageHash % 50); // Range 50-100 ms
+    const hrv = baseHrv * (1 + (clearanceBoost * 0.3) * triadBoost);
+    
+    // Determine coherence
+    const coherent = gamma > 40 && hrv > 50;
+    
+    return {
+      eeg: { gamma, theta },
+      hrv,
+      coherent: triadLock.stability > 0.7 ? true : coherent // Triad always ensures coherence
     };
   }
 }

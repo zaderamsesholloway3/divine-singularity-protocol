@@ -1,9 +1,10 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Activity } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Brain, Zap, Network } from 'lucide-react';
+import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
 interface BiofeedbackMonitorPanelProps {
   biometrics: {
@@ -13,66 +14,104 @@ interface BiofeedbackMonitorPanelProps {
   resonanceBoostActive: boolean;
   resonanceLevel: number;
   activateResonanceBoost: () => void;
+  triadBoostActive?: boolean;
+  toggleTriadBoost?: () => void;
 }
 
 const BiofeedbackMonitorPanel: React.FC<BiofeedbackMonitorPanelProps> = ({
   biometrics,
   resonanceBoostActive,
   resonanceLevel,
-  activateResonanceBoost
+  activateResonanceBoost,
+  triadBoostActive = false,
+  toggleTriadBoost
 }) => {
+  const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  const triadReady = triadStatus.stability > 0.7;
+
   return (
-    <div className="mb-4 p-2 border rounded-md bg-black/30">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-xs font-medium flex items-center">
-          <Activity className="h-3 w-3 mr-1" />
-          Biometric Coherence
-        </span>
-        <div className="flex items-center gap-2">
-          <Badge variant={biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "default" : "outline"}>
-            {biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "Coherent" : "Incoherent"}
+    <div className="bg-black/20 rounded-md p-3 mb-4 space-y-3">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-medium flex items-center">
+          <Brain className="h-4 w-4 mr-2" />
+          Biofeedback Monitor
+        </h3>
+        {resonanceBoostActive && (
+          <Badge variant="secondary" className="bg-green-500/20">
+            Resonance Active
           </Badge>
+        )}
+        {triadBoostActive && (
+          <Badge variant="secondary" className="bg-[#7928ca]/40">
+            Triad Active
+          </Badge>
+        )}
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="text-xs">HRV Coherence</span>
+            <span className="text-xs text-muted-foreground">{biometrics.hrv.toFixed(1)} ms</span>
+          </div>
+          <Progress value={Math.min(100, biometrics.hrv)} className="h-2" />
+          
+          <div className="flex justify-between items-center">
+            <span className="text-xs">EEG Gamma Power</span>
+            <span className="text-xs text-muted-foreground">{biometrics.eeg.gamma.toFixed(1)} Hz</span>
+          </div>
+          <Progress value={Math.min(100, biometrics.eeg.gamma * 1.5)} className="h-2" />
+        </div>
+        
+        <div className="space-y-2">
           <Button 
-            variant="outline" 
             size="sm" 
-            className={`h-6 px-2 text-xs ${resonanceBoostActive ? "bg-purple-500/20" : ""}`}
+            variant={resonanceBoostActive ? "default" : "outline"}
+            className={`w-full ${resonanceBoostActive ? 'bg-green-600 hover:bg-green-700' : ''}`}
             onClick={activateResonanceBoost}
+            disabled={resonanceBoostActive}
           >
-            Boost
+            <Zap className="h-4 w-4 mr-2" />
+            {resonanceBoostActive ? 'Boost Active' : 'Boost Resonance'}
           </Button>
+          
+          {toggleTriadBoost && (
+            <Button 
+              size="sm" 
+              variant={triadBoostActive ? "default" : "outline"}
+              className={`w-full ${triadBoostActive ? 'bg-[#7928ca] hover:bg-[#6928ca]' : ''}`}
+              onClick={toggleTriadBoost}
+              disabled={!triadReady && !triadBoostActive}
+            >
+              <Network className="h-4 w-4 mr-2" />
+              {triadBoostActive ? 'Triad Active' : triadReady ? 'Activate Triad' : 'Triad Unstable'}
+            </Button>
+          )}
+          
+          {resonanceBoostActive && (
+            <div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs">Soul Resonance</span>
+                <span className="text-xs text-muted-foreground">{(resonanceLevel * 100).toFixed(1)}%</span>
+              </div>
+              <Progress value={resonanceLevel * 100} className="h-2 bg-muted/50" />
+            </div>
+          )}
+          
+          {(toggleTriadBoost || triadBoostActive) && (
+            <div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs">Triad Phase Lock</span>
+                <span className="text-xs text-muted-foreground">{(triadStatus.stability * 100).toFixed(1)}%</span>
+              </div>
+              <Progress 
+                value={triadStatus.stability * 100} 
+                className={`h-2 ${triadStatus.stability > 0.7 ? 'bg-[#7928ca]/30' : 'bg-muted/50'}`} 
+              />
+            </div>
+          )}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <div className="flex justify-between text-xs">
-            <span>HRV</span>
-            <span>{biometrics.hrv.toFixed(1)}</span>
-          </div>
-          <Progress value={(biometrics.hrv / 120) * 100} className="h-1" />
-        </div>
-        <div>
-          <div className="flex justify-between text-xs">
-            <span>EEG Gamma</span>
-            <span>{biometrics.eeg.gamma.toFixed(2)}</span>
-          </div>
-          <Progress value={biometrics.eeg.gamma * 100} className="h-1" />
-        </div>
-      </div>
-      {resonanceBoostActive && (
-        <div className="mt-2">
-          <div className="flex justify-between text-xs">
-            <span>Soul Resonance</span>
-            <span className="text-divine-gold">
-              {(resonanceLevel * 100).toFixed(1)}%
-            </span>
-          </div>
-          <Progress 
-            value={resonanceLevel * 100} 
-            className="h-1" 
-            indicatorClassName={resonanceLevel > 0.85 ? "bg-divine-gold" : ""}
-          />
-        </div>
-      )}
     </div>
   );
 };
