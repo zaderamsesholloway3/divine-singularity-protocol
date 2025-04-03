@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -61,8 +60,8 @@ const UniversalConnectionVisualizer = () => {
   
   const [triadData, setTriadData] = useState({
     zade: { strength: 0.95, messages: 24, lastUpdate: new Date().toISOString() },
-    lockheed: { strength: 0.87, messages: 18, lastUpdate: new Date(Date.now() - 120000).toISOString() },
-    cia: { strength: 0.75, messages: 12, lastUpdate: new Date(Date.now() - 300000).toISOString() }
+    zadeRamsesHolloway1: { strength: 0.87, messages: 18, lastUpdate: new Date(Date.now() - 120000).toISOString() },
+    zadeRamsesHolloway2: { strength: 0.75, messages: 12, lastUpdate: new Date(Date.now() - 300000).toISOString() }
   });
   
   // Chart data for universal waveform
@@ -91,7 +90,7 @@ const UniversalConnectionVisualizer = () => {
         fill: true
       },
       {
-        label: 'Lockheed',
+        label: 'Zade Ramses Holloway',
         data: Array.from({ length: 30 }, () => Math.random() * 0.4 + 0.5),
         borderColor: 'rgba(6, 182, 212, 0.8)',
         backgroundColor: 'rgba(6, 182, 212, 0.2)',
@@ -99,7 +98,7 @@ const UniversalConnectionVisualizer = () => {
         fill: true
       },
       {
-        label: 'CIA',
+        label: 'Zade Ramses Holloway',
         data: Array.from({ length: 30 }, () => Math.random() * 0.5 + 0.3),
         borderColor: 'rgba(249, 115, 22, 0.8)',
         backgroundColor: 'rgba(249, 115, 22, 0.2)',
@@ -177,15 +176,15 @@ const UniversalConnectionVisualizer = () => {
           strength: Math.max(0.7, Math.min(0.98, prev.zade.strength + (Math.random() - 0.5) * 0.02)),
           lastUpdate: new Date().toISOString()
         },
-        lockheed: { 
-          ...prev.lockheed,
-          strength: Math.max(0.6, Math.min(0.95, prev.lockheed.strength + (Math.random() - 0.5) * 0.03)),
-          lastUpdate: Math.random() > 0.7 ? new Date().toISOString() : prev.lockheed.lastUpdate
+        zadeRamsesHolloway1: { 
+          ...prev.zadeRamsesHolloway1,
+          strength: Math.max(0.6, Math.min(0.95, prev.zadeRamsesHolloway1.strength + (Math.random() - 0.5) * 0.03)),
+          lastUpdate: Math.random() > 0.7 ? new Date().toISOString() : prev.zadeRamsesHolloway1.lastUpdate
         },
-        cia: { 
-          ...prev.cia,
-          strength: Math.max(0.5, Math.min(0.9, prev.cia.strength + (Math.random() - 0.5) * 0.04)),
-          lastUpdate: Math.random() > 0.8 ? new Date().toISOString() : prev.cia.lastUpdate
+        zadeRamsesHolloway2: { 
+          ...prev.zadeRamsesHolloway2,
+          strength: Math.max(0.5, Math.min(0.9, prev.zadeRamsesHolloway2.strength + (Math.random() - 0.5) * 0.04)),
+          lastUpdate: Math.random() > 0.8 ? new Date().toISOString() : prev.zadeRamsesHolloway2.lastUpdate
         }
       }));
       
@@ -211,8 +210,8 @@ const UniversalConnectionVisualizer = () => {
           newValues.shift();
           let baseVal;
           if (index === 0) baseVal = triadData.zade.strength;
-          else if (index === 1) baseVal = triadData.lockheed.strength;
-          else baseVal = triadData.cia.strength;
+          else if (index === 1) baseVal = triadData.zadeRamsesHolloway1.strength;
+          else baseVal = triadData.zadeRamsesHolloway2.strength;
           
           newValues.push(baseVal * (0.9 + Math.random() * 0.2));
           return { ...dataset, data: newValues };
@@ -386,18 +385,18 @@ const UniversalConnectionVisualizer = () => {
                 </div>
                 <div className="flex items-center text-xs">
                   <Circle className="h-2 w-2 mr-1 text-cyan-500" />
-                  <span className="mr-1">Lockheed:</span>
-                  <span>{(triadData.lockheed.strength * 100).toFixed(1)}%</span>
+                  <span className="mr-1">Zade Ramses Holloway:</span>
+                  <span>{(triadData.zadeRamsesHolloway1.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">
-                    {new Date(triadData.lockheed.lastUpdate).toLocaleTimeString()}
+                    {new Date(triadData.zadeRamsesHolloway1.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
                   <Circle className="h-2 w-2 mr-1 text-orange-500" />
-                  <span className="mr-1">CIA:</span>
-                  <span>{(triadData.cia.strength * 100).toFixed(1)}%</span>
+                  <span className="mr-1">Zade Ramses Holloway:</span>
+                  <span>{(triadData.zadeRamsesHolloway2.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">
-                    {new Date(triadData.cia.lastUpdate).toLocaleTimeString()}
+                    {new Date(triadData.zadeRamsesHolloway2.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">

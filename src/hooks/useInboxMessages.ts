@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuantumEntanglement } from '@/hooks/useQuantumEntanglement';
 import { useToast } from '@/hooks/use-toast';
@@ -82,7 +81,6 @@ export function useInboxMessages(userId: string) {
   
   const unreadCount = messages.filter(m => !m.read).length;
   
-  // Triad initialization
   useEffect(() => {
     const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
     if (triadStatus.stability > 0.85) {
@@ -94,7 +92,6 @@ export function useInboxMessages(userId: string) {
     }
   }, [toast]);
   
-  // Biofeedback monitoring
   useEffect(() => {
     if (!biofeedbackActive) return;
     
@@ -111,13 +108,10 @@ export function useInboxMessages(userId: string) {
     
     let biofeedback;
     
-    // Use triad quantum backdoor if active
     if (triadBoostActive) {
-      // Generate synthetic biofeedback
       biofeedback = QuantumSimulator.generateSyntheticBiofeedback(newMessage, userId);
       console.log("Using Triad Quantum Backdoor", biofeedback);
     } else if (biofeedbackActive && !resonanceBoostActive) {
-      // Use actual biofeedback
       biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
       if (!biofeedback.coherent) {
         toast({
@@ -128,11 +122,9 @@ export function useInboxMessages(userId: string) {
         return;
       }
     } else {
-      // Default biofeedback
       biofeedback = { coherent: true, metrics: { hrv: 70, eeg: { gamma: 50, theta: 6 } } };
     }
     
-    // Attempt entanglement with enhancements
     if (!entanglementState.active || entanglementState.entangledWith !== recipient) {
       const result = initiateEntanglement(recipient.toLowerCase(), recipient);
       if (!result.success) {
@@ -145,7 +137,6 @@ export function useInboxMessages(userId: string) {
       }
     }
     
-    // Create stabilized message with triad
     const triadLock = AkashicAccessRegistry.getTriadPhaseLockStatus();
     
     const message: Message = {
@@ -165,12 +156,10 @@ export function useInboxMessages(userId: string) {
     
     setMessages(prev => [...prev, message]);
     
-    // Generate response with triad enhancement if active
     setTimeout(() => {
       let response;
       
       if (triadBoostActive && triadLock.stability > 0.7) {
-        // Stabilized response with triad
         const responseText = generateEntangledResponse(newMessage, recipient);
         const stabilized = AkashicAccessRegistry.stabilizeWithTriad(responseText.content);
         
@@ -194,11 +183,10 @@ export function useInboxMessages(userId: string) {
         if (!responseText.filtered) {
           toast({
             title: "Triad-Enhanced Response",
-            description: `Zade match: ${(stabilized.validation.zadeMatch * 100).toFixed(1)}% | Clearance: ${stabilized.validation.ciaClearance}`,
+            description: `Zade match: ${(stabilized.validation.zadeMatch * 100).toFixed(1)}%`,
           });
         }
       } else {
-        // Standard response
         const responseText = generateEntangledResponse(newMessage, recipient);
         
         response = {
@@ -292,7 +280,7 @@ export function useInboxMessages(userId: string) {
         setTriadBoostActive(true);
         toast({
           title: 'Triad Quantum Backdoor Activated',
-          description: `Zade-CIA-Lockheed Akashic synchronization complete. All modules enhanced.`,
+          description: `Zade Ramses Holloway Akashic synchronization complete. All modules enhanced.`,
         });
       } else {
         toast({
