@@ -8,6 +8,7 @@ export function useTriadBoost() {
   const [triadBoostActive, setTriadBoostActive] = useState(false);
   const [emergencyProtocolActive, setEmergencyProtocolActive] = useState(false);
   const [stabilityLevel, setStabilityLevel] = useState(0);
+  const [faithQuotient, setFaithQuotient] = useState(0.5); // Default faith quotient
   
   // Check triad status on initialization
   useEffect(() => {
@@ -59,11 +60,14 @@ export function useTriadBoost() {
     
     if (!triadBoostActive) {
       // Try to activate
-      if (triadStatus.stability > 0.7) {
+      if (triadStatus.stability > 0.7 || faithQuotient > 0.9) {
         setTriadBoostActive(true);
+        
+        const faithBoostText = faithQuotient > 0.9 ? " (UFQ override)" : "";
+        
         toast({
           title: "Triad Quantum Backdoor Activated",
-          description: `Phase lock: ${(triadStatus.stability * 100).toFixed(1)}% | Enhanced quantum access enabled`,
+          description: `Phase lock: ${(triadStatus.stability * 100).toFixed(1)}%${faithBoostText} | Enhanced quantum access enabled`,
         });
       } else {
         // If stability is too low, offer emergency protocol
@@ -83,6 +87,24 @@ export function useTriadBoost() {
         title: "Triad Quantum Backdoor Disabled",
         description: "Reverting to standard quantum operations",
       });
+    }
+  };
+  
+  // Update faith quotient
+  const updateFaithQuotient = (newQuotient: number) => {
+    setFaithQuotient(Math.min(0.98, newQuotient));
+    
+    // High faith can auto-stabilize the connection
+    if (newQuotient > 0.9 && stabilityLevel < 0.7) {
+      setStabilityLevel(prev => Math.min(0.9, prev + 0.2));
+      
+      if (!triadBoostActive) {
+        setTriadBoostActive(true);
+        toast({
+          title: "Ultimate Faith Quotient Detected",
+          description: "Quantum backdoor auto-activated through faith resonance",
+        });
+      }
     }
   };
   
@@ -113,14 +135,16 @@ export function useTriadBoost() {
     const schumann = 7.83; // Target frequency
     const divineFreq = 1.855e43; // Divine frequency constant
     
-    // Apply quantum boost algorithm
-    const boostFactor = 1 + (1 - currentStability) * 0.5;
+    // Apply quantum boost algorithm with faith amplification
+    const faithMultiplier = 1 + (faithQuotient * 0.5);
+    const boostFactor = 1 + (1 - currentStability) * 0.5 * faithMultiplier;
     const newStability = Math.min(0.98, currentStability * boostFactor);
     const resonanceBoost = newStability * 2.18; // Maximum boost as per specifications
     
     // Log the emergency protocol actions (would be actual quantum operations in a real system)
     console.log(`Emergency Protocol: Boosting phase lock from ${(currentStability * 100).toFixed(1)}% to ${(newStability * 100).toFixed(1)}%`);
     console.log(`Schumann resonance locked at ${schumann}Hz | Divine frequency: ${divineFreq}Hz`);
+    console.log(`Faith amplification: ${(faithMultiplier * 100).toFixed(0)}%`);
     
     return {
       stability: newStability,
@@ -133,6 +157,8 @@ export function useTriadBoost() {
     toggleTriadBoost,
     stabilityLevel,
     emergencyProtocolActive,
-    activateEmergencyProtocol
+    activateEmergencyProtocol,
+    faithQuotient,
+    updateFaithQuotient
   };
 }

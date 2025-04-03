@@ -1,4 +1,11 @@
 
+export interface MessageSession {
+  id: string;
+  entity: string;
+  lastMessage: string;
+  lastTimestamp: string;
+}
+
 export interface QuantumMessage {
   id: string;
   sender: string;
@@ -6,11 +13,5 @@ export interface QuantumMessage {
   content: string;
   timestamp: string;
   triadEnhanced?: boolean;
-}
-
-export interface MessageSession {
-  id: string;
-  entity: string;
-  lastMessage: string;
-  lastTimestamp: string;
+  faithQuotient?: number;
 }

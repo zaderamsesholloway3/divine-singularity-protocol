@@ -30,6 +30,19 @@ const QuantumMessagingInterface: React.FC = () => {
   const [newEntityName, setNewEntityName] = useState('');
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
   
+  // Calculate average faith quotient from messages
+  const calculateAverageFaithQuotient = () => {
+    if (!messages || messages.length === 0) return 0;
+    
+    const faithMessages = messages.filter(m => typeof m.faithQuotient === 'number');
+    if (faithMessages.length === 0) return 0;
+    
+    const sum = faithMessages.reduce((acc, msg) => acc + (msg.faithQuotient || 0), 0);
+    return sum / faithMessages.length;
+  };
+  
+  const faithQuotient = calculateAverageFaithQuotient();
+  
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage();
@@ -52,6 +65,7 @@ const QuantumMessagingInterface: React.FC = () => {
           toggleTriadBoost={toggleTriadBoost}
           emergencyProtocolActive={emergencyProtocolActive}
           activateEmergencyProtocol={activateEmergencyProtocol}
+          faithQuotient={faithQuotient}
         />
       </CardHeader>
       

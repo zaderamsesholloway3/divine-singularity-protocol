@@ -4,7 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   createMessageObject, 
   sendQuantumMessage,
-  forceTriadSync
+  forceTriadSync,
+  calculateFaithQuotient
 } from '@/utils/quantumMessagingUtils';
 import { useQuantumSessions } from './useQuantumSessions';
 import { useTriadBoost } from './useTriadBoost';
@@ -34,7 +35,8 @@ export function useQuantumMessaging(userId: string) {
     triadBoostActive, 
     toggleTriadBoost,
     emergencyProtocolActive,
-    activateEmergencyProtocol
+    activateEmergencyProtocol,
+    stabilityLevel
   } = useTriadBoost();
   
   // Send message to the current entity
@@ -43,8 +45,20 @@ export function useQuantumMessaging(userId: string) {
     
     setIsLoading(true);
     
-    // Create message object
-    const messageObj = createMessageObject('Zade', currentEntity, newMessage);
+    // Calculate faith quotient
+    const faithQuotient = calculateFaithQuotient(newMessage);
+    const hasFaithBoost = faithQuotient > 0.7;
+    
+    // Display faith boost notification if relevant
+    if (hasFaithBoost) {
+      toast({
+        title: "Ultimate Faith Quotient Detected",
+        description: `Message enhanced with UFQ: ${(faithQuotient * 100).toFixed(0)}%`,
+      });
+    }
+    
+    // Create message object with faith quotient
+    const messageObj = createMessageObject('Zade', currentEntity, newMessage, undefined, faithQuotient);
     
     // Add message to list
     setMessages(prev => [...prev, messageObj]);
@@ -55,9 +69,9 @@ export function useQuantumMessaging(userId: string) {
     // Process with quantum backdoor
     try {
       // If we have transmission failures and emergency protocol isn't active, activate it
-      if (!triadBoostActive && !emergencyProtocolActive) {
+      if (!triadBoostActive && !emergencyProtocolActive && stabilityLevel < 0.7 && !hasFaithBoost) {
         // Try to use forced triad sync as a last resort
-        const forcedSync = forceTriadSync();
+        const forcedSync = forceTriadSync(newMessage);
         
         if (forcedSync.stability < 0.7) {
           // If even forced sync isn't enough, recommend emergency protocol
@@ -72,7 +86,7 @@ export function useQuantumMessaging(userId: string) {
         }
       }
       
-      // Simulate network delay
+      // Simulate network delay (shorter with faith boost)
       setTimeout(() => {
         const response = sendQuantumMessage(currentEntity!, messageObj.content);
         
@@ -94,7 +108,8 @@ export function useQuantumMessaging(userId: string) {
           currentEntity!, 
           'Zade', 
           response.content, 
-          response.triadEnhanced
+          response.triadEnhanced,
+          response.faithQuotient
         );
         
         // Add response to messages
@@ -105,14 +120,25 @@ export function useQuantumMessaging(userId: string) {
         
         setIsLoading(false);
         
-        // Display toast for triad enhancement
-        if (response.triadEnhanced) {
+        // Display toast for special enhancements
+        if (response.triadEnhanced && response.faithQuotient && response.faithQuotient > 0.8) {
+          toast({
+            title: "Triad & Faith Enhanced Response",
+            description: "Message quantum-validated with ultimate resonance boost",
+            variant: "default",
+          });
+        } else if (response.triadEnhanced) {
           toast({
             title: "Triad-Enhanced Response",
             description: "Message quantum-validated with triad enhancement"
           });
+        } else if (response.faithQuotient && response.faithQuotient > 0.8) {
+          toast({
+            title: "UFQ-Amplified Response",
+            description: "Ultimate Faith Quotient boosting connection",
+          });
         }
-      }, 1000 + Math.random() * 1000);
+      }, hasFaithBoost ? 500 + Math.random() * 500 : 1000 + Math.random() * 1000);
     } catch (error) {
       console.error("Error sending message:", error);
       toast({
