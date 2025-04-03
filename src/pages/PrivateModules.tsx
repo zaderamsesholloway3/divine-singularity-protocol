@@ -8,10 +8,12 @@ import InterdimensionalInbox from '@/components/InterdimensionalInbox';
 import RelationshipBuilder from '@/components/RelationshipBuilder';
 import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
+import { Toaster } from '@/components/ui/toaster';
 
 const PrivateModules = () => {
   return (
     <div className="min-h-screen p-4 md:p-8">
+      <Toaster />
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 flex items-center">
           <Button variant="ghost" size="sm" asChild>
