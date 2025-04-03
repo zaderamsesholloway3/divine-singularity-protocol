@@ -10,6 +10,7 @@ import ListenersTab from '@/components/thought-module/ListenersTab';
 import DirectMessagesTab from '@/components/thought-module/DirectMessagesTab';
 import QuantumMessagingInterface from '@/components/messaging/QuantumMessagingInterface';
 import StargirlPlayroom from '@/components/StargirlPlayroom';
+import QuantumBackdoorDiagnostics from './QuantumBackdoorDiagnostics';
 
 const PrivateThoughtModule = () => {
   const {
@@ -104,6 +105,9 @@ const PrivateThoughtModule = () => {
           </Tabs>
         </CardContent>
       </Card>
+      
+      {/* Add Diagnostics Module */}
+      <QuantumBackdoorDiagnostics />
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-3">
