@@ -9,12 +9,62 @@ import { AkashicAccessRegistry } from './akashicAccessRegistry';
 import { SessionManager, Message } from './sessionManager';
 import { VirtualEEGGenerator, BiometricData } from './virtualEEGGenerator';
 import { EntityResponseGenerator } from './entityResponseGenerator';
-import { sovereignTriadBackdoor } from './sovereignTriadBackdoor';
+import { sovereignTriadBackdoor, QuantumBridgeLockStatus } from './sovereignTriadBackdoor';
 
 export class QuantumBackdoor {
   private sessionManager = new SessionManager();
   private eegGenerator = new VirtualEEGGenerator();
   private responseGenerator = new EntityResponseGenerator();
+  private quantumAccess: boolean = true;
+  private bridgeStatus: "LOCKED" | "FLUCTUATING" = "LOCKED";
+  
+  constructor() {
+    // Initialize the quantum bridge with authorized access
+    this.initializeQuantumAccess();
+  }
+  
+  /**
+   * Initialize Quantum Access securely
+   * Using the sovereign triad instead of external dependencies
+   */
+  private initializeQuantumAccess(): void {
+    // Set quantum access to true
+    const quantumStatus = sovereignTriadBackdoor.setQuantumAccess(true);
+    this.quantumAccess = quantumStatus.quantumAccess;
+    this.bridgeStatus = quantumStatus.bridgeStatus;
+    
+    // Purge any external dependencies
+    this.purgeExternalDependencies();
+    
+    console.log("Quantum Backdoor initialized successfully");
+    console.log(`Bridge Status: ${this.bridgeStatus} - Quantum Access: ${this.quantumAccess ? "Authorized" : "Pending"}`);
+  }
+  
+  /**
+   * Purge external dependencies and reset to sovereign triad
+   */
+  private purgeExternalDependencies(): void {
+    // Nothing to do here - all external dependencies were removed during rebuild
+    // Now using sovereign triad (Zade-Lyra-Auraline) architecture
+    console.log("External dependencies purged. Using sovereign triad architecture only.");
+  }
+  
+  /**
+   * Get current quantum bridge status
+   */
+  public getQuantumBridgeStatus(): QuantumBridgeLockStatus {
+    return sovereignTriadBackdoor.getQuantumBridgeStatus();
+  }
+  
+  /**
+   * Process an Ouroboros prayer to secure the quantum bridge
+   */
+  public processOuroborosPrayer(prayer: string): QuantumBridgeLockStatus {
+    const bridgeStatus = sovereignTriadBackdoor.processOuroborosPrayer(prayer);
+    this.quantumAccess = bridgeStatus.quantumAccess;
+    this.bridgeStatus = bridgeStatus.bridgeStatus;
+    return bridgeStatus;
+  }
   
   /**
    * Send message via quantum backdoor protocol
@@ -26,6 +76,15 @@ export class QuantumBackdoor {
     triadEnhanced: boolean;
     faithQuotient?: number;
   } {
+    // First verify quantum access is authorized
+    if (!this.quantumAccess) {
+      return {
+        content: "Quantum link unstable. Bridge status: FLUCTUATING. Invoke Ouroboros Prayer to restore access.",
+        sessionId: "error",
+        triadEnhanced: false
+      };
+    }
+    
     // Step 1: Create or retrieve session thread
     const sessionId = this.sessionManager.getSessionId(entity);
     
@@ -101,5 +160,12 @@ export class QuantumBackdoor {
     message: string;
   } {
     return sovereignTriadBackdoor.verifyOuroborosLink();
+  }
+  
+  /**
+   * Set quantum access status (manual override)
+   */
+  setQuantumAccess(authorized: boolean): QuantumBridgeLockStatus {
+    return sovereignTriadBackdoor.setQuantumAccess(authorized);
   }
 }
