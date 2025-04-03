@@ -1,203 +1,169 @@
-
-import React, { useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import React, { useState, useEffect, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useQuantumMessaging } from '@/hooks/useQuantumMessaging';
-import { useDivineEntities } from '@/hooks/useDivineEntities';
-import { soulStreamTranslator } from '@/utils/soulStreamHub';
-import { User, Link } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { useUser } from '@/context/UserContext';
+import MessageHeader from './MessageHeader';
+import { GlowingText } from "@/components/GlowingText";
+import { Network, AlertTriangle, Infinity, Zap } from 'lucide-react';
+import { Badge } from "@/components/ui/badge";
 
-// Import smaller components
-import EntityMessageHeader from './components/EntityMessageHeader';
-import SessionSidebar from './components/SessionSidebar';
-import MessageArea from './components/MessageArea';
-import NoActiveSession from './components/NoActiveSession';
-import { Link as RouterLink } from 'react-router-dom';
+// Define the QuantumMessage type
+export type QuantumMessage = {
+  id: string;
+  sender: string;
+  recipient: string;
+  content: string;
+  timestamp: string;
+  faithQuotient: number;
+};
 
 const QuantumMessagingInterface: React.FC = () => {
-  const {
-    messages,
-    activeSessions,
-    currentEntity,
-    newMessage,
-    setNewMessage,
-    triadBoostActive,
-    emergencyProtocolActive,
-    isLoading,
-    sendMessage,
-    startSession,
-    toggleTriadBoost,
-    activateEmergencyProtocol,
-    clearSession,
-    createNewSession
-  } = useQuantumMessaging('zade');
+  const { toast } = useToast();
+  const { userData, updateUserData } = useUser();
+  const [messages, setMessages] = useState<QuantumMessage[]>([]);
+  const [newMessageText, setNewMessageText] = useState<string>('');
+  const [activeEntity, setActiveEntity] = useState<string>("Lyra");
+  const [triadBoostActive, setTriadBoostActive] = useState<boolean>(false);
+  const [emergencyProtocolActive, setEmergencyProtocolActive] = useState<boolean>(false);
+  
+  // Mock translateMessage function (replace with actual logic)
+  const translateMessage = (message: string): string => {
+    return `[${activeEntity}]: ${message}`;
+  };
+  
+  // Mock function to simulate emergency protocol activation
+  const activateEmergencyProtocol = () => {
+    setEmergencyProtocolActive(true);
+    
+    toast({
+      title: "Emergency Protocol Activated",
+      description: "Ouroboros Sync Initiated",
+    });
+  };
+  
+  // Toggle Triad Boost
+  const toggleTriadBoost = () => {
+    setTriadBoostActive(prev => !prev);
+    
+    toast({
+      title: "Triad Boost",
+      description: triadBoostActive ? "Deactivated" : "Activated",
+    });
+    
+    // Simulate faith quotient increase (replace with actual logic)
+    if (!triadBoostActive) {
+      const newFaithQuotient = Math.min(1, userData.faithQuotient + 0.15);
+      updateUserData({ ...userData, faithQuotient: newFaithQuotient });
+    }
+  };
+  
+  const handleSendMessage = (text: string) => {
+    if (!text.trim()) return;
 
-  const {
-    lyraPresence,
-    auralinePresence,
-    summonLyra,
-    summonAuraline,
-    getEntityResponse
-  } = useDivineEntities();
-  
-  const [newEntityName, setNewEntityName] = useState('');
-  const [showNewSessionForm, setShowNewSessionForm] = useState(false);
-  const [useSoulStream, setUseSoulStream] = useState(true);
-  
-  // Calculate average faith quotient from messages
-  const calculateAverageFaithQuotient = () => {
-    if (!messages || messages.length === 0) return 0;
-    
-    const faithMessages = messages.filter(m => typeof m.faithQuotient === 'number');
-    if (faithMessages.length === 0) return 0;
-    
-    const sum = faithMessages.reduce((acc, msg) => acc + (msg.faithQuotient || 0), 0);
-    return sum / faithMessages.length;
+    // Add timestamp to the message object
+    const translatedMessage = translateMessage(text);
+    const newMessage: QuantumMessage = {
+      id: uuidv4(),
+      sender: activeEntity,
+      recipient: "User",
+      content: translatedMessage,
+      faithQuotient: userData.faithQuotient,
+      timestamp: new Date().toISOString() // Add timestamp
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    setNewMessageText('');
   };
   
-  const faithQuotient = calculateAverageFaithQuotient();
+  // Mock function to simulate receiving a message
+  const receiveMessage = useCallback((incomingMessage: QuantumMessage) => {
+    setMessages(prev => [...prev, incomingMessage]);
+  }, []);
   
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Simulate incoming messages (replace with actual logic)
+  useEffect(() => {
+    const mockIncomingMessages = [
+      {
+        id: uuidv4(),
+        sender: "Lyra",
+        recipient: "User",
+        content: "Quantum entanglement established. Ready for secure communication.",
+        timestamp: new Date().toISOString(),
+        faithQuotient: 0.92
+      },
+      {
+        id: uuidv4(),
+        sender: "Auraline",
+        recipient: "User",
+        content: "Verifying quantum key exchange...",
+        timestamp: new Date().toISOString(),
+        faithQuotient: 0.92
+      },
+    ];
     
-    // Use SoulStream for specific entities if enabled
-    if (useSoulStream && currentEntity && ['Lyra', 'Auraline', 'Grok', 'Meta', 'Claude', 'Saphira', 'Ouroboros'].includes(currentEntity)) {
-      const translatedResponse = soulStreamTranslator.translate(newMessage, currentEntity);
-      
-      // We'll handle this ourselves instead of using the sendMessage function
-      if (translatedResponse) {
-        // Create fake message object for display
-        const translatedMsg = {
-          id: Date.now().toString(),
-          sender: currentEntity,
-          recipient: 'Zade',
-          content: translatedResponse,
-          faithQuotient: 0.9
-        };
-        
-        // Add to message list
-        messages.push(translatedMsg);
-        
-        // Clear input
-        setNewMessage('');
-        return;
-      }
-    }
-    
-    // Otherwise use the regular quantum messaging
-    sendMessage();
-  };
-  
-  const handleCreateSession = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newEntityName.trim()) {
-      createNewSession(newEntityName);
-      setNewEntityName('');
-      setShowNewSessionForm(false);
-    }
-  };
-  
-  const handleSummonEntity = useCallback((entity: 'Lyra' | 'Auraline') => {
-    if (entity === 'Lyra') {
-      summonLyra();
-      
-      // Create a session for Lyra if one doesn't exist
-      if (!activeSessions.some(s => s.entity === 'Lyra')) {
-        createNewSession('Lyra');
-      } else {
-        startSession('Lyra');
-      }
-    } else if (entity === 'Auraline') {
-      summonAuraline();
-      
-      // Create a session for Auraline if one doesn't exist
-      if (!activeSessions.some(s => s.entity === 'Auraline')) {
-        createNewSession('Auraline');
-      } else {
-        startSession('Auraline');
-      }
-    }
-  }, [summonLyra, summonAuraline, activeSessions, createNewSession, startSession]);
-  
-  const toggleSoulStream = () => {
-    setUseSoulStream(!useSoulStream);
-  };
+    mockIncomingMessages.forEach((msg, index) => {
+      setTimeout(() => {
+        receiveMessage(msg);
+      }, (index + 1) * 2000); // Simulate staggered arrival
+    });
+  }, [receiveMessage]);
   
   return (
-    <Card className="glass-panel w-full max-w-[800px] mx-auto">
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-center">
-          <EntityMessageHeader 
-            triadBoostActive={triadBoostActive} 
-            toggleTriadBoost={toggleTriadBoost}
-            emergencyProtocolActive={emergencyProtocolActive}
-            activateEmergencyProtocol={activateEmergencyProtocol}
-            faithQuotient={faithQuotient}
-            lyraPresence={lyraPresence}
-            auralinePresence={auralinePresence}
-            onSummonEntity={handleSummonEntity}
-          />
-          
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className={useSoulStream ? "bg-[#00b3e6]/20" : ""} 
-              onClick={toggleSoulStream}
-              title="Toggle SoulStream Enhancement"
+    <Card className="glass-panel">
+      <CardContent className="p-4">
+        <MessageHeader 
+          triadBoostActive={triadBoostActive}
+          toggleTriadBoost={toggleTriadBoost}
+          emergencyProtocolActive={emergencyProtocolActive}
+          activateEmergencyProtocol={activateEmergencyProtocol}
+          faithQuotient={userData.faithQuotient}
+        />
+        
+        <ScrollArea className="h-[300px] mt-4 mb-2">
+          {messages.map((message) => (
+            <div 
+              key={message.id} 
+              className={`flex items-start gap-2 py-2 ${message.sender === "User" ? 'justify-end' : ''}`}
             >
-              <User className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-            >
-              <RouterLink to="/soulstream">
-                <Link className="mr-1 h-4 w-4" />
-                SoulStream
-              </RouterLink>
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="p-4 pt-2">
-        <div className="grid grid-cols-3 gap-4 h-[600px]">
-          {/* Sessions sidebar */}
-          <SessionSidebar 
-            activeSessions={activeSessions}
-            currentEntity={currentEntity}
-            startSession={startSession}
-            showNewSessionForm={showNewSessionForm}
-            setShowNewSessionForm={setShowNewSessionForm}
-            newEntityName={newEntityName}
-            setNewEntityName={setNewEntityName}
-            handleCreateSession={handleCreateSession}
-            triadBoostActive={triadBoostActive}
-          />
-          
-          {/* Message area */}
-          {currentEntity ? (
-            <MessageArea 
-              currentEntity={currentEntity}
-              messages={messages}
-              newMessage={newMessage}
-              setNewMessage={setNewMessage}
-              handleSendMessage={handleSendMessage}
-              isLoading={isLoading}
-              clearSession={clearSession}
-              triadBoostActive={triadBoostActive}
-            />
-          ) : (
-            <div className="col-span-2">
-              <NoActiveSession 
-                onNewConnection={() => setShowNewSessionForm(true)}
-                onSelectEntity={createNewSession}
-              />
+              {message.sender !== "User" && (
+                <Avatar>
+                  <AvatarImage src={`https://i.pravatar.cc/150?img=${message.sender.length}`} alt={message.sender} />
+                  <AvatarFallback>{message.sender.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+              )}
+              
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="text-xs font-bold">{message.sender}</div>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(message.timestamp).toLocaleTimeString()}
+                  </span>
+                  {message.faithQuotient > 0.8 && (
+                    <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">
+                      <Infinity className="h-2 w-2 mr-0.5" /> 
+                      <span>FQ</span>
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm">{message.content}</p>
+              </div>
             </div>
-          )}
+          ))}
+        </ScrollArea>
+        
+        <div className="flex gap-2">
+          <Input
+            placeholder="Enter message..."
+            value={newMessageText}
+            onChange={(e) => setNewMessageText(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(newMessageText)}
+          />
+          <Button onClick={() => handleSendMessage(newMessageText)}>Send</Button>
         </div>
       </CardContent>
     </Card>
