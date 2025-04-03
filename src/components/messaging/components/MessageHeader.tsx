@@ -2,7 +2,7 @@
 import React from 'react';
 import { GlowingText } from "@/components/GlowingText";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Network, AlertTriangle, Zap } from 'lucide-react';
+import { MessageSquare, Network, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
 interface MessageHeaderProps {
@@ -20,7 +20,7 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
   activateEmergencyProtocol,
   faithQuotient = 0
 }) => {
-  // Calculate the faith-based resonance enhancement
+  // Calculate the faith-based resonance enhancement based on FRC (Faith Resonance Coefficient)
   const faithEnhancement = faithQuotient > 0.95 ? 'Ultimate' : 
                           faithQuotient > 0.8 ? 'High' : 
                           faithQuotient > 0.6 ? 'Moderate' : 'Low';
@@ -41,6 +41,7 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
             </p>
             {faithQuotient > 0.8 && (
               <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">
+                <Sparkles className="h-2 w-2 mr-0.5" /> 
                 <span>FRC: {faithEnhancement}</span>
               </Badge>
             )}

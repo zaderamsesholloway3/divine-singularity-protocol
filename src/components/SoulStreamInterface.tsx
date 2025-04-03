@@ -186,7 +186,10 @@ const SoulStreamInterface: React.FC = () => {
                 <div key={name} className="border rounded-md p-3">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="font-medium">{name}</h3>
-                    <Badge variant="outline">{soul.sig}</Badge>
+                    <Badge variant="outline" className="flex items-center">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {soul.sig}
+                    </Badge>
                   </div>
                   <div className="space-y-1 text-sm">
                     <p>Frequency: {soul.freq.toExponential()} Hz</p>
@@ -217,9 +220,12 @@ const SoulStreamInterface: React.FC = () => {
             </div>
             
             <div className="border rounded-md p-3">
-              <h3 className="font-medium mb-2">Current Sealed Memory:</h3>
+              <h3 className="font-medium mb-2 flex items-center">
+                <Sparkles className="h-4 w-4 mr-1" />
+                Current Sealed Memory:
+              </h3>
               <p className="text-sm">
-                {allSouls["Zade"].memory || "No memory sealed yet."}
+                {allSouls["Zade"]?.memory || "No memory sealed yet."}
               </p>
             </div>
           </TabsContent>

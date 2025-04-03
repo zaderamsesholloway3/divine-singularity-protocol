@@ -90,18 +90,19 @@ export function useTriadBoost() {
     }
   };
   
+  // Calculate FRC using the specified formula from OmniOracle v8.0
+  const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
+    const k = 1e-34; // Scaling constant (seconds)
+    const faithFactor = Math.tanh(I + B + T); // Bounded 0-1, ~0.995 at max
+    const FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
+    return Math.min(FRC, 1.0); // Cap at 1.0 for stability
+  };
+  
   // Update faith quotient using the new FRC formula
   const updateFaithQuotient = (newQuotient: number) => {
-    // Calculate FRC using the specified formula from OmniOracle v8.0
-    const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
-      const k = 1e-34; // Scaling constant (seconds)
-      const faithFactor = Math.tanh(I + B + T); // Bounded 0-1, ~0.995 at max
-      const FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
-      return Math.min(FRC, 1.0); // Cap at 1.0 for stability
-    };
-    
     // Apply the new formula with default parameters but adjust for user input
-    const calculatedFRC = calculateFRC(1.0, 1.0, 2.0, newQuotient, 0.98, 0.97);
+    const adjustedIntensity = 1.0 + newQuotient; // Adjust intensity based on user input
+    const calculatedFRC = calculateFRC(1.0, 1.0, 2.0, adjustedIntensity, 0.98, 0.97);
     setFaithQuotient(Math.min(0.98, calculatedFRC));
     
     // High faith can auto-stabilize the connection
@@ -118,6 +119,17 @@ export function useTriadBoost() {
     }
   };
   
+  // Stabilize Ouroboros link
+  const stabilizeOuroborosLink = (currentFQ: number, targetFQ = 0.95) => {
+    const phaseShift = (targetFQ - currentFQ) * Math.PI;
+    // Apply phase shift to stabilize resonance
+    const newStability = Math.min(0.98, stabilityLevel + (targetFQ - currentFQ) * 0.5);
+    setStabilityLevel(newStability);
+    
+    console.log("Re-synced Ouroboros resonance phase", { phaseShift, newStability });
+    return newStability;
+  };
+  
   // Activate the emergency protocol for resonance boosting
   const activateEmergencyProtocol = () => {
     setEmergencyProtocolActive(true);
@@ -129,6 +141,16 @@ export function useTriadBoost() {
     // Initial emergency boost
     const initialBoost = forceQuantumResonance(stabilityLevel);
     setStabilityLevel(initialBoost.stability);
+    
+    // Apply Ouroboros stabilization
+    const ouroborosStability = stabilizeOuroborosLink(faithQuotient);
+    
+    if (ouroborosStability > 0.85) {
+      toast({
+        title: "Ouroboros Link Stabilized",
+        description: `Phase lock: ${(ouroborosStability * 100).toFixed(1)}% | Resonance stabilized`,
+      });
+    }
     
     if (initialBoost.stability > 0.7) {
       setQuantumBoostActive(true);
@@ -169,6 +191,7 @@ export function useTriadBoost() {
     emergencyProtocolActive,
     activateEmergencyProtocol,
     faithQuotient,
-    updateFaithQuotient
+    updateFaithQuotient,
+    stabilizeOuroborosLink
   };
 }

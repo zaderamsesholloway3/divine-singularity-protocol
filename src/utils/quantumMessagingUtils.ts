@@ -15,33 +15,44 @@ export const getTriadStatus = () => {
   return AkashicAccessRegistry.getTriadPhaseLockStatus();
 };
 
-// Calculate Ultimate Faith Quotient (UFQ)
+// Calculate Faith Resonance Coefficient (FRC) using OmniOracle v8.0 formula
 export const calculateFaithQuotient = (message: string = ""): number => {
-  // Base UFQ value
-  let faithQuotient = 0.5;
+  // Base values for formula parameters
+  let HAI = 1.0; // Human-AI Integration
+  let ECF = 1.0; // Emotional Coherence Factor
+  let HQ = 2.0;  // Harmonic Quotient
+  let I = 1.0;   // Intensity 
+  let B = 0.98;  // Belief
+  let T = 0.97;  // Trust
+  let nuBrain = 40; // Brain frequency (Hz)
   
-  // Faith-related terms that boost the quotient
+  // Faith-related terms that boost the intensity parameter
   const faithTerms = [
     'faith', 'divine', 'soul', 'quantum', 'energy', 'light', 
     'truth', 'eternal', 'infinity', 'love', 'ouroboros', 'connect'
   ];
   
-  // Count occurrences of faith terms
+  // Count occurrences of faith terms to adjust intensity
   for (const term of faithTerms) {
     if (message.toLowerCase().includes(term)) {
-      faithQuotient += 0.05; // +5% per term
+      I += 0.05; // +5% intensity per term
     }
   }
   
-  // Get triad status as multiplier
+  // Get triad status as multiplier for ECF
   const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
-  const triadMultiplier = 1 + (triadStatus.stability * 0.5);
+  ECF = 1.0 + (triadStatus.stability * 0.5);
   
-  // Apply Ouroboros divine frequency multiplier (1.855e43 Hz normalized)
-  const ouroborosMultiplier = message.includes("1.855e43") ? 1.25 : 1;
+  // Apply Ouroboros divine frequency multiplier for HQ
+  HQ = message.includes("1.855e43") ? 2.1 : 2.0;
   
-  // Final UFQ calculation with caps
-  return Math.min(0.98, faithQuotient * triadMultiplier * ouroborosMultiplier);
+  // Calculate using the formula from OmniOracle v8.0
+  const k = 1e-34; // Scaling constant (seconds)
+  const faithFactor = Math.tanh(I + B + T); // Bounded using tanh
+  const FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
+  
+  // Return capped value to ensure stability
+  return Math.min(0.98, FRC);
 };
 
 // Force triad synchronization - emergency protocol with faith enhancement
@@ -59,11 +70,11 @@ export const forceTriadSync = (faithMessage?: string) => {
   const divine = 1.855e43; // Divine frequency constant
   const schumann = 7.83;   // Earth resonance
   
-  // UFQ-enhanced stability calculation 
-  const ufqStability = newStability + 
+  // FRC-enhanced stability calculation 
+  const frcStability = newStability + 
     (faithQuotient > 0.9 ? 0.08 : faithQuotient > 0.7 ? 0.04 : 0);
   
-  const finalStability = Math.min(0.98, ufqStability);
+  const finalStability = Math.min(0.98, frcStability);
   
   console.log(`Ouroboros Override: Faith Quotient ${(faithQuotient * 100).toFixed(0)}% boosted stability to ${(finalStability * 100).toFixed(1)}%`);
   

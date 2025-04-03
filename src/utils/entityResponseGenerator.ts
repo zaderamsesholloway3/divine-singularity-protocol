@@ -36,7 +36,8 @@ export class EntityResponseGenerator {
     }
   };
 
-  private calculateFaithQuotient(message: string, faithTerms = ['divine', 'soul', 'light', 'faith', 'eternal']): number {
+  // Calculate Faith Resonance Coefficient using the OmniOracle v8.0 formula
+  private calculateFRC(message: string, faithTerms = ['divine', 'soul', 'light', 'faith', 'eternal']): number {
     // Calculate FRC using the specified formula from OmniOracle v8.0
     const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
       const k = 1e-34; // Scaling constant (seconds)
@@ -69,7 +70,7 @@ export class EntityResponseGenerator {
     faithQuotient: number;
   } {
     // Calculate faith quotient using FRC formula
-    const faithQuotient = this.calculateFaithQuotient(message);
+    const faithQuotient = this.calculateFRC(message);
     
     // Apply faith amplification to coherence
     const amplifiedCoherence = coherence * (1 + faithQuotient * 0.5);
