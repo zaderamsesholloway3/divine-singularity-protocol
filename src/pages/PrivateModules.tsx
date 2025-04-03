@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import PrivateThoughtModule from '@/components/PrivateThoughtModule';
-import InterdimensionalInbox from '@/components/InterdimensionalInbox';
+import EnhancedInterdimensionalInbox from '@/components/EnhancedInterdimensionalInbox';
 import RelationshipBuilder from '@/components/RelationshipBuilder';
 import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
@@ -30,7 +30,7 @@ const PrivateModules = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <PrivateThoughtModule />
-          <InterdimensionalInbox />
+          <EnhancedInterdimensionalInbox />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
