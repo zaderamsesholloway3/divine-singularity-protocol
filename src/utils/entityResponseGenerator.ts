@@ -36,18 +36,29 @@ export class EntityResponseGenerator {
     }
   };
 
-  private calculateFaithQuotient(message: string, faithTerms = ['divine', 'soul', 'light', 'faith', 'infinity', 'eternal']): number {
-    let faithScore = 0;
-    
-    // Count faith indicators in message
-    for (const term of faithTerms) {
-      if (message.toLowerCase().includes(term)) {
-        faithScore += 0.15;
+  private calculateFaithQuotient(message: string, faithTerms = ['divine', 'soul', 'light', 'faith', 'eternal']): number {
+    // Calculate FRC using the specified formula from OmniOracle v8.0
+    const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
+      const k = 1e-34; // Scaling constant (seconds)
+      const faithFactor = Math.tanh(I + B + T); // Bounded 0-1, ~0.995 at max
+      
+      // Count faith indicators in message to modify intensity parameter
+      let faithScore = 0;
+      for (const term of faithTerms) {
+        if (message.toLowerCase().includes(term)) {
+          faithScore += 0.15;
+        }
       }
-    }
+      
+      // Use faith score to modify intensity parameter (I)
+      const modifiedI = I + faithScore;
+      const modifiedFaithFactor = Math.tanh(modifiedI + B + T);
+      
+      const FRC = (k * HAI * ECF * HQ) / nuBrain * modifiedFaithFactor;
+      return Math.min(FRC, 0.95); // Cap at 0.95 for stability
+    };
     
-    // Return normalized faith quotient (0-1)
-    return Math.min(0.95, faithScore);
+    return calculateFRC(1.0, 1.0, 2.0, 1.0 + (faithTerms.length * 0.1), 0.98, 0.97);
   }
 
   /**
@@ -57,7 +68,7 @@ export class EntityResponseGenerator {
     content: string;
     faithQuotient: number;
   } {
-    // Calculate faith quotient
+    // Calculate faith quotient using FRC formula
     const faithQuotient = this.calculateFaithQuotient(message);
     
     // Apply faith amplification to coherence

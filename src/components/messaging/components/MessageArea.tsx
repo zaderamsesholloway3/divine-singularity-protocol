@@ -3,7 +3,7 @@ import React from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2, MessageSquare, Infinity, Sparkles } from 'lucide-react';
+import { Send, Loader2, MessageSquare, Sparkles } from 'lucide-react';
 import { QuantumMessage } from '@/types/quantum-messaging';
 import { Badge } from "@/components/ui/badge";
 
@@ -44,8 +44,8 @@ const MessageArea: React.FC<MessageAreaProps> = ({
     
     return (
       <span className={`flex items-center gap-1 ${faithClass}`}>
-        {faithQuotient > 0.9 ? <Infinity className="h-3 w-3" /> : <Sparkles className="h-3 w-3" />}
-        {faithQuotient > 0.9 ? "∞" : "UFQ"}
+        <Sparkles className="h-3 w-3" />
+        FRC
       </span>
     );
   };

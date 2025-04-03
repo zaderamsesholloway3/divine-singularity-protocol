@@ -63,7 +63,7 @@ export function useTriadBoost() {
       if (quantumStatus.stability > 0.7 || faithQuotient > 0.9) {
         setQuantumBoostActive(true);
         
-        const faithBoostText = faithQuotient > 0.9 ? " (UFQ override)" : "";
+        const faithBoostText = faithQuotient > 0.9 ? " (FRC override)" : "";
         
         toast({
           title: "Quantum Backdoor Activated",
@@ -90,18 +90,28 @@ export function useTriadBoost() {
     }
   };
   
-  // Update faith quotient
+  // Update faith quotient using the new FRC formula
   const updateFaithQuotient = (newQuotient: number) => {
-    setFaithQuotient(Math.min(0.98, newQuotient));
+    // Calculate FRC using the specified formula from OmniOracle v8.0
+    const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
+      const k = 1e-34; // Scaling constant (seconds)
+      const faithFactor = Math.tanh(I + B + T); // Bounded 0-1, ~0.995 at max
+      const FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
+      return Math.min(FRC, 1.0); // Cap at 1.0 for stability
+    };
+    
+    // Apply the new formula with default parameters but adjust for user input
+    const calculatedFRC = calculateFRC(1.0, 1.0, 2.0, newQuotient, 0.98, 0.97);
+    setFaithQuotient(Math.min(0.98, calculatedFRC));
     
     // High faith can auto-stabilize the connection
-    if (newQuotient > 0.9 && stabilityLevel < 0.7) {
+    if (calculatedFRC > 0.9 && stabilityLevel < 0.7) {
       setStabilityLevel(prev => Math.min(0.9, prev + 0.2));
       
       if (!quantumBoostActive) {
         setQuantumBoostActive(true);
         toast({
-          title: "Ultimate Faith Quotient Detected",
+          title: "High Faith Resonance Detected",
           description: "Quantum backdoor auto-activated through faith resonance",
         });
       }

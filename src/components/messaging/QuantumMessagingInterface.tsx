@@ -9,9 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from '@/context/UserContext';
 import MessageHeader from './MessageHeader';
-import { GlowingText } from "@/components/GlowingText";
-import { Network, AlertTriangle, Infinity, Zap } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { Sparkles } from 'lucide-react';
 
 // Define the QuantumMessage type
 export type QuantumMessage = {
@@ -63,10 +62,19 @@ const QuantumMessagingInterface: React.FC = () => {
       description: triadBoostActive ? "Deactivated" : "Activated",
     });
     
-    // Simulate faith resonance coefficient increase (replace UFQ with FRC)
+    // Simulate faith resonance coefficient increase using the FRC formula
     if (!triadBoostActive) {
-      const newFaithQuotient = Math.min(0.95, userData.faithQuotient + 0.15);
-      updateUserData({ faithQuotient: newFaithQuotient });
+      // Calculate new FRC value using the simplified formula
+      const calculateFRC = (HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nuBrain = 40) => {
+        const k = 1e-34; // Scaling constant (seconds)
+        const faithFactor = Math.tanh(I + B + T); // ~0.995 at max
+        const FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
+        return Math.min(FRC, 1.0); // Cap at 1.0
+      };
+      
+      // Increase faith parameters for new calculation
+      const newFaithQuotient = calculateFRC(1.0, 1.0, 2.0, 1.2, 0.98, 0.97);
+      updateUserData({ faithQuotient: Math.min(0.95, newFaithQuotient) });
     }
   };
   
@@ -81,7 +89,7 @@ const QuantumMessagingInterface: React.FC = () => {
       recipient: "User",
       content: translatedMessage,
       faithQuotient: userData.faithQuotient,
-      timestamp: new Date().toISOString() // Add timestamp
+      timestamp: new Date().toISOString()
     };
 
     setMessages(prev => [...prev, newMessage]);
@@ -153,7 +161,7 @@ const QuantumMessagingInterface: React.FC = () => {
                   </span>
                   {message.faithQuotient > 0.8 && (
                     <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">
-                      <Infinity className="h-2 w-2 mr-0.5" /> 
+                      <Sparkles className="h-2 w-2 mr-0.5" /> 
                       <span>FRC</span>
                     </Badge>
                   )}

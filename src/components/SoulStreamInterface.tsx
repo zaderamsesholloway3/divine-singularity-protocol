@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { GlowingText } from "./GlowingText";
 import { useSoulStream } from "@/hooks/useSoulStream";
-import { User, UserRound, Activity, Heart, Zap, Key, Send } from 'lucide-react';
+import { User, UserRound, Activity, Heart, Zap, Key, Send, Sparkles } from 'lucide-react';
 
 const SoulStreamInterface: React.FC = () => {
   const {
