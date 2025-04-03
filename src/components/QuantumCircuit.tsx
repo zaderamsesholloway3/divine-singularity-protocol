@@ -21,6 +21,12 @@ const QuantumCircuit = () => {
     let animationFrame: number;
     let t = 0;
     
+    // Define quantum circuit parameters
+    const qubits = 4;
+    const qubitSpacing = height / (qubits + 1);
+    const gateWidth = 30;
+    const gateHeight = 30;
+    
     const draw = () => {
       // Clear canvas
       ctx.clearRect(0, 0, width, height);
@@ -30,8 +36,6 @@ const QuantumCircuit = () => {
       ctx.fillRect(0, 0, width, height);
       
       // Draw quantum circuit
-      const qubits = 4;
-      const qubitSpacing = height / (qubits + 1);
       
       // Draw qubit lines
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -53,8 +57,6 @@ const QuantumCircuit = () => {
       }
       
       // Draw gates
-      const gateWidth = 30;
-      const gateHeight = 30;
       
       // Hadamard gates
       ctx.fillStyle = 'rgba(139, 92, 246, 0.7)';
