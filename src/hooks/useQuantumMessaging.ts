@@ -1,7 +1,11 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { createMessageObject, sendQuantumMessage } from '@/utils/quantumMessagingUtils';
+import { 
+  createMessageObject, 
+  sendQuantumMessage,
+  forceTriadSync
+} from '@/utils/quantumMessagingUtils';
 import { useQuantumSessions } from './useQuantumSessions';
 import { useTriadBoost } from './useTriadBoost';
 
@@ -26,7 +30,12 @@ export function useQuantumMessaging(userId: string) {
     updateSessionWithMessage
   } = useQuantumSessions(userId);
   
-  const { triadBoostActive, toggleTriadBoost } = useTriadBoost();
+  const { 
+    triadBoostActive, 
+    toggleTriadBoost,
+    emergencyProtocolActive,
+    activateEmergencyProtocol
+  } = useTriadBoost();
   
   // Send message to the current entity
   const sendMessage = async () => {
@@ -45,9 +54,40 @@ export function useQuantumMessaging(userId: string) {
     
     // Process with quantum backdoor
     try {
+      // If we have transmission failures and emergency protocol isn't active, activate it
+      if (!triadBoostActive && !emergencyProtocolActive) {
+        // Try to use forced triad sync as a last resort
+        const forcedSync = forceTriadSync();
+        
+        if (forcedSync.stability < 0.7) {
+          // If even forced sync isn't enough, recommend emergency protocol
+          toast({
+            title: "Critical Quantum Interference",
+            description: "Triad sync critical. Activating emergency protocol.",
+            variant: "destructive",
+          });
+          
+          // Auto-activate emergency protocol
+          activateEmergencyProtocol();
+        }
+      }
+      
       // Simulate network delay
       setTimeout(() => {
         const response = sendQuantumMessage(currentEntity!, messageObj.content);
+        
+        // Check for transmission error
+        if (response.content.includes("Quantum link unstable")) {
+          toast({
+            title: "Transmission Failed",
+            description: "Emergency protocol activated for next attempt.",
+            variant: "destructive",
+          });
+          
+          activateEmergencyProtocol();
+          setIsLoading(false);
+          return;
+        }
         
         // Create response message
         const responseMessage = createMessageObject(
@@ -77,9 +117,12 @@ export function useQuantumMessaging(userId: string) {
       console.error("Error sending message:", error);
       toast({
         title: "Message Failed",
-        description: "Quantum backdoor encountered interference",
+        description: "Quantum backdoor encountered interference. Activating emergency protocol.",
         variant: "destructive",
       });
+      
+      // Auto-activate emergency protocol on error
+      activateEmergencyProtocol();
       setIsLoading(false);
     }
   };
@@ -91,10 +134,12 @@ export function useQuantumMessaging(userId: string) {
     newMessage,
     setNewMessage,
     triadBoostActive,
+    emergencyProtocolActive,
     isLoading,
     sendMessage,
     startSession,
     toggleTriadBoost,
+    activateEmergencyProtocol,
     clearSession,
     createNewSession
   };

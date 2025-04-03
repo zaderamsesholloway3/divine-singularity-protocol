@@ -1,43 +1,73 @@
 
 import React from 'react';
-import { CardTitle, CardDescription } from "@/components/ui/card";
 import { GlowingText } from "@/components/GlowingText";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Zap, ZapOff } from 'lucide-react';
+import { MessageSquare, Network, AlertTriangle } from 'lucide-react';
 
 interface MessageHeaderProps {
   triadBoostActive: boolean;
   toggleTriadBoost: () => void;
+  emergencyProtocolActive?: boolean;
+  activateEmergencyProtocol?: () => void;
 }
 
 const MessageHeader: React.FC<MessageHeaderProps> = ({ 
   triadBoostActive, 
-  toggleTriadBoost 
+  toggleTriadBoost,
+  emergencyProtocolActive = false,
+  activateEmergencyProtocol
 }) => {
   return (
     <div className="flex justify-between items-center">
-      <div>
-        <CardTitle className="text-sm font-medium flex items-center">
-          <MessageSquare className="mr-2 h-4 w-4 divine-glow" />
-          <GlowingText className="divine-glow">Quantum Akashic Messaging</GlowingText>
-        </CardTitle>
-        <CardDescription className="text-xs">
-          Direct Ouroboros-Validated Communication
-          {triadBoostActive && (
-            <span className="ml-2 text-[#7928ca]">| Triad-Enhanced</span>
-          )}
-        </CardDescription>
+      <div className="flex items-center">
+        <MessageSquare className="mr-2 h-4 w-4 divine-glow" />
+        <div>
+          <GlowingText className="divine-glow text-sm font-medium">
+            Quantum Messaging Interface
+          </GlowingText>
+          <p className="text-xs text-muted-foreground">
+            Divine Quantum Backdoor {triadBoostActive && <span className="text-purple-500">(Triad-Enhanced)</span>}
+            {emergencyProtocolActive && <span className="text-amber-500"> (Emergency Protocol Active)</span>}
+          </p>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <Button 
-          variant={triadBoostActive ? "default" : "outline"} 
-          size="sm" 
-          className={`${triadBoostActive ? 'bg-[#7928ca] text-white' : ''}`}
-          onClick={toggleTriadBoost}
-        >
-          {triadBoostActive ? <Zap className="h-4 w-4 mr-1" /> : <ZapOff className="h-4 w-4 mr-1" />}
-          {triadBoostActive ? 'Triad Active' : 'Triad Boost'}
-        </Button>
+      
+      <div className="flex gap-2">
+        {emergencyProtocolActive ? (
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="bg-amber-500/20 text-amber-700"
+            disabled
+          >
+            <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+            Emergency Protocol Active
+          </Button>
+        ) : (
+          <>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className={triadBoostActive ? "bg-purple-500/20" : ""}
+              onClick={toggleTriadBoost}
+            >
+              <Network className="h-3.5 w-3.5 mr-1" />
+              {triadBoostActive ? "Disable" : "Enable"} Triad Boost
+            </Button>
+            
+            {activateEmergencyProtocol && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-amber-700"
+                onClick={activateEmergencyProtocol}
+              >
+                <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                Force Sync
+              </Button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

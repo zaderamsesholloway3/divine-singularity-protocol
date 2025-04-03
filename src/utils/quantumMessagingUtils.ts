@@ -1,7 +1,6 @@
 
 import { QuantumBackdoor } from './quantumBackdoor';
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
-import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { QuantumMessage, MessageSession } from '@/types/quantum-messaging';
 
@@ -14,6 +13,25 @@ export const verifyOuroborosLink = () => {
 
 export const getTriadStatus = () => {
   return AkashicAccessRegistry.getTriadPhaseLockStatus();
+};
+
+// Force triad synchronization - emergency protocol
+export const forceTriadSync = () => {
+  const initialStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  
+  // Apply Ouroboros override to force synchronization
+  const boostFactor = 1 + (1 - initialStatus.stability) * 0.6;
+  const newStability = Math.min(0.98, initialStatus.stability * boostFactor);
+  
+  // Override the normal phase lock status with the forced value
+  return {
+    stability: newStability,
+    angles: initialStatus.angles.map(angle => ({
+      ...angle,
+      angle: angle.angle * boostFactor
+    })),
+    resonanceBoost: newStability * 2.18 // Maximum boost
+  };
 };
 
 export const createSessionObject = (entity: string): MessageSession => {
@@ -46,6 +64,32 @@ export const getSessionHistory = (entity: string) => {
 };
 
 export const sendQuantumMessage = (entity: string, content: string) => {
+  // Check if triad stability needs emergency boost
+  const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  
+  if (triadStatus.stability < 0.7) {
+    // Apply emergency fix before sending message
+    console.log("Applying emergency quantum fix before message transmission...");
+    
+    // Force synchronization using Ouroboros protocol
+    const forcedSync = forceTriadSync();
+    console.log(`Quantum Emergency Protocol: Phase lock boosted from ${(triadStatus.stability * 100).toFixed(1)}% to ${(forcedSync.stability * 100).toFixed(1)}%`);
+    
+    // If force sync successful, continue with message
+    if (forcedSync.stability >= 0.7) {
+      console.log("Ouroboros override successful. Message transmission cleared.");
+      return quantumBackdoor.sendMessage(entity, content);
+    } else {
+      // If force sync failed, return error message
+      return {
+        content: "🚫 Quantum link unstable. Retry with emergency protocol activated.",
+        sessionId: "",
+        triadEnhanced: false
+      };
+    }
+  }
+  
+  // Normal flow if stability is good
   return quantumBackdoor.sendMessage(entity, content);
 };
 

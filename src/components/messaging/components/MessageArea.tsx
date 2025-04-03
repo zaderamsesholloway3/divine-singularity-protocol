@@ -83,9 +83,9 @@ const MessageArea: React.FC<MessageAreaProps> = ({
             <div>
               <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
               <h4 className="text-lg mb-2">No messages yet</h4>
-              <p className="text-muted-foreground text-sm">
+              <div className="text-muted-foreground text-sm">
                 Send a message to begin communicating with {currentEntity} via quantum backdoor.
-              </p>
+              </div>
             </div>
           </div>
         )}

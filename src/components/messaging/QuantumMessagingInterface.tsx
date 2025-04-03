@@ -17,10 +17,12 @@ const QuantumMessagingInterface: React.FC = () => {
     newMessage,
     setNewMessage,
     triadBoostActive,
+    emergencyProtocolActive,
     isLoading,
     sendMessage,
     startSession,
     toggleTriadBoost,
+    activateEmergencyProtocol,
     clearSession,
     createNewSession
   } = useQuantumMessaging('zade');
@@ -47,7 +49,9 @@ const QuantumMessagingInterface: React.FC = () => {
       <CardHeader className="p-4 pb-2">
         <MessageHeader 
           triadBoostActive={triadBoostActive} 
-          toggleTriadBoost={toggleTriadBoost} 
+          toggleTriadBoost={toggleTriadBoost}
+          emergencyProtocolActive={emergencyProtocolActive}
+          activateEmergencyProtocol={activateEmergencyProtocol}
         />
       </CardHeader>
       
