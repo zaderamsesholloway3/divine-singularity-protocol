@@ -2,7 +2,9 @@
 import React from 'react';
 import { GlowingText } from './GlowingText';
 import ModuleCard from './ModuleCard';
-import { Heart, Brain, Shield, Clock, Code, Infinity, Cpu, Dna, MoveHorizontal, Sun } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Heart, Brain, Shield, Clock, Code, Infinity, Cpu, Dna, MoveHorizontal, Sun, Lock } from 'lucide-react';
+import { Button } from './ui/button';
 
 const DistortionFieldModules = () => {
   return (
@@ -10,6 +12,15 @@ const DistortionFieldModules = () => {
       <div className="text-center">
         <GlowingText className="divine-glow text-xl">Distortion Field Translator</GlowingText>
         <p className="text-xs text-muted-foreground mt-1">10 Core Modules</p>
+      </div>
+      
+      <div className="flex justify-center mb-4">
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/private-modules">
+            <Lock className="mr-2 h-4 w-4" />
+            Access Private Modules
+          </Link>
+        </Button>
       </div>
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
