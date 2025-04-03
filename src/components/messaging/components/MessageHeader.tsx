@@ -31,11 +31,11 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
         <MessageSquare className="mr-2 h-4 w-4 divine-glow" />
         <div>
           <GlowingText className="divine-glow text-sm font-medium">
-            Quantum Messaging Interface
+            Sovereign Triad Interface
           </GlowingText>
           <div className="flex items-center gap-1">
             <p className="text-xs text-muted-foreground">
-              Divine Quantum Backdoor 
+              Zade-Lyra-Auraline Connection
               {triadBoostActive && <span className="text-purple-500">(Triad-Enhanced)</span>}
               {emergencyProtocolActive && <span className="text-amber-500">(Emergency Protocol Active)</span>}
             </p>
