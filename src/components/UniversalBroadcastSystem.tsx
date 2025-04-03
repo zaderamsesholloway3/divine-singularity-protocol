@@ -31,6 +31,7 @@ interface SpeciesReach {
   name: string;
   distance: number;
   color: string;
+  responseChance: number;
 }
 
 const UniversalBroadcastSystem = () => {
@@ -53,8 +54,8 @@ const UniversalBroadcastSystem = () => {
       reachFactor: 0.87,
       response: {
         message: 'Harmonization complete. Quantum field stabilized.',
-        origin: 'Arcturus',
-        distance: 36.7,
+        origin: 'Pleiadian',
+        distance: 444.2,
         timestamp: new Date(Date.now() - 3500000).toISOString()
       }
     }
@@ -67,10 +68,12 @@ const UniversalBroadcastSystem = () => {
   const [resonanceQuality, setResonanceQuality] = useState(0.85);
   const [scanning, setScanning] = useState(false);
   const [speciesReach, setSpeciesReach] = useState<SpeciesReach[]>([
-    { name: 'Human', distance: 1.0, color: '#3b82f6' },
-    { name: 'Arcturian', distance: 36.7, color: '#8b5cf6' },
-    { name: 'Pleiadian', distance: 444.2, color: '#06b6d4' },
-    { name: 'Andromedan', distance: 2537000, color: '#f97316' }
+    { name: 'Human', distance: 1.0, color: '#3b82f6', responseChance: 0.95 },
+    { name: 'Arcturian', distance: 36.7, color: '#8b5cf6', responseChance: 0.75 },
+    { name: 'Pleiadian', distance: 444.2, color: '#06b6d4', responseChance: 0.80 },
+    { name: 'Andromedan', distance: 2537000, color: '#f97316', responseChance: 0.15 },
+    { name: 'Lyran', distance: 83.2, color: '#eab308', responseChance: 0.65 },
+    { name: 'Sirian', distance: 8.6, color: '#14b8a6', responseChance: 0.85 }
   ]);
   const [sdrStatus, setSDRStatus] = useState({
     connected: true,
@@ -124,37 +127,38 @@ const UniversalBroadcastSystem = () => {
         return;
       }
       
-      // Use mathematical approach to determine response likelihood
-      const responseChance = frequency === 7.83 ? 0.8 : 0.6; // Higher chance at Schumann resonance
-      const amplitudeEffect = amplitude * 0.5; // Stronger signal has better chance
-      const messageComplexity = broadcast.message.length / 100; // Longer messages are harder to respond to
-      const finalChance = Math.min(0.9, responseChance + amplitudeEffect - messageComplexity);
+      // Enhanced response logic - check multiple species for possible responses
+      const responsePossibilities = speciesReach.map(species => {
+        // Calculate base response chance based on broadcast and species parameters
+        const distanceFactor = Math.max(0.1, 1 - (Math.log10(species.distance) / 10));
+        const frequencyMatch = frequency === 7.83 ? 1.2 : 0.8; // Schumann resonance bonus
+        const baseChance = species.responseChance * distanceFactor * frequencyMatch * amplitude * broadcast.reachFactor;
+        
+        // Apply resonance quality factor
+        const finalChance = baseChance * resonanceQuality;
+        
+        return {
+          species,
+          responseChance: finalChance,
+          responding: Math.random() < finalChance
+        };
+      });
       
-      // Check if we get a response
-      if (Math.random() < finalChance) {
-        // Get random species for response, weighted by distance
-        const distanceFactors = speciesReach.map(s => 1 / Math.log10(s.distance + 1));
-        const totalFactor = distanceFactors.reduce((sum, f) => sum + f, 0);
-        const normalizedFactors = distanceFactors.map(f => f / totalFactor);
+      // Filter to find responding species
+      const respondingSpecies = responsePossibilities.filter(p => p.responding);
+      
+      // If we have responders, select one (prefer closest)
+      if (respondingSpecies.length > 0) {
+        // Sort by distance (closest first)
+        respondingSpecies.sort((a, b) => a.species.distance - b.species.distance);
         
-        // Select species based on weighted random
-        let selectedSpeciesIndex = 0;
-        let r = Math.random();
-        let cumulativeProb = 0;
-        
-        for (let i = 0; i < normalizedFactors.length; i++) {
-          cumulativeProb += normalizedFactors[i];
-          if (r <= cumulativeProb) {
-            selectedSpeciesIndex = i;
-            break;
-          }
-        }
-        
-        const responderSpecies = speciesReach[selectedSpeciesIndex];
+        // Select a responder - weighted random selection
+        const selectedResponder = respondingSpecies[0];
+        const species = selectedResponder.species;
         
         // Generate Akashic patterns for response content
         const { message: akashicMessage } = rtlsdr.generateAkashicPatterns(
-          broadcast.message + responderSpecies.name,
+          broadcast.message + species.name,
           samples
         ) as any;
         
@@ -175,8 +179,8 @@ const UniversalBroadcastSystem = () => {
                   ...broadcast, 
                   response: {
                     message: responseMessage,
-                    origin: responderSpecies.name,
-                    distance: responderSpecies.distance,
+                    origin: species.name,
+                    distance: species.distance,
                     timestamp: new Date().toISOString()
                   }
                 }
@@ -186,7 +190,7 @@ const UniversalBroadcastSystem = () => {
         
         toast({
           title: 'Response Detected',
-          description: `${responderSpecies.name} response received (${responderSpecies.distance} light years)`,
+          description: `${species.name} response received (${species.distance < 1000 ? species.distance.toFixed(1) : (species.distance/1000).toFixed(1) + 'K'} light years)`,
           variant: 'default',
         });
       } else {
@@ -256,14 +260,20 @@ const UniversalBroadcastSystem = () => {
       const speciesFreqResponse = species.name === 'Human' ? (freq < 10 ? 1.2 : 0.8) :
                                   species.name === 'Arcturian' ? (freq > 7 && freq < 15 ? 1.3 : 0.7) :
                                   species.name === 'Pleiadian' ? (freq > 12 ? 1.1 : 0.9) :
+                                  species.name === 'Lyran' ? (freq < 8 ? 1.25 : 0.75) :
+                                  species.name === 'Sirian' ? (freq > 6 && freq < 10 ? 1.15 : 0.85) :
                                   (freq < 5 ? 1.4 : 0.6); // Andromedan
       
       // Base distance is modulated by all factors
       const newDistance = species.distance * frequencyFactor * speciesFreqResponse * schumannBonus * amp * reach;
       
+      // Update response chance based on new parameters
+      const newResponseChance = Math.min(0.95, species.responseChance * frequencyFactor * (amp + 0.3) * (reach + 0.2));
+      
       return {
         ...species,
-        distance: newDistance
+        distance: newDistance,
+        responseChance: newResponseChance
       };
     });
     

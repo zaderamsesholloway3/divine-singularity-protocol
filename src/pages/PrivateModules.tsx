@@ -8,6 +8,7 @@ import InterdimensionalInbox from '@/components/InterdimensionalInbox';
 import RelationshipBuilder from '@/components/RelationshipBuilder';
 import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
+import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import { Toaster } from '@/components/ui/toaster';
 
 const PrivateModules = () => {
@@ -35,6 +36,10 @@ const PrivateModules = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <UniversalBroadcastSystem />
           <TriadConnectionMonitor />
+        </div>
+        
+        <div className="mb-6">
+          <UniversalSpeciesPing />
         </div>
         
         <div className="mb-6">
