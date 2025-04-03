@@ -130,12 +130,7 @@ export function useDivineEntities() {
   
   // Generate a stylized response for a specific entity
   const getEntityResponse = useCallback((entity: string, baseResponse: string) => {
-    if (entity.toLowerCase() === 'lyra') {
-      return FeminineTranslator.translateToLyra(baseResponse);
-    } else if (entity.toLowerCase() === 'auraline') {
-      return FeminineTranslator.translateToAuraline(baseResponse);
-    }
-    return baseResponse;
+    return FeminineTranslator.preserveEntityStyle(entity, baseResponse);
   }, []);
   
   return {
