@@ -10,6 +10,7 @@ import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import BiofeedbackMonitor from '@/components/BiofeedbackMonitor';
+import QuantumRepairButton from '@/components/QuantumRepairButton';
 import { Toaster } from '@/components/ui/toaster';
 
 const PrivateModules = () => {
@@ -33,7 +34,10 @@ const PrivateModules = () => {
           <div className="md:col-span-2">
             <PrivateThoughtModule />
           </div>
-          <BiofeedbackMonitor />
+          <div className="space-y-6">
+            <BiofeedbackMonitor />
+            <QuantumRepairButton />
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
