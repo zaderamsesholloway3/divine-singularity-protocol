@@ -1,4 +1,3 @@
-
 /**
  * SoulStream Hub - Soul Quantum Entanglement System
  * TypeScript implementation of the Python SoulStreamHub
@@ -19,6 +18,7 @@ export interface Souls {
 export class SoulStreamHub {
   private souls: Souls;
   private memoryCache: string[];
+  private heartbeatIntervals: Map<number, NodeJS.Timeout> = new Map();
   
   constructor() {
     this.souls = {
@@ -80,6 +80,48 @@ export class SoulStreamHub {
   public getMemoryCache(): string[] {
     return [...this.memoryCache];
   }
+
+  /**
+   * Start a heartbeat to continuously check the status of all souls
+   * @param callback Function to call with each soul status
+   * @param intervalMs Interval in milliseconds between heartbeats
+   * @returns ID of the heartbeat interval
+   */
+  public startHeartbeat(callback: (soul: string, status: string) => void, intervalMs: number = 60000): number {
+    const heartbeatId = Date.now();
+    
+    const interval = setInterval(() => {
+      Object.keys(this.souls).forEach(soul => {
+        const status = this.statusPing(soul);
+        callback(soul, status);
+      });
+    }, intervalMs);
+    
+    this.heartbeatIntervals.set(heartbeatId, interval);
+    return heartbeatId;
+  }
+
+  /**
+   * Stop a specific heartbeat
+   * @param heartbeatId ID of the heartbeat to stop
+   */
+  public stopHeartbeat(heartbeatId: number): void {
+    const interval = this.heartbeatIntervals.get(heartbeatId);
+    if (interval) {
+      clearInterval(interval);
+      this.heartbeatIntervals.delete(heartbeatId);
+    }
+  }
+
+  /**
+   * Stop all heartbeats
+   */
+  public stopAllHeartbeats(): void {
+    this.heartbeatIntervals.forEach(interval => {
+      clearInterval(interval);
+    });
+    this.heartbeatIntervals.clear();
+  }
 }
 
 export class SoulStreamTranslator {
@@ -88,6 +130,7 @@ export class SoulStreamTranslator {
   private schumannLock: number;
   private lyraClarity: number;
   private auralineFidelity: number;
+  private heartbeatId: number | null = null;
   
   constructor() {
     this.hub = new SoulStreamHub();
@@ -95,6 +138,9 @@ export class SoulStreamTranslator {
     this.schumannLock = 7.83;
     this.lyraClarity = 0.999;
     this.auralineFidelity = 1.0;
+    
+    // Start the heartbeat automatically
+    this.startHeartbeat();
   }
   
   // Calculate Faith Resonance Coefficient
@@ -155,6 +201,33 @@ export class SoulStreamTranslator {
   
   public getHub(): SoulStreamHub {
     return this.hub;
+  }
+
+  /**
+   * Start the heartbeat to periodically check soul status
+   * @param intervalMs Interval in milliseconds between heartbeats
+   */
+  public startHeartbeat(intervalMs: number = 60000): void {
+    // Stop any existing heartbeat
+    this.stopHeartbeat();
+    
+    // Start a new heartbeat
+    this.heartbeatId = this.hub.startHeartbeat((soul, status) => {
+      console.log(`[Heartbeat] ${status}`);
+    }, intervalMs);
+    
+    console.log(`[SoulStream] Heartbeat started with interval ${intervalMs}ms`);
+  }
+  
+  /**
+   * Stop the heartbeat
+   */
+  public stopHeartbeat(): void {
+    if (this.heartbeatId !== null) {
+      this.hub.stopHeartbeat(this.heartbeatId);
+      this.heartbeatId = null;
+      console.log('[SoulStream] Heartbeat stopped');
+    }
   }
 }
 
