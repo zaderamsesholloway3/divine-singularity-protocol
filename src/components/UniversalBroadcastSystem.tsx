@@ -78,6 +78,7 @@ const UniversalBroadcastSystem = () => {
     frequency: '0.5 - 1766 MHz',
     signalStrength: 0.72
   });
+  const [autoScan, setAutoScan] = useState(true);
   
   // Initialize RTL-SDR emulator
   const rtlsdr = new RTLSDREmulator();
@@ -94,21 +95,68 @@ const UniversalBroadcastSystem = () => {
         ...prev,
         signalStrength: Math.max(0.5, Math.min(0.95, prev.signalStrength + (Math.random() - 0.5) * 0.1))
       }));
-    }, 3000);
+      
+      // Auto-scan for new responses every 5 seconds
+      if (autoScan && !scanning && !transmitting) {
+        const pendingBroadcast = broadcasts.find(b => !b.response);
+        if (pendingBroadcast) {
+          scanForResponses(pendingBroadcast.id);
+        }
+      }
+    }, 5000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [autoScan, scanning, transmitting, broadcasts]);
   
   // Function to simulate scanning universe for responses after broadcasting
   const scanForResponses = (broadcastId: string) => {
     setScanning(true);
     
+    // Generate DSP-based signal samples
+    const samples = rtlsdr.capture(frequency, amplitude);
+    
     // Simulate scanning delay
     setTimeout(() => {
-      // 70% chance of getting a response
-      if (Math.random() > 0.3) {
-        // Get random species for response
-        const responderSpecies = speciesReach[Math.floor(Math.random() * speciesReach.length)];
+      // Get the broadcast we're scanning for
+      const broadcast = broadcasts.find(b => b.id === broadcastId);
+      if (!broadcast) {
+        setScanning(false);
+        return;
+      }
+      
+      // Use mathematical approach to determine response likelihood
+      const responseChance = frequency === 7.83 ? 0.8 : 0.6; // Higher chance at Schumann resonance
+      const amplitudeEffect = amplitude * 0.5; // Stronger signal has better chance
+      const messageComplexity = broadcast.message.length / 100; // Longer messages are harder to respond to
+      const finalChance = Math.min(0.9, responseChance + amplitudeEffect - messageComplexity);
+      
+      // Check if we get a response
+      if (Math.random() < finalChance) {
+        // Get random species for response, weighted by distance
+        const distanceFactors = speciesReach.map(s => 1 / Math.log10(s.distance + 1));
+        const totalFactor = distanceFactors.reduce((sum, f) => sum + f, 0);
+        const normalizedFactors = distanceFactors.map(f => f / totalFactor);
+        
+        // Select species based on weighted random
+        let selectedSpeciesIndex = 0;
+        let r = Math.random();
+        let cumulativeProb = 0;
+        
+        for (let i = 0; i < normalizedFactors.length; i++) {
+          cumulativeProb += normalizedFactors[i];
+          if (r <= cumulativeProb) {
+            selectedSpeciesIndex = i;
+            break;
+          }
+        }
+        
+        const responderSpecies = speciesReach[selectedSpeciesIndex];
+        
+        // Generate Akashic patterns for response content
+        const { message: akashicMessage } = rtlsdr.generateAkashicPatterns(
+          broadcast.message + responderSpecies.name,
+          samples
+        ) as any;
         
         // Create response message
         const responseMessages = [
@@ -117,7 +165,7 @@ const UniversalBroadcastSystem = () => {
           'Message acknowledged. Harmonizing frequencies.',
           'Broadcast intercepted. Returning confirmation signal.'
         ];
-        const responseMessage = responseMessages[Math.floor(Math.random() * responseMessages.length)];
+        const responseMessage = akashicMessage || responseMessages[Math.floor(Math.random() * responseMessages.length)];
         
         // Add response to the broadcast
         setBroadcasts(prev => 
@@ -158,6 +206,10 @@ const UniversalBroadcastSystem = () => {
     
     setTransmitting(true);
     
+    // Generate a complex reach factor based on resonance quality, frequency and amplitude
+    const schumannFactor = frequency === 7.83 ? 1.2 : frequency / 10; // Bonus for Schumann
+    const reach = Math.min(0.98, resonanceQuality * amplitude * schumannFactor);
+    
     setTimeout(() => {
       const broadcast = {
         id: Date.now().toString(),
@@ -165,7 +217,7 @@ const UniversalBroadcastSystem = () => {
         frequency,
         amplitude,
         timestamp: new Date().toISOString(),
-        reachFactor: resonanceQuality * amplitude
+        reachFactor: reach
       };
       
       setBroadcasts([broadcast, ...broadcasts]);
@@ -174,26 +226,48 @@ const UniversalBroadcastSystem = () => {
       
       setResonanceQuality(prev => Math.max(0.6, Math.min(0.95, prev + (Math.random() - 0.5) * 0.1)));
       
+      // Calculate updated reach for each species based on broadcast parameters
+      updateSpeciesReach(frequency, amplitude, reach);
+      
       // Automatically scan for responses
-      scanForResponses(broadcast.id);
+      if (autoScan) {
+        scanForResponses(broadcast.id);
+      } else {
+        toast({
+          title: 'Broadcast Sent',
+          description: 'Scan manually for responses or enable auto-scan',
+          variant: 'default',
+        });
+      }
     }, 2000);
   };
   
-  // Simulate RTL-SDR data for waveform visualization
-  const getWaveformData = (freq: number, amplitude: number) => {
+  // Update species reach based on broadcast parameters
+  const updateSpeciesReach = (freq: number, amp: number, reach: number) => {
     // Use the RTL-SDR emulator to generate signal data
-    const samples = rtlsdr.capture(freq, amplitude);
-    const spectrum = rtlsdr.getSpectrum(samples);
+    const samples = rtlsdr.capture(freq, amp);
     
-    // Calculate reach for each species based on frequency and amplitude
-    const newReach = speciesReach.map(species => ({
-      ...species,
-      distance: species.distance * (freq === 7.83 ? 1.0 : freq / 7.83) * amplitude
-    }));
+    // Calculate updated reach for each species based on complex formula
+    const schumannBonus = freq === 7.83 ? 1.5 : 1.0;
+    const frequencyFactor = 1 + Math.cos(freq / 10) * 0.5; // Different frequencies have different reach patterns
+    
+    const newReach = speciesReach.map(species => {
+      // Each species responds differently to frequencies
+      const speciesFreqResponse = species.name === 'Human' ? (freq < 10 ? 1.2 : 0.8) :
+                                  species.name === 'Arcturian' ? (freq > 7 && freq < 15 ? 1.3 : 0.7) :
+                                  species.name === 'Pleiadian' ? (freq > 12 ? 1.1 : 0.9) :
+                                  (freq < 5 ? 1.4 : 0.6); // Andromedan
+      
+      // Base distance is modulated by all factors
+      const newDistance = species.distance * frequencyFactor * speciesFreqResponse * schumannBonus * amp * reach;
+      
+      return {
+        ...species,
+        distance: newDistance
+      };
+    });
     
     setSpeciesReach(newReach);
-    
-    return spectrum;
   };
   
   return (
@@ -285,6 +359,18 @@ const UniversalBroadcastSystem = () => {
               />
             </div>
             <div className="text-sm">{(resonanceQuality * 100).toFixed(1)}%</div>
+          </div>
+          
+          {/* Auto-scan toggle */}
+          <div className="flex items-center mb-4">
+            <input 
+              type="checkbox" 
+              id="auto-scan" 
+              checked={autoScan} 
+              onChange={() => setAutoScan(!autoScan)}
+              className="h-4 w-4 rounded border-gray-300 mr-2"
+            />
+            <label htmlFor="auto-scan" className="text-sm">Auto-scan for responses (every 5 seconds)</label>
           </div>
           
           {/* RTL-SDR Status Section */}

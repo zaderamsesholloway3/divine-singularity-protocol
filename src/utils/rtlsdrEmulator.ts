@@ -121,6 +121,89 @@ export class RTLSDREmulator {
   }
 
   /**
+   * Enhanced detection of Ouroboros divine frequency
+   * @param samples Signal samples
+   * @returns Divine frequency detection results
+   */
+  public detectDivineFrequency(samples: number[]): { detected: boolean, harmonics: number[], strength: number } {
+    const divineFreq = 1.855e43; // Divine frequency in Hz
+    
+    // Create downscaled harmonics that can be detected in SDR range
+    const harmonics = [
+      divineFreq % 100, // First harmonic
+      (divineFreq * 1.618) % 100, // Golden ratio harmonic
+      (divineFreq * Math.PI) % 100, // Pi harmonic
+      (divineFreq * Math.E) % 100, // E harmonic
+    ];
+    
+    // Check for harmonic presence in signal
+    const spectrum = this.getSpectrum(samples);
+    const detectedStrengths = harmonics.map(harmonic => {
+      const idx = spectrum.frequencies.findIndex(f => Math.abs(f - harmonic) < 0.1);
+      return idx >= 0 ? spectrum.magnitudes[idx] : 0;
+    });
+    
+    const totalStrength = detectedStrengths.reduce((sum, s) => sum + s, 0) / detectedStrengths.length;
+    
+    return {
+      detected: totalStrength > 0.6,
+      harmonics: harmonics,
+      strength: totalStrength
+    };
+  }
+
+  /**
+   * Generate Akashic data patterns based on signal and seed
+   * @param seed String seed for Akashic generation
+   * @param samples Signal samples
+   * @returns Simulated Akashic patterns
+   */
+  public generateAkashicPatterns(seed: string, samples: number[]): {
+    patterns: number[],
+    resonance: number,
+    voSynchronization: number,
+    message?: string
+  } {
+    // Generate a deterministic but seemingly random pattern based on seed
+    const seedValue = seed.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    // Create fractal patterns using simplified Mandelbrot algorithm
+    const patterns: number[] = [];
+    let z = seedValue / 1000;
+    
+    for (let i = 0; i < 10; i++) {
+      z = z * z + (samples[i % samples.length] || 0) * 0.01;
+      patterns.push(Math.abs(z) % 1);
+    }
+    
+    // Calculate resonance with Vo (0-1)
+    const voSynchronization = (Math.sin(seedValue / 100) + 1) / 2;
+    
+    // Calculate Akashic resonance (0-1)
+    const resonance = patterns.reduce((sum, p) => sum + p, 0) / patterns.length;
+    
+    // Generate message if resonance is high enough
+    let message: string | undefined;
+    if (resonance > 0.7) {
+      const messageOptions = [
+        "Quantum field alignment detected.",
+        "Akashic resonance established.",
+        "Divine frequency synchronization active.",
+        "Ouroboros connection validated.",
+        "Interdimensional channel open."
+      ];
+      message = messageOptions[Math.floor(seedValue % messageOptions.length)];
+    }
+    
+    return {
+      patterns,
+      resonance,
+      voSynchronization,
+      message
+    };
+  }
+
+  /**
    * Private helper methods for DSP operations
    */
   private computeFFT(samples: number[]): number[] {

@@ -9,12 +9,17 @@ import DistortionFieldModules from '@/components/DistortionFieldModules';
 import QuantumArkInterface from '@/components/QuantumArkInterface';
 import ScriptureReference from '@/components/ScriptureReference';
 import OmniOracleHeader from '@/components/OmniOracleHeader';
+import UniversalConnectionVisualizer from '@/components/UniversalConnectionVisualizer';
 
 const Index = () => {
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <OmniOracleHeader />
+        
+        <div className="mb-8">
+          <UniversalConnectionVisualizer />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
           <div className="md:col-span-3">
