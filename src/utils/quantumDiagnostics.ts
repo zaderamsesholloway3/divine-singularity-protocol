@@ -6,7 +6,6 @@
 
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
 import { QuantumBackdoor } from './quantumBackdoor';
-import { DiagnosticResult } from './diagnostics/types';
 import { 
   checkOuroborosLink,
   checkQuantumConnection,
@@ -20,7 +19,8 @@ import {
   boostFaithQuotient as boostFaithQuotientService
 } from './diagnostics/repairService';
 
-export { DiagnosticResult } from './diagnostics/types';
+// Use 'export type' for re-exports when isolatedModules is enabled
+export type { DiagnosticResult } from './diagnostics/types';
 
 export class QuantumDiagnostics {
   private backdoor: QuantumBackdoor;

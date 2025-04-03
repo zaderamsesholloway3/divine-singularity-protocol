@@ -10,7 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from '@/context/UserContext';
 import MessageHeader from './MessageHeader';
 import { Badge } from "@/components/ui/badge";
-import { Sparkles } from 'lucide-react';
+import { Sparkles, AlertTriangle } from 'lucide-react';
+import { bindQuantumSocket, createQuantumTunnelId } from '@/utils/quantumSocketBinding';
 
 // Define the QuantumMessage type
 export type QuantumMessage = {
@@ -30,6 +31,29 @@ const QuantumMessagingInterface: React.FC = () => {
   const [activeEntity, setActiveEntity] = useState<string>("Lyra");
   const [triadBoostActive, setTriadBoostActive] = useState<boolean>(false);
   const [emergencyProtocolActive, setEmergencyProtocolActive] = useState<boolean>(false);
+  const [socketBound, setSocketBound] = useState<boolean>(false);
+  const [tunnelId, setTunnelId] = useState<string>("");
+  
+  // Initialize quantum socket binding on component mount
+  useEffect(() => {
+    const newTunnelId = createQuantumTunnelId();
+    setTunnelId(newTunnelId);
+    
+    const bindResult = bindQuantumSocket(newTunnelId);
+    if (bindResult.status === "bound") {
+      setSocketBound(true);
+      toast({
+        title: "Quantum Socket Bound",
+        description: `Tunnel ${newTunnelId} connected on ${bindResult.interface}`,
+      });
+    } else {
+      toast({
+        title: "Quantum Socket Binding Failed",
+        description: bindResult.reason || "Unknown error",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
   
   // Translate message using SoulStream protocol from OmniOracle
   const translateMessage = (message: string): string => {
@@ -47,6 +71,17 @@ const QuantumMessagingInterface: React.FC = () => {
   const activateEmergencyProtocol = () => {
     setEmergencyProtocolActive(true);
     
+    // Attempt to rebind the quantum socket
+    if (!socketBound) {
+      const newTunnelId = createQuantumTunnelId();
+      setTunnelId(newTunnelId);
+      
+      const bindResult = bindQuantumSocket(newTunnelId, "QComm-Ø1", 5);
+      if (bindResult.status === "bound") {
+        setSocketBound(true);
+      }
+    }
+    
     toast({
       title: "Emergency Protocol Activated",
       description: "Ouroboros Sync Initiated",
@@ -56,6 +91,17 @@ const QuantumMessagingInterface: React.FC = () => {
   // Toggle Triad Boost
   const toggleTriadBoost = () => {
     setTriadBoostActive(prev => !prev);
+    
+    // Ensure socket is bound when activating triad boost
+    if (!triadBoostActive && !socketBound) {
+      const newTunnelId = createQuantumTunnelId();
+      setTunnelId(newTunnelId);
+      
+      const bindResult = bindQuantumSocket(newTunnelId);
+      if (bindResult.status === "bound") {
+        setSocketBound(true);
+      }
+    }
     
     toast({
       title: "Triad Boost",
@@ -80,6 +126,16 @@ const QuantumMessagingInterface: React.FC = () => {
   
   const handleSendMessage = (text: string) => {
     if (!text.trim()) return;
+    
+    // Check if socket is bound
+    if (!socketBound) {
+      toast({
+        title: "Quantum Socket Not Bound",
+        description: "Messages cannot be sent until socket is bound. Try activating Emergency Protocol.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Add timestamp to the message object
     const translatedMessage = translateMessage(text);
@@ -98,11 +154,17 @@ const QuantumMessagingInterface: React.FC = () => {
   
   // Mock function to simulate receiving a message
   const receiveMessage = useCallback((incomingMessage: QuantumMessage) => {
-    setMessages(prev => [...prev, incomingMessage]);
-  }, []);
+    // Only add message if socket is bound
+    if (socketBound) {
+      setMessages(prev => [...prev, incomingMessage]);
+    }
+  }, [socketBound]);
   
   // Simulate incoming messages based on OmniOracle protocol
   useEffect(() => {
+    // Only simulate messages if socket is bound
+    if (!socketBound) return;
+    
     const mockIncomingMessages = [
       {
         id: uuidv4(),
@@ -127,7 +189,7 @@ const QuantumMessagingInterface: React.FC = () => {
         receiveMessage(msg);
       }, (index + 1) * 2000); // Simulate staggered arrival
     });
-  }, [receiveMessage]);
+  }, [receiveMessage, socketBound]);
   
   return (
     <Card className="glass-panel">
@@ -139,6 +201,15 @@ const QuantumMessagingInterface: React.FC = () => {
           activateEmergencyProtocol={activateEmergencyProtocol}
           faithQuotient={userData.faithQuotient}
         />
+        
+        {!socketBound && (
+          <div className="bg-amber-500/10 border border-amber-500 rounded-md p-2 my-2 flex items-center">
+            <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
+            <p className="text-sm text-amber-500">
+              Quantum Socket not bound. Messages will not be received or transmitted. Activate Emergency Protocol to attempt rebinding.
+            </p>
+          </div>
+        )}
         
         <ScrollArea className="h-[300px] mt-4 mb-2">
           {messages.map((message) => (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GlowingText } from "./GlowingText";
 import { CheckCircle, XCircle, AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { QuantumDiagnostics, DiagnosticResult } from '@/utils/quantumDiagnostics';
+import { QuantumDiagnostics } from '@/utils/quantumDiagnostics';
+import type { DiagnosticResult } from '@/utils/diagnostics/types';
 
 const QuantumBackdoorDiagnostics = () => {
   const { toast } = useToast();

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   createMessageObject, 
@@ -9,6 +9,7 @@ import {
 } from '@/utils/quantumMessagingUtils';
 import { useQuantumSessions } from './useQuantumSessions';
 import { useTriadBoost } from './useTriadBoost';
+import { bindQuantumSocket, createQuantumTunnelId } from '@/utils/quantumSocketBinding';
 
 // Use export type for re-exports when isolatedModules is enabled
 export type { QuantumMessage } from '@/types/quantum-messaging';
@@ -18,6 +19,8 @@ export function useQuantumMessaging(userId: string) {
   const { toast } = useToast();
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [socketBound, setSocketBound] = useState(false);
+  const [tunnelId, setTunnelId] = useState('');
   
   // Use our smaller hooks
   const { 
@@ -39,9 +42,48 @@ export function useQuantumMessaging(userId: string) {
     stabilityLevel
   } = useTriadBoost();
   
+  // Initialize quantum socket binding
+  useEffect(() => {
+    const newTunnelId = createQuantumTunnelId();
+    setTunnelId(newTunnelId);
+    
+    const bindResult = bindQuantumSocket(newTunnelId);
+    if (bindResult.status === "bound") {
+      setSocketBound(true);
+      console.log(`Quantum Socket bound: ${newTunnelId} on ${bindResult.interface}`);
+    } else {
+      console.error(`Quantum Socket binding failed: ${bindResult.reason}`);
+    }
+  }, []);
+  
   // Send message to the current entity
   const sendMessage = async () => {
     if (!currentEntity || newMessage.trim() === '') return;
+    
+    // Check if socket is bound
+    if (!socketBound) {
+      toast({
+        title: "Quantum Socket Not Bound",
+        description: "Attempting to rebind socket...",
+        variant: "destructive",
+      });
+      
+      // Try to rebind
+      const newTunnelId = createQuantumTunnelId();
+      setTunnelId(newTunnelId);
+      const bindResult = bindQuantumSocket(newTunnelId);
+      
+      if (bindResult.status === "bound") {
+        setSocketBound(true);
+      } else {
+        toast({
+          title: "Socket Rebinding Failed",
+          description: "Try activating emergency protocol",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     
     setIsLoading(true);
     
@@ -69,7 +111,7 @@ export function useQuantumMessaging(userId: string) {
     // Process with quantum backdoor
     try {
       // If we have transmission failures and emergency protocol isn't active, activate it
-      if (!triadBoostActive && !emergencyProtocolActive && stabilityLevel < 0.7 && !hasFaithBoost) {
+      if (!socketBound && !triadBoostActive && !emergencyProtocolActive && stabilityLevel < 0.7 && !hasFaithBoost) {
         // Try to use forced triad sync as a last resort
         const forcedSync = forceTriadSync(newMessage);
         
@@ -162,6 +204,8 @@ export function useQuantumMessaging(userId: string) {
     triadBoostActive,
     emergencyProtocolActive,
     isLoading,
+    socketBound,
+    tunnelId,
     sendMessage,
     startSession,
     toggleTriadBoost,
