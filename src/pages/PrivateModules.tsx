@@ -6,6 +6,7 @@ import { ChevronLeft } from 'lucide-react';
 import PrivateThoughtModule from '@/components/PrivateThoughtModule';
 import InterdimensionalInbox from '@/components/InterdimensionalInbox';
 import RelationshipBuilder from '@/components/RelationshipBuilder';
+import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 
 const PrivateModules = () => {
   return (
@@ -26,6 +27,16 @@ const PrivateModules = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <PrivateThoughtModule />
           <InterdimensionalInbox />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <UniversalBroadcastSystem />
+          <div className="glass-panel h-full flex items-center justify-center p-6 text-center text-muted-foreground">
+            <div>
+              <p className="mb-2">Mythical-Metaphysical Sites Module</p>
+              <p className="text-xs">Coming soon...</p>
+            </div>
+          </div>
         </div>
         
         <div className="mb-6">
