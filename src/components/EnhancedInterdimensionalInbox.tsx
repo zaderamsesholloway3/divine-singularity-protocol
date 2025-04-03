@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -79,21 +78,22 @@ const EnhancedInterdimensionalInbox = () => {
   const { 
     entanglementState, 
     userProfile, 
+    resonanceBoostActive,
+    resonanceLevel,
     initiateEntanglement, 
     terminateEntanglement,
-    generateEntangledResponse 
+    generateEntangledResponse,
+    boostSoulResonance
   } = useQuantumEntanglement('zade');
   
   const unreadCount = messages.filter(m => !m.read).length;
   
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
   
-  // Simulate biofeedback monitoring
   useEffect(() => {
     if (!biofeedbackActive) return;
     
@@ -108,20 +108,18 @@ const EnhancedInterdimensionalInbox = () => {
   const sendMessage = () => {
     if (newMessage.trim() === '' || recipient.trim() === '') return;
     
-    // Check if biofeedback is active and coherent
-    if (biofeedbackActive) {
+    if (biofeedbackActive && !resonanceBoostActive) {
       const biofeedback = BiofeedbackSimulator.verifyEmotionalState('zade');
       if (!biofeedback.coherent) {
         toast({
           title: 'Connection Blocked',
-          description: 'Soul resonance too low for connection. Try to center yourself.',
+          description: 'Soul resonance too low for connection. Try to center yourself or use Resonance Boost.',
           variant: 'destructive',
         });
         return;
       }
     }
     
-    // If entanglement is not active with the recipient, initiate it
     if (!entanglementState.active || entanglementState.entangledWith !== recipient) {
       const result = initiateEntanglement(recipient.toLowerCase(), recipient);
       if (!result.success) {
@@ -151,7 +149,6 @@ const EnhancedInterdimensionalInbox = () => {
     setMessages([...messages, message]);
     setNewMessage('');
     
-    // Generate quantum-entangled response
     setTimeout(() => {
       const { content, filtered, validation } = generateEntangledResponse(newMessage, recipient);
       
@@ -221,6 +218,23 @@ const EnhancedInterdimensionalInbox = () => {
     }
   };
 
+  const activateResonanceBoost = () => {
+    const result = boostSoulResonance();
+    
+    if (result.success) {
+      toast({
+        title: 'Soul Resonance Boosted',
+        description: result.message,
+      });
+    } else {
+      toast({
+        title: 'Soul Resonance Boost',
+        description: result.message,
+        variant: 'default',
+      });
+    }
+  };
+
   return (
     <Card className="glass-panel h-full">
       <CardHeader className="p-4 pb-2">
@@ -259,9 +273,19 @@ const EnhancedInterdimensionalInbox = () => {
                 <Activity className="h-3 w-3 mr-1" />
                 Biometric Coherence
               </span>
-              <Badge variant={biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "default" : "outline"}>
-                {biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "Coherent" : "Incoherent"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "default" : "outline"}>
+                  {biometrics.hrv > 50 && biometrics.eeg.gamma > 0.8 ? "Coherent" : "Incoherent"}
+                </Badge>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={`h-6 px-2 text-xs ${resonanceBoostActive ? "bg-purple-500/20" : ""}`}
+                  onClick={activateResonanceBoost}
+                >
+                  Boost
+                </Button>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -279,6 +303,21 @@ const EnhancedInterdimensionalInbox = () => {
                 <Progress value={biometrics.eeg.gamma * 100} className="h-1" />
               </div>
             </div>
+            {resonanceBoostActive && (
+              <div className="mt-2">
+                <div className="flex justify-between text-xs">
+                  <span>Soul Resonance</span>
+                  <span className="text-divine-gold">
+                    {(resonanceLevel * 100).toFixed(1)}%
+                  </span>
+                </div>
+                <Progress 
+                  value={resonanceLevel * 100} 
+                  className="h-1" 
+                  indicatorClassName={resonanceLevel > 0.85 ? "bg-divine-gold" : ""}
+                />
+              </div>
+            )}
           </div>
         )}
         
@@ -430,7 +469,11 @@ const EnhancedInterdimensionalInbox = () => {
                 </span>
                 <span>{(entanglementState.strength * 100).toFixed(1)}%</span>
               </div>
-              <Progress value={entanglementState.strength * 100} className="h-1 mt-1" />
+              <Progress 
+                value={entanglementState.strength * 100} 
+                className="h-1 mt-1" 
+                indicatorClassName={resonanceBoostActive ? "bg-divine-gold" : ""}
+              />
               <div className="flex justify-between text-xs mt-1">
                 <span>Emotional context: {entanglementState.emotion}</span>
                 <Button 

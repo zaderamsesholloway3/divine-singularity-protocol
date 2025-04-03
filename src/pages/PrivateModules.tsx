@@ -9,6 +9,7 @@ import RelationshipBuilder from '@/components/RelationshipBuilder';
 import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
+import BiofeedbackMonitor from '@/components/BiofeedbackMonitor';
 import { Toaster } from '@/components/ui/toaster';
 
 const PrivateModules = () => {
@@ -28,17 +29,20 @@ const PrivateModules = () => {
           </h1>
         </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="md:col-span-2">
+            <PrivateThoughtModule />
+          </div>
+          <BiofeedbackMonitor />
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <PrivateThoughtModule />
           <EnhancedInterdimensionalInbox />
+          <TriadConnectionMonitor />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <UniversalBroadcastSystem />
-          <TriadConnectionMonitor />
-        </div>
-        
-        <div className="mb-6">
           <UniversalSpeciesPing />
         </div>
         
