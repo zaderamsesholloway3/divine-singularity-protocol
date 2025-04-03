@@ -33,8 +33,8 @@ export class QuantumDiagnostics {
     // 1. Check Ouroboros link stability
     results.push(this.checkOuroborosLink());
     
-    // 2. Check triad connection
-    results.push(this.checkTriadConnection());
+    // 2. Check quantum connection
+    results.push(this.checkQuantumConnection());
     
     // 3. Check Akashic Registry access
     results.push(this.checkAkashicAccess());
@@ -63,29 +63,29 @@ export class QuantumDiagnostics {
       details: linkStatus.message,
       repairActions: !linkStatus.stable ? [
         'Initiate Ouroboros prayer (ν₀=1.855e43 Hz)',
-        'Activate triad phase lock protocol',
+        'Activate phase lock protocol',
         'Increase faith quotient through positive affirmations'
       ] : undefined
     };
   }
   
   /**
-   * Check triad connection
+   * Check quantum connection
    */
-  private checkTriadConnection(): DiagnosticResult {
-    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  private checkQuantumConnection(): DiagnosticResult {
+    const quantumStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
     
     return {
-      moduleName: 'Triad Connection',
-      status: triadStatus.stability > 0.85 ? 'optimal' : 
-              triadStatus.stability > 0.7 ? 'stable' : 
-              triadStatus.stability > 0.5 ? 'unstable' : 'critical',
-      resonance: triadStatus.stability * 100,
-      triadConnected: triadStatus.stability > 0.7,
+      moduleName: 'Quantum Connection',
+      status: quantumStatus.stability > 0.85 ? 'optimal' : 
+              quantumStatus.stability > 0.7 ? 'stable' : 
+              quantumStatus.stability > 0.5 ? 'unstable' : 'critical',
+      resonance: quantumStatus.stability * 100,
+      triadConnected: quantumStatus.stability > 0.7,
       faithQuotient: 0.8,
-      details: `Phase lock: ${(triadStatus.stability * 100).toFixed(1)}% | Resonance boost: ${triadStatus.resonanceBoost.toFixed(2)}x`,
-      repairActions: triadStatus.stability < 0.7 ? [
-        'Align all three entities (Zade, CIA, Lockheed)',
+      details: `Phase lock: ${(quantumStatus.stability * 100).toFixed(1)}% | Resonance boost: ${quantumStatus.resonanceBoost.toFixed(2)}x`,
+      repairActions: quantumStatus.stability < 0.7 ? [
+        'Align quantum entities',
         'Apply Schumann resonance (7.83Hz) calibration',
         'Check Akashic clearance levels'
       ] : undefined
@@ -97,23 +97,19 @@ export class QuantumDiagnostics {
    */
   private checkAkashicAccess(): DiagnosticResult {
     const zadeAccess = AkashicAccessRegistry.getAccessCode('zade');
-    const ciaAccess = AkashicAccessRegistry.getAccessCode('cia');
-    const lockheedAccess = AkashicAccessRegistry.getAccessCode('lockheed');
     
-    const accessCount = [zadeAccess, ciaAccess, lockheedAccess].filter(Boolean).length;
-    const accessLevel = accessCount / 3;
+    const accessCount = [zadeAccess].filter(Boolean).length;
+    const accessLevel = accessCount / 1;
     
     return {
       moduleName: 'Akashic Registry',
-      status: accessLevel === 1 ? 'optimal' : 
-              accessLevel >= 0.66 ? 'stable' : 
-              accessLevel >= 0.33 ? 'unstable' : 'critical',
+      status: accessLevel === 1 ? 'optimal' : 'critical',
       resonance: accessLevel * 100,
-      triadConnected: accessLevel >= 0.66,
+      triadConnected: accessLevel >= 1,
       faithQuotient: 0.9,
-      details: `${accessCount}/3 access codes verified. Primary code: ${zadeAccess?.accessCode || 'MISSING'}`,
+      details: `${accessCount}/1 access codes verified. Primary code: ${zadeAccess?.accessCode || 'MISSING'}`,
       repairActions: accessLevel < 1 ? [
-        'Revalidate Akashic credentials (AK-ZRH-1144, AK-CIA-7788, AK-LMT-5566)',
+        'Revalidate Akashic credentials (AK-ZRH-1144)',
         'Check entanglement keys',
         'Review dimensional reach values'
       ] : undefined
@@ -138,7 +134,7 @@ export class QuantumDiagnostics {
       details: `Response received. Faith quotient: ${testResult.faithQuotient ? (testResult.faithQuotient * 100).toFixed(0) + '%' : 'unknown'}`,
       repairActions: (!testResult.triadEnhanced && (!testResult.faithQuotient || testResult.faithQuotient < 0.7)) ? [
         'Clear session history and reinitialize',
-        'Apply triad enhancement protocol',
+        'Apply enhancement protocol',
         'Increase faith quotient through UFQ boost'
       ] : undefined
     };

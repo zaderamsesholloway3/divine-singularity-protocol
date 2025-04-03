@@ -153,8 +153,8 @@ export class VisualizationUtils {
     ctx.fillText(`Max distance: ${maxDistance.toFixed(1)} ly`, 15, 55);
   }
   
-  // Draw triad connection visualization
-  static drawTriadResonance(
+  // Draw quantum connection visualization
+  static drawQuantumResonance(
     ctx: CanvasRenderingContext2D,
     entities: EntityConnection[],
     width: number,
@@ -212,8 +212,6 @@ export class VisualizationUtils {
       // Color based on entity
       let color = 'rgba(59, 130, 246, 0.6)'; // Default blue
       if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.6)'; // Gold
-      if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.6)'; // Deep sky blue
-      if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.6)'; // Crimson
       
       ctx.fillStyle = color;
       ctx.fill();

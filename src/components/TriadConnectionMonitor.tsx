@@ -70,28 +70,6 @@ const TriadConnectionMonitor = () => {
       harmonicAlignment: 0.918
     },
     { 
-      name: 'Lockheed', 
-      status: 'active', 
-      lastContact: new Date(Date.now() - 15000).toISOString(), 
-      bandwidth: '0.9Tb/s', 
-      signalStrength: 0.87,
-      species: 'Human',
-      distance: 0.01,
-      akashicValidated: true,
-      harmonicAlignment: 0.830
-    },
-    { 
-      name: 'CIA', 
-      status: 'latent', 
-      lastContact: new Date(Date.now() - 300000).toISOString(), 
-      bandwidth: '0.4Tb/s', 
-      signalStrength: 0.78,
-      species: 'Human',
-      distance: 0.02,
-      akashicValidated: true,
-      harmonicAlignment: 0.781
-    },
-    { 
       name: 'Ouroboros', 
       status: 'active', 
       lastContact: new Date().toISOString(), 
@@ -108,16 +86,16 @@ const TriadConnectionMonitor = () => {
     {
       id: '1',
       from: 'Zade',
-      to: 'Lockheed',
+      to: 'Ouroboros',
       content: 'Quantum bridge initialized. Awaiting confirmation.',
       encrypted: 'e8f2a1b5c6d9...',
       timestamp: new Date(Date.now() - 3600000).toISOString()
     },
     {
       id: '2',
-      from: 'Lockheed',
+      from: 'Ouroboros',
       to: 'Zade',
-      content: 'Confirmation received. Project Ouroboros at 72% resonance.',
+      content: 'Confirmation received. Project resonance at 72%.',
       encrypted: 'f7e6d5c4b3a2...',
       timestamp: new Date(Date.now() - 1800000).toISOString()
     }
@@ -131,7 +109,7 @@ const TriadConnectionMonitor = () => {
   ]);
 
   const [newMessage, setNewMessage] = useState('');
-  const [recipient, setRecipient] = useState('Lockheed');
+  const [recipient, setRecipient] = useState('Ouroboros');
   const [frequency, setFrequency] = useState(7.83);
   const [isScanning, setIsScanning] = useState(false);
   const [autoScan, setAutoScan] = useState(true);
@@ -179,7 +157,7 @@ const TriadConnectionMonitor = () => {
     return () => clearInterval(interval);
   }, []);
   
-  // Effect for Triad Resonance Sphere visualization
+  // Effect for Resonance Sphere visualization
   useEffect(() => {
     if (visualizationType === 'sphere' && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -236,8 +214,6 @@ const TriadConnectionMonitor = () => {
         // Color based on entity
         let color = 'rgba(59, 130, 246, 0.6)'; // Default blue
         if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.6)'; // Gold
-        if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.6)'; // Deep sky blue
-        if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.6)'; // Crimson
         
         ctx.fillStyle = color;
         ctx.fill();
@@ -265,7 +241,7 @@ const TriadConnectionMonitor = () => {
       ctx.fillStyle = 'white';
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('Triad Resonance Sphere', centerX, 20);
+      ctx.fillText('Quantum Resonance Sphere', centerX, 20);
       
       // Add ν₀ notation
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
@@ -331,8 +307,6 @@ const TriadConnectionMonitor = () => {
             if (Math.random() < entity.signalStrength * 0.05) {
               let color = 'rgba(255, 255, 255, 0.7)';
               if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.7)';
-              if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.7)';
-              if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.7)';
               
               particles.push({
                 x: source.x,
@@ -374,8 +348,6 @@ const TriadConnectionMonitor = () => {
           let color = 'rgba(59, 130, 246, 0.6)'; // Default blue
           if (entity.name === 'Ouroboros') color = 'rgba(138, 43, 226, 0.6)'; // Blueviolet
           if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.6)'; // Gold
-          if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.6)'; // Deep sky blue
-          if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.6)'; // Crimson
           
           ctx.fillStyle = color;
           ctx.fill();
@@ -612,8 +584,6 @@ const TriadConnectionMonitor = () => {
     switch (name) {
       case 'Ouroboros': return 'rgba(138, 43, 226, 0.8)';
       case 'Zade': return 'rgba(255, 215, 0, 0.8)';
-      case 'Lockheed': return 'rgba(0, 191, 255, 0.8)';
-      case 'CIA': return 'rgba(220, 20, 60, 0.8)';
       default: return 'rgba(59, 130, 246, 0.8)';
     }
   };
@@ -637,7 +607,7 @@ const TriadConnectionMonitor = () => {
           <div>
             <CardTitle className="text-sm font-medium flex items-center">
               <Signal className="mr-2 h-4 w-4 quantum-glow" />
-              <GlowingText className="quantum-glow">Triad Quantum-Akashic Link Monitor</GlowingText>
+              <GlowingText className="quantum-glow">Quantum-Akashic Link Monitor</GlowingText>
             </CardTitle>
             <CardDescription className="text-xs">Secure Connections via Schumann Resonance</CardDescription>
           </div>
@@ -1030,7 +1000,7 @@ const TriadConnectionMonitor = () => {
                   className="w-full"
                 />
                 <div className="text-xs text-center text-muted-foreground mt-2">
-                  Triad Resonance Sphere showing connection strengths between entities
+                  Quantum Resonance Sphere showing connection strengths between entities
                 </div>
               </div>
             )}

@@ -28,28 +28,28 @@ const DirectMessagesTab: React.FC<DirectMessagesTabProps> = ({
   sendMessage
 }) => {
   const { toast } = useToast();
-  const [triadBoostActive, setTriadBoostActive] = useState(false);
+  const [quantumBoostActive, setQuantumBoostActive] = useState(false);
   
-  const activateTriadBoost = () => {
-    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  const activateQuantumBoost = () => {
+    const resonanceStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
     
-    if (triadStatus.stability > 0.7) {
-      setTriadBoostActive(true);
+    if (resonanceStatus.stability > 0.7) {
+      setQuantumBoostActive(true);
       toast({
-        title: "Triad Quantum Backdoor Activated",
-        description: `Phase lock stability: ${(triadStatus.stability * 100).toFixed(1)}% | Resonance boost: ${(triadStatus.resonanceBoost).toFixed(1)}x`,
+        title: "Quantum Backdoor Activated",
+        description: `Phase lock stability: ${(resonanceStatus.stability * 100).toFixed(1)}% | Resonance boost: ${(resonanceStatus.resonanceBoost).toFixed(1)}x`,
       });
     } else {
       toast({
-        title: "Triad Synchronization Failed",
-        description: "Insufficient phase lock stability. Verify all three Akashic access codes.",
+        title: "Quantum Synchronization Failed",
+        description: "Insufficient phase lock stability. Verify Akashic access code.",
         variant: "destructive",
       });
     }
   };
   
-  const handleSendWithTriad = () => {
-    if (triadBoostActive) {
+  const handleSendWithQuantum = () => {
+    if (quantumBoostActive) {
       // Generate synthetic biofeedback from message content
       const messageHash = [...newMessage].reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const syntheticGamma = (messageHash % 60) + 30; // Range 30-90 Hz
@@ -68,18 +68,18 @@ const DirectMessagesTab: React.FC<DirectMessagesTabProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <Button 
-            variant={triadBoostActive ? "default" : "outline"} 
+            variant={quantumBoostActive ? "default" : "outline"} 
             size="sm" 
-            className={`${triadBoostActive ? 'bg-[#7928ca] text-white' : ''} mr-2`}
-            onClick={activateTriadBoost}
+            className={`${quantumBoostActive ? 'bg-[#7928ca] text-white' : ''} mr-2`}
+            onClick={activateQuantumBoost}
           >
-            {triadBoostActive ? <Zap className="h-4 w-4 mr-1" /> : <ZapOff className="h-4 w-4 mr-1" />}
-            {triadBoostActive ? 'Triad Active' : 'Triad Boost'}
+            {quantumBoostActive ? <Zap className="h-4 w-4 mr-1" /> : <ZapOff className="h-4 w-4 mr-1" />}
+            {quantumBoostActive ? 'Quantum Active' : 'Quantum Boost'}
           </Button>
           <p className="text-xs text-muted-foreground">
-            {triadBoostActive 
-              ? "Zade-CIA-Lockheed quantum backdoor engaged" 
-              : "Use triad boost to bypass biofeedback requirements"}
+            {quantumBoostActive 
+              ? "Quantum backdoor engaged" 
+              : "Use quantum boost to bypass biofeedback requirements"}
           </p>
         </div>
       </div>
@@ -101,7 +101,7 @@ const DirectMessagesTab: React.FC<DirectMessagesTabProps> = ({
           onChange={(e) => setNewMessage(e.target.value)}
           className="flex-1"
         />
-        <Button size="sm" onClick={handleSendWithTriad}>
+        <Button size="sm" onClick={handleSendWithQuantum}>
           <Send className="h-4 w-4" />
         </Button>
       </div>
