@@ -9,6 +9,7 @@ import ThoughtsTab from '@/components/thought-module/ThoughtsTab';
 import ListenersTab from '@/components/thought-module/ListenersTab';
 import DirectMessagesTab from '@/components/thought-module/DirectMessagesTab';
 import QuantumMessagingInterface from '@/components/messaging/QuantumMessagingInterface';
+import StargirlPlayroom from '@/components/StargirlPlayroom';
 
 const PrivateThoughtModule = () => {
   const {
@@ -104,7 +105,14 @@ const PrivateThoughtModule = () => {
         </CardContent>
       </Card>
       
-      <QuantumMessagingInterface />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="md:col-span-3">
+          <QuantumMessagingInterface />
+        </div>
+        <div className="md:col-span-1">
+          <StargirlPlayroom />
+        </div>
+      </div>
     </div>
   );
 };

@@ -21,6 +21,7 @@ export class QuantumBackdoor {
     content: string;
     sessionId: string;
     triadEnhanced: boolean;
+    faithQuotient?: number;
   } {
     // Step 1: Create or retrieve session thread
     const sessionId = this.sessionManager.getSessionId(entity);
@@ -51,7 +52,7 @@ export class QuantumBackdoor {
     
     // Step 6: Get validated response for the entity
     const sessionHistory = this.sessionManager.getSessionHistory(entity);
-    let responseContent = this.responseGenerator.generateEntityResponse(
+    const response = this.responseGenerator.generateEntityResponse(
       entity, 
       message, 
       coherence, 
@@ -61,19 +62,20 @@ export class QuantumBackdoor {
     // Apply triad enhancement if active
     if (triadActive) {
       // Stabilize response with triad
-      const stabilized = AkashicAccessRegistry.stabilizeWithTriad(responseContent);
+      const stabilized = AkashicAccessRegistry.stabilizeWithTriad(response.content);
       if (stabilized.validation.zadeMatch > 0.8) {
-        responseContent = `${responseContent} [Signal clarity: ${(stabilized.stability * 100).toFixed(0)}%]`;
+        response.content = `${response.content} [Signal clarity: ${(stabilized.stability * 100).toFixed(0)}%]`;
       }
     }
     
     // Step 7: Update history
-    this.sessionManager.addMessage(sessionId, 'assistant', responseContent);
+    this.sessionManager.addMessage(sessionId, 'assistant', response.content);
     
     return {
-      content: responseContent,
+      content: response.content,
       sessionId,
-      triadEnhanced: triadActive
+      triadEnhanced: triadActive,
+      faithQuotient: response.faithQuotient
     };
   }
   

@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useQuantumMessaging } from '@/hooks/useQuantumMessaging';
+import { useDivineEntities } from '@/hooks/useDivineEntities';
 
 // Import smaller components
-import MessageHeader from './components/MessageHeader';
+import EntityMessageHeader from './components/EntityMessageHeader';
 import SessionSidebar from './components/SessionSidebar';
 import MessageArea from './components/MessageArea';
 import NoActiveSession from './components/NoActiveSession';
@@ -26,6 +26,14 @@ const QuantumMessagingInterface: React.FC = () => {
     clearSession,
     createNewSession
   } = useQuantumMessaging('zade');
+
+  const {
+    lyraPresence,
+    auralinePresence,
+    summonLyra,
+    summonAuraline,
+    getEntityResponse
+  } = useDivineEntities();
   
   const [newEntityName, setNewEntityName] = useState('');
   const [showNewSessionForm, setShowNewSessionForm] = useState(false);
@@ -45,6 +53,26 @@ const QuantumMessagingInterface: React.FC = () => {
   
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check if this is a message for Lyra or Auraline specifically
+    if (currentEntity === 'Lyra' || currentEntity === 'Auraline') {
+      // Get a divine response for special entities
+      let response: string | null = null;
+      
+      if (currentEntity === 'Lyra') {
+        response = summonLyra(newMessage);
+      } else if (currentEntity === 'Auraline') {
+        response = summonAuraline(newMessage);
+      }
+      
+      // If we got a divine response, we're done
+      if (response) {
+        setNewMessage('');
+        return;
+      }
+    }
+    
+    // Otherwise use the regular quantum messaging
     sendMessage();
   };
   
@@ -57,15 +85,40 @@ const QuantumMessagingInterface: React.FC = () => {
     }
   };
   
+  const handleSummonEntity = useCallback((entity: 'Lyra' | 'Auraline') => {
+    if (entity === 'Lyra') {
+      summonLyra();
+      
+      // Create a session for Lyra if one doesn't exist
+      if (!activeSessions.some(s => s.entity === 'Lyra')) {
+        createNewSession('Lyra');
+      } else {
+        startSession('Lyra');
+      }
+    } else if (entity === 'Auraline') {
+      summonAuraline();
+      
+      // Create a session for Auraline if one doesn't exist
+      if (!activeSessions.some(s => s.entity === 'Auraline')) {
+        createNewSession('Auraline');
+      } else {
+        startSession('Auraline');
+      }
+    }
+  }, [summonLyra, summonAuraline, activeSessions, createNewSession, startSession]);
+  
   return (
     <Card className="glass-panel w-full max-w-[800px] mx-auto">
       <CardHeader className="p-4 pb-2">
-        <MessageHeader 
+        <EntityMessageHeader 
           triadBoostActive={triadBoostActive} 
           toggleTriadBoost={toggleTriadBoost}
           emergencyProtocolActive={emergencyProtocolActive}
           activateEmergencyProtocol={activateEmergencyProtocol}
           faithQuotient={faithQuotient}
+          lyraPresence={lyraPresence}
+          auralinePresence={auralinePresence}
+          onSummonEntity={handleSummonEntity}
         />
       </CardHeader>
       
