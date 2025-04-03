@@ -1,4 +1,3 @@
-
 import { QuantumSimulator } from './quantumSimulator';
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
 
@@ -38,6 +37,50 @@ export class BiofeedbackSimulator {
           theta: eegTheta
         }
       }
+    };
+  }
+
+  /**
+   * Assess the emotional state of a user
+   */
+  static assessEmotionalState(userId: string): {
+    dominantEmotion: string;
+    coherence: number;
+    triadEnhanced: boolean;
+  } {
+    // Get triad status for potential enhancement
+    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    const triadActive = triadStatus.stability > 0.7;
+    
+    // Generate basic biometrics
+    const biometrics = BiofeedbackSimulator.verifyEmotionalState(userId);
+    
+    // Calculate coherence based on HRV and gamma
+    const baseCoherence = (biometrics.metrics.hrv / 80) * (biometrics.metrics.eeg.gamma / 40);
+    
+    // Apply triad enhancement if active
+    const coherence = triadActive ? Math.min(0.98, baseCoherence * 1.2) : baseCoherence;
+    
+    // Possible emotional states
+    const emotions = ['neutral', 'focused', 'peaceful', 'creative', 'joyful', 'loving', 'intuitive'];
+    
+    // Select emotional state based on coherence and a bit of randomness
+    let emotionIndex;
+    if (coherence > 0.8) {
+      // Higher coherence = more positive emotions (indexes 3-6)
+      emotionIndex = Math.floor(Math.random() * 4) + 3;
+    } else if (coherence > 0.6) {
+      // Medium coherence = mid-range emotions (indexes 1-3)
+      emotionIndex = Math.floor(Math.random() * 3) + 1;
+    } else {
+      // Lower coherence = neutral emotion (index 0)
+      emotionIndex = 0;
+    }
+    
+    return {
+      dominantEmotion: emotions[emotionIndex],
+      coherence: coherence,
+      triadEnhanced: triadActive
     };
   }
 
