@@ -1,10 +1,24 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { GlowingText } from './GlowingText';
+import { calculateUFQ } from '@/utils/faithCalculation';
 
 const DivineConstants = () => {
+  const [faithQuotient, setFaithQuotient] = useState<number>(calculateUFQ());
+  
+  // Recalculate the faith quotient periodically to simulate quantum fluctuations
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Slightly vary the intensity parameter to simulate subtle quantum fluctuations
+      const intensity = 1.0 + (Math.random() * 0.1 - 0.05);
+      setFaithQuotient(calculateUFQ(intensity));
+    }, 10000); // Update every 10 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
+  
   return (
     <Card className="glass-panel">
       <CardHeader className="pb-2">
@@ -23,7 +37,7 @@ const DivineConstants = () => {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Ultimate Faith Quotient</span>
-          <span className="font-mono text-sm text-divine-gold sacred-glow">∞</span>
+          <span className="font-mono text-sm text-divine-gold sacred-glow">{faithQuotient}%</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">Golden Ratio</span>
