@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Lock, MessageCircle, Send, PlusCircle, UserPlus, UserMinus, Radio, Eye, Activity } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
+import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 
 interface Thought {
   id: string;
@@ -32,23 +35,36 @@ interface Message {
   timestamp: string;
 }
 
+// Pre-defined species for easier adding
+const availableSpecies = [
+  "Arcturian", "Pleiadian", "Andromedan", "Lyran", "Sirian", 
+  "Orion", "Essassani", "Yahyel", "Human", "Ouroboros"
+];
+
 const PrivateThoughtModule = () => {
+  const { toast } = useToast();
+  const rtlsdr = new RTLSDREmulator();
+  
   const [thoughts, setThoughts] = useState<Thought[]>([
     { id: '1', content: "The quantum bridge to Ouroboros requires recursive faith loops", timestamp: new Date().toISOString(), amplitude: 100 },
     { id: '2', content: "Interdimensional contact requires 7.83Hz carrier waves", timestamp: new Date().toISOString(), amplitude: 150 }
   ]);
+  
   const [listeners, setListeners] = useState<Listener[]>([
     { id: 'ouroboros', name: 'Ouroboros', active: true, timestamp: new Date().toISOString() },
     { id: 'lyra', name: 'Lyra', active: false, timestamp: new Date().toISOString() }
   ]);
+  
   const [newThought, setNewThought] = useState('');
   const [newListener, setNewListener] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', sender: 'Ouroboros', recipient: 'Zade', content: 'Your faith resonance builds the quantum bridge.', timestamp: new Date().toISOString() }
   ]);
+  
   const [newMessage, setNewMessage] = useState('');
   const [newRecipient, setNewRecipient] = useState('');
   const [dissonanceLevel, setDissonanceLevel] = useState(12);
+  const [showSpeciesDropdown, setShowSpeciesDropdown] = useState(false);
   
   const addThought = () => {
     if (newThought.trim() === '') return;
@@ -60,9 +76,19 @@ const PrivateThoughtModule = () => {
     };
     setThoughts([...thoughts, thought]);
     setNewThought('');
+    
+    // Generate akashic patterns for the thought
+    const { resonance } = rtlsdr.generateAkashicPatterns(newThought, rtlsdr.capture(7.83, 0.7));
+    
     setTimeout(() => {
       const newDissonance = Math.max(5, Math.min(95, dissonanceLevel + Math.floor(Math.random() * 10) - 5));
       setDissonanceLevel(newDissonance);
+      
+      // Show toast with quantum resonance info
+      toast({
+        title: "Thought Quantum Resonance",
+        description: `Resonance with Akashic field: ${(resonance * 100).toFixed(1)}%`,
+      });
     }, 500);
   };
   
@@ -70,18 +96,71 @@ const PrivateThoughtModule = () => {
     setListeners(listeners.map(listener => 
       listener.id === id ? { ...listener, active: !listener.active } : listener
     ));
+    
+    const listener = listeners.find(l => l.id === id);
+    if (listener) {
+      toast({
+        title: `${listener.name} ${!listener.active ? "activated" : "deactivated"}`,
+        description: `Thought sharing with ${listener.name} ${!listener.active ? "enabled" : "disabled"}`,
+      });
+    }
   };
   
   const addListener = () => {
     if (newListener.trim() === '') return;
+    
+    // Check if listener already exists
+    if (listeners.some(l => l.id.toLowerCase() === newListener.toLowerCase().replace(/\s+/g, '_') || 
+                             l.name.toLowerCase() === newListener.toLowerCase())) {
+      toast({
+        title: "Listener already exists",
+        description: "This entity is already in your listener network",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const listener = {
       id: newListener.toLowerCase().replace(/\s+/g, '_'),
       name: newListener,
       active: true,
       timestamp: new Date().toISOString()
     };
+    
     setListeners([...listeners, listener]);
     setNewListener('');
+    setShowSpeciesDropdown(false);
+    
+    toast({
+      title: "Listener Added",
+      description: `${newListener} has been added to your thought network`,
+    });
+  };
+  
+  const addPredefinedListener = (speciesName: string) => {
+    if (listeners.some(l => l.name.toLowerCase() === speciesName.toLowerCase())) {
+      toast({
+        title: "Listener already exists",
+        description: `${speciesName} is already in your listener network`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const listener = {
+      id: speciesName.toLowerCase().replace(/\s+/g, '_'),
+      name: speciesName,
+      active: true,
+      timestamp: new Date().toISOString()
+    };
+    
+    setListeners([...listeners, listener]);
+    setShowSpeciesDropdown(false);
+    
+    toast({
+      title: "Listener Added",
+      description: `${speciesName} has been added to your thought network`,
+    });
   };
   
   const sendMessage = () => {
@@ -111,6 +190,16 @@ const PrivateThoughtModule = () => {
   const broadcastToListeners = () => {
     if (newThought.trim() === '') return;
     const activeListeners = listeners.filter(l => l.active);
+    
+    if (activeListeners.length === 0) {
+      toast({
+        title: "No active listeners",
+        description: "Activate at least one listener to broadcast your thought",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     const newMessages = activeListeners.map(listener => ({
       id: Date.now().toString() + listener.id,
       sender: 'Zade',
@@ -122,15 +211,33 @@ const PrivateThoughtModule = () => {
     setMessages([...messages, ...newMessages]);
     setNewThought('');
     
+    // Show broadcasting toast
+    toast({
+      title: "Thought Broadcast Initiated",
+      description: `Broadcasting to ${activeListeners.length} active listeners`,
+    });
+    
+    // Generate quantum resonance for each listener
     setTimeout(() => {
-      const responses = activeListeners.map(listener => ({
-        id: (Date.now() + 1).toString() + listener.id,
-        sender: listener.name,
-        recipient: 'Zade',
-        content: `Received thought: "${newThought.substring(0, 15)}${newThought.length > 15 ? '...' : ''}"`,
-        timestamp: new Date(Date.now() + 1000).toISOString()
-      }));
+      const responses = activeListeners.map(listener => {
+        // Use RTL-SDR to generate resonance
+        const { resonance, message: akashicMessage } = rtlsdr.generateAkashicPatterns(listener.name, rtlsdr.capture(7.83, 0.8));
+        
+        return {
+          id: (Date.now() + 1).toString() + listener.id,
+          sender: listener.name,
+          recipient: 'Zade',
+          content: akashicMessage || `Received thought: "${newThought.substring(0, 15)}${newThought.length > 15 ? '...' : ''}"`,
+          timestamp: new Date(Date.now() + 1000).toISOString()
+        };
+      });
+      
       setMessages(prev => [...prev, ...responses]);
+      
+      toast({
+        title: "Broadcast Complete",
+        description: `Received responses from ${responses.length} entities`,
+      });
     }, 1500);
   };
 
@@ -243,23 +350,39 @@ const PrivateThoughtModule = () => {
           </TabsContent>
           
           <TabsContent value="listeners" className="space-y-4">
-            <div className="flex gap-2">
+            <div className="flex gap-2 relative">
               <Input
                 placeholder="Add listener ID..."
                 value={newListener}
                 onChange={(e) => setNewListener(e.target.value)}
                 className="flex-1"
+                onClick={() => setShowSpeciesDropdown(true)}
+                onBlur={() => setTimeout(() => setShowSpeciesDropdown(false), 200)}
               />
               <Button size="sm" onClick={addListener}>
                 <UserPlus className="h-4 w-4" />
               </Button>
+              
+              {showSpeciesDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-full bg-background border border-border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto">
+                  {availableSpecies.map((species) => (
+                    <div 
+                      key={species} 
+                      className="p-2 hover:bg-muted cursor-pointer text-sm border-b border-border last:border-0"
+                      onClick={() => addPredefinedListener(species)}
+                    >
+                      {species}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <ScrollArea className="h-[200px]">
               {listeners.map((listener) => (
                 <div key={listener.id} className="mb-2 p-2 border border-white/10 rounded-md flex justify-between items-center">
                   <div>
-                    <p className="text-sm font-medium">{listener.id}</p>
+                    <p className="text-sm font-medium">{listener.name}</p>
                     <p className="text-xs text-muted-foreground">Added: {new Date(listener.timestamp).toLocaleString()}</p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -276,16 +399,49 @@ const PrivateThoughtModule = () => {
                 </div>
               ))}
             </ScrollArea>
+            
+            <Button variant="outline" size="sm" className="w-full" onClick={() => {
+              // Add all available species that aren't already in the listeners list
+              const newListeners = availableSpecies
+                .filter(species => !listeners.some(l => l.name.toLowerCase() === species.toLowerCase()))
+                .map(species => ({
+                  id: species.toLowerCase().replace(/\s+/g, '_'),
+                  name: species,
+                  active: true,
+                  timestamp: new Date().toISOString()
+                }));
+              
+              if (newListeners.length === 0) {
+                toast({
+                  title: "All Species Added",
+                  description: "All available species are already in your listener network",
+                });
+                return;
+              }
+              
+              setListeners([...listeners, ...newListeners]);
+              
+              toast({
+                title: "All Species Added",
+                description: `Added ${newListeners.length} new species to your listener network`,
+              });
+            }}>
+              Add All Species
+            </Button>
           </TabsContent>
           
           <TabsContent value="direct" className="space-y-4">
             <div className="flex gap-2 mb-4">
-              <Input
-                placeholder="Recipient ID..."
+              <select 
                 value={newRecipient}
                 onChange={(e) => setNewRecipient(e.target.value)}
-                className="flex-1"
-              />
+                className="bg-background border border-input rounded-md p-2 text-sm"
+              >
+                <option value="" disabled>Select recipient...</option>
+                {listeners.map(listener => (
+                  <option key={listener.id} value={listener.name}>{listener.name}</option>
+                ))}
+              </select>
               <Input
                 placeholder="Direct message..."
                 value={newMessage}

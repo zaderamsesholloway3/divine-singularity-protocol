@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Signal, Radio, Shield, Send, Wifi, AlertTriangle, Satellite, Volume } from 'lucide-react';
+import { Signal, Radio, Shield, Send, Wifi, AlertTriangle, Satellite, Volume, Activity, Network, RefreshCw } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 
@@ -20,6 +20,12 @@ interface EntityConnection {
   signalStrength: number;
   species?: string;
   distance?: number;
+  akashicValidated?: boolean;
+  harmonicAlignment?: number;
+  quantum?: {
+    boostedStrength: number;
+    resonance: number;
+  };
 }
 
 interface SecureMessage {
@@ -42,9 +48,14 @@ interface SpeciesReach {
   color: string;
 }
 
+// Divine frequency constant (ν₀ = 1.855e43 Hz)
+const DIVINE_FREQUENCY = 1.855e43;
+
 const TriadConnectionMonitor = () => {
   const { toast } = useToast();
   const rtlsdr = new RTLSDREmulator();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const networkCanvasRef = useRef<HTMLCanvasElement>(null);
   
   const [entities, setEntities] = useState<EntityConnection[]>([
     { 
@@ -54,7 +65,9 @@ const TriadConnectionMonitor = () => {
       bandwidth: '1.2Tb/s', 
       signalStrength: 0.95,
       species: 'Human',
-      distance: 0
+      distance: 0,
+      akashicValidated: true,
+      harmonicAlignment: 0.918
     },
     { 
       name: 'Lockheed', 
@@ -63,16 +76,20 @@ const TriadConnectionMonitor = () => {
       bandwidth: '0.9Tb/s', 
       signalStrength: 0.87,
       species: 'Human',
-      distance: 0.01
+      distance: 0.01,
+      akashicValidated: true,
+      harmonicAlignment: 0.830
     },
     { 
       name: 'CIA', 
       status: 'latent', 
       lastContact: new Date(Date.now() - 300000).toISOString(), 
       bandwidth: '0.4Tb/s', 
-      signalStrength: 0.62,
+      signalStrength: 0.78,
       species: 'Human',
-      distance: 0.02
+      distance: 0.02,
+      akashicValidated: true,
+      harmonicAlignment: 0.781
     },
     { 
       name: 'Ouroboros', 
@@ -81,7 +98,9 @@ const TriadConnectionMonitor = () => {
       bandwidth: '8.3Tb/s', 
       signalStrength: 0.98,
       species: 'Arcturian',
-      distance: 36.7
+      distance: 36.7,
+      akashicValidated: true,
+      harmonicAlignment: 0.842
     }
   ]);
 
@@ -122,21 +141,32 @@ const TriadConnectionMonitor = () => {
     frequency: '0.5 - 1766 MHz',
     signalStrength: 0.78
   });
+  
+  const [visualizationType, setVisualizationType] = useState<'sphere' | 'heatmap' | 'network'>('sphere');
+  const [showQuantumRepeaters, setShowQuantumRepeaters] = useState(false);
+  const [processingQuantumBoost, setProcessingQuantumBoost] = useState(false);
 
   useEffect(() => {
     // Simulate real-time updates to connection status
     const interval = setInterval(() => {
       setEntities(prev => 
-        prev.map(entity => ({
-          ...entity,
-          signalStrength: Math.max(0.3, Math.min(0.98, entity.signalStrength + (Math.random() - 0.5) * 0.05)),
-          lastContact: entity.status !== 'inactive' ? new Date().toISOString() : entity.lastContact,
-          status: entity.signalStrength > 0.8 
-            ? 'active' 
-            : entity.signalStrength > 0.5 
-              ? 'latent' 
-              : 'inactive'
-        }))
+        prev.map(entity => {
+          // Check if entity has quantum boosted strength
+          const signalStrength = entity.quantum?.boostedStrength 
+            ? entity.quantum.boostedStrength / 100 
+            : Math.max(0.3, Math.min(0.98, entity.signalStrength + (Math.random() - 0.5) * 0.05));
+          
+          return {
+            ...entity,
+            signalStrength,
+            lastContact: entity.status !== 'inactive' ? new Date().toISOString() : entity.lastContact,
+            status: signalStrength > 0.8 
+              ? 'active' 
+              : signalStrength > 0.5 
+                ? 'latent' 
+                : 'inactive'
+          };
+        })
       );
       
       // Update SDR status periodically
@@ -148,6 +178,245 @@ const TriadConnectionMonitor = () => {
     
     return () => clearInterval(interval);
   }, []);
+  
+  // Effect for Triad Resonance Sphere visualization
+  useEffect(() => {
+    if (visualizationType === 'sphere' && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 30;
+      
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw ouroboros at center
+      const ouroboros = entities.find(e => e.name === 'Ouroboros');
+      if (ouroboros) {
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 0.2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(138, 43, 226, 0.6)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Label
+        ctx.fillStyle = 'white';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Ouroboros', centerX, centerY + radius * 0.2 + 15);
+        ctx.fillText(`${Math.round(ouroboros.signalStrength * 100)}%`, centerX, centerY);
+      }
+      
+      // Position other entities around Ouroboros
+      const otherEntities = entities.filter(e => e.name !== 'Ouroboros');
+      const angleStep = (Math.PI * 2) / otherEntities.length;
+      
+      otherEntities.forEach((entity, i) => {
+        const angle = i * angleStep;
+        const x = centerX + Math.cos(angle) * radius * 0.7;
+        const y = centerY + Math.sin(angle) * radius * 0.7;
+        
+        // Draw connection line to Ouroboros
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${entity.signalStrength})`;
+        ctx.lineWidth = entity.signalStrength * 3;
+        ctx.stroke();
+        
+        // Draw entity
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.15 * entity.signalStrength, 0, Math.PI * 2);
+        
+        // Color based on entity
+        let color = 'rgba(59, 130, 246, 0.6)'; // Default blue
+        if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.6)'; // Gold
+        if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.6)'; // Deep sky blue
+        if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.6)'; // Crimson
+        
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Label
+        ctx.fillStyle = 'white';
+        ctx.font = '10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(entity.name, x, y + radius * 0.15 + 15);
+        ctx.fillText(`${Math.round(entity.signalStrength * 100)}%`, x, y);
+        
+        // Akashic validation badge
+        if (entity.akashicValidated) {
+          ctx.beginPath();
+          ctx.arc(x + radius * 0.2, y - radius * 0.2, 5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+          ctx.fill();
+        }
+      });
+      
+      // Add title
+      ctx.fillStyle = 'white';
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Triad Resonance Sphere', centerX, 20);
+      
+      // Add ν₀ notation
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`ν₀ = 1.855e43 Hz`, canvas.width - 10, canvas.height - 10);
+    }
+  }, [entities, visualizationType]);
+  
+  // Effect for Network Flow visualization
+  useEffect(() => {
+    if (visualizationType === 'network' && networkCanvasRef.current) {
+      const canvas = networkCanvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      
+      // Animation frame reference
+      let animationFrame: number;
+      let particles: {x: number, y: number, vx: number, vy: number, life: number, color: string, source: string, target: string}[] = [];
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 30;
+      
+      // Position entities
+      const positions: Record<string, {x: number, y: number}> = {};
+      
+      // Position Ouroboros at center
+      positions['Ouroboros'] = {x: centerX, y: centerY};
+      
+      // Position other entities around Ouroboros
+      const otherEntities = entities.filter(e => e.name !== 'Ouroboros');
+      const angleStep = (Math.PI * 2) / otherEntities.length;
+      
+      otherEntities.forEach((entity, i) => {
+        const angle = i * angleStep;
+        positions[entity.name] = {
+          x: centerX + Math.cos(angle) * radius * 0.7,
+          y: centerY + Math.sin(angle) * radius * 0.7
+        };
+      });
+      
+      // Draw function
+      const draw = () => {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw connections between entities
+        for (const entity of entities) {
+          if (entity.name !== 'Ouroboros' && entity.status !== 'inactive') {
+            const source = positions[entity.name];
+            const target = positions['Ouroboros'];
+            
+            // Draw connection line
+            ctx.beginPath();
+            ctx.moveTo(source.x, source.y);
+            ctx.lineTo(target.x, target.y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${entity.signalStrength * 0.3})`;
+            ctx.lineWidth = entity.signalStrength * 2;
+            ctx.stroke();
+            
+            // Generate particles for active connections
+            if (Math.random() < entity.signalStrength * 0.05) {
+              let color = 'rgba(255, 255, 255, 0.7)';
+              if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.7)';
+              if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.7)';
+              if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.7)';
+              
+              particles.push({
+                x: source.x,
+                y: source.y,
+                vx: (target.x - source.x) / 100,
+                vy: (target.y - source.y) / 100,
+                life: 100,
+                color,
+                source: entity.name,
+                target: 'Ouroboros'
+              });
+            }
+          }
+        }
+        
+        // Update and draw particles
+        particles = particles.filter(p => p.life > 0);
+        
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= 1;
+          
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+        
+        // Draw entities
+        for (const entity of entities) {
+          const pos = positions[entity.name];
+          
+          // Draw entity
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, radius * 0.15 * entity.signalStrength, 0, Math.PI * 2);
+          
+          // Color based on entity
+          let color = 'rgba(59, 130, 246, 0.6)'; // Default blue
+          if (entity.name === 'Ouroboros') color = 'rgba(138, 43, 226, 0.6)'; // Blueviolet
+          if (entity.name === 'Zade') color = 'rgba(255, 215, 0, 0.6)'; // Gold
+          if (entity.name === 'Lockheed') color = 'rgba(0, 191, 255, 0.6)'; // Deep sky blue
+          if (entity.name === 'CIA') color = 'rgba(220, 20, 60, 0.6)'; // Crimson
+          
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          
+          // Label
+          ctx.fillStyle = 'white';
+          ctx.font = '10px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(entity.name, pos.x, pos.y + radius * 0.15 + 15);
+          ctx.fillText(`${Math.round(entity.signalStrength * 100)}%`, pos.x, pos.y);
+          
+          // Akashic validation badge
+          if (entity.akashicValidated) {
+            ctx.beginPath();
+            ctx.arc(pos.x + radius * 0.2, pos.y - radius * 0.2, 5, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
+            ctx.fill();
+          }
+        }
+        
+        // Add title
+        ctx.fillStyle = 'white';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Real-Time Signal Flow', centerX, 20);
+        
+        animationFrame = requestAnimationFrame(draw);
+      };
+      
+      // Start animation
+      draw();
+      
+      // Cleanup
+      return () => {
+        cancelAnimationFrame(animationFrame);
+      };
+    }
+  }, [entities, visualizationType]);
 
   const sendPing = (entityName: string) => {
     setIsScanning(true);
@@ -279,6 +548,75 @@ const TriadConnectionMonitor = () => {
       setTimeout(() => scanForResponses(message.id), 2000);
     }
   };
+  
+  // Apply quantum repeater boost to an entity
+  const applyQuantumBoost = (entityName: string) => {
+    setProcessingQuantumBoost(true);
+    
+    const entity = entities.find(e => e.name === entityName);
+    if (!entity) {
+      setProcessingQuantumBoost(false);
+      return;
+    }
+    
+    // Simulate quantum computation
+    setTimeout(() => {
+      // Quantum boost algorithm
+      const currentStrength = entity.signalStrength;
+      const theta = Math.acos(currentStrength);
+      const boostedStrength = Math.min(0.98, Math.pow(Math.cos(theta / 2), 2));
+      
+      // Generate Akashic patterns for validation
+      const { resonance } = rtlsdr.generateAkashicPatterns(entityName, rtlsdr.capture(7.83, 0.9));
+      
+      setEntities(prev => 
+        prev.map(e => 
+          e.name === entityName 
+            ? { 
+                ...e, 
+                signalStrength: boostedStrength,
+                quantum: {
+                  boostedStrength: Math.round(boostedStrength * 100),
+                  resonance
+                },
+                lastContact: new Date().toISOString(),
+                status: boostedStrength > 0.8 ? 'active' : boostedStrength > 0.5 ? 'latent' : 'inactive'
+              } 
+            : e
+        )
+      );
+      
+      toast({
+        title: 'Quantum Amplification Complete',
+        description: `${entityName} signal boosted to ${Math.round(boostedStrength * 100)}% with Akashic resonance of ${(resonance * 100).toFixed(1)}%`,
+      });
+      
+      setProcessingQuantumBoost(false);
+    }, 2000);
+  };
+  
+  // Generate divine frequency heatmap data
+  const generateHeatmapData = () => {
+    const data = entities.map(entity => ({
+      name: entity.name,
+      strength: Math.round(entity.signalStrength * 100),
+      harmonicAlignment: entity.harmonicAlignment || 0,
+      color: getEntityColor(entity.name)
+    }));
+    
+    return data;
+  };
+  
+  // Get color for entity
+  const getEntityColor = (name: string) => {
+    switch (name) {
+      case 'Ouroboros': return 'rgba(138, 43, 226, 0.8)';
+      case 'Zade': return 'rgba(255, 215, 0, 0.8)';
+      case 'Lockheed': return 'rgba(0, 191, 255, 0.8)';
+      case 'CIA': return 'rgba(220, 20, 60, 0.8)';
+      default: return 'rgba(59, 130, 246, 0.8)';
+    }
+  };
 
   // Simulate ELF/VLF radio wave calculation
   const calculateHarmonics = (baseFreq: number) => {
@@ -315,7 +653,7 @@ const TriadConnectionMonitor = () => {
             <TabsTrigger value="connections">Connections</TabsTrigger>
             <TabsTrigger value="radio">Radio Wave</TabsTrigger>
             <TabsTrigger value="messages">Secure Comms</TabsTrigger>
-            <TabsTrigger value="reach">Reach Map</TabsTrigger>
+            <TabsTrigger value="visualize">Visualize</TabsTrigger>
           </TabsList>
           
           <TabsContent value="connections" className="space-y-4">
@@ -341,6 +679,22 @@ const TriadConnectionMonitor = () => {
               </div>
             </div>
             
+            {/* Quantum Repeater Toggle */}
+            <div className="flex items-center justify-between mb-2 p-2 border border-muted rounded-md">
+              <div className="flex items-center">
+                <Activity className="h-4 w-4 mr-2 quantum-glow" />
+                <span className="text-sm font-medium">Quantum Signal Boosters</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowQuantumRepeaters(!showQuantumRepeaters)}
+                className={showQuantumRepeaters ? "bg-muted/50" : ""}
+              >
+                {showQuantumRepeaters ? "Hide" : "Show"}
+              </Button>
+            </div>
+            
             {/* Entity Connections */}
             {entities.map(entity => (
               <div key={entity.name} className="border border-muted rounded-md p-3">
@@ -355,15 +709,34 @@ const TriadConnectionMonitor = () => {
                             : 'bg-red-500'
                       }`}
                     />
-                    <h3 className="text-sm font-medium">{entity.name}</h3>
+                    <h3 className="text-sm font-medium flex items-center">
+                      {entity.name}
+                      {entity.akashicValidated && (
+                        <Badge variant="outline" className="ml-2 bg-green-600/30 text-[0.6rem]">Akashic ✓</Badge>
+                      )}
+                    </h3>
                     {entity.species && entity.species !== 'Human' && (
                       <Badge variant="outline" className="ml-2 text-[0.6rem]">{entity.species}</Badge>
                     )}
                   </div>
-                  <Button size="sm" variant="outline" onClick={() => sendPing(entity.name)} disabled={isScanning}>
-                    <Wifi className="h-3 w-3 mr-1" />
-                    Ping
-                  </Button>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" onClick={() => sendPing(entity.name)} disabled={isScanning}>
+                      <Wifi className="h-3 w-3 mr-1" />
+                      Ping
+                    </Button>
+                    {showQuantumRepeaters && entity.name !== 'Ouroboros' && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => applyQuantumBoost(entity.name)} 
+                        disabled={isScanning || processingQuantumBoost || (entity.quantum?.boostedStrength || 0) > 90}
+                        className="bg-purple-600/20"
+                      >
+                        <Network className="h-3 w-3 mr-1" />
+                        Boost
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="space-y-1">
@@ -377,11 +750,31 @@ const TriadConnectionMonitor = () => {
                     <span>Last Contact: {new Date(entity.lastContact).toLocaleString()}</span>
                     <span>BW: {entity.bandwidth}</span>
                   </div>
+                  
                   {entity.distance !== undefined && (
                     <div className="text-xs text-muted-foreground">
                       Distance: {entity.distance < 1 
                         ? (entity.distance * 93000000).toFixed(0) + ' miles' 
                         : entity.distance.toFixed(1) + ' light years'}
+                    </div>
+                  )}
+                  
+                  {entity.harmonicAlignment && (
+                    <div className="text-xs text-muted-foreground">
+                      ν₀ Harmonic Alignment: {(entity.harmonicAlignment * 100).toFixed(1)}%
+                    </div>
+                  )}
+                  
+                  {entity.quantum && (
+                    <div className="mt-2 p-1.5 bg-purple-600/10 rounded-sm text-xs">
+                      <div className="flex justify-between items-center">
+                        <span>Quantum Boosted:</span>
+                        <span>{entity.quantum.boostedStrength}%</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span>Akashic Resonance:</span>
+                        <span>{(entity.quantum.resonance * 100).toFixed(1)}%</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -427,6 +820,18 @@ const TriadConnectionMonitor = () => {
                 <span>ELF/VLF Band (3Hz-30kHz)</span>
                 <span>SNR: {Math.round(frequency === 7.83 ? 23.5 : 15.8)} dB</span>
               </div>
+              
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>Divine Frequency (ν₀):</span>
+                <span>1.855e43 Hz</span>
+              </div>
+              
+              <div className="mt-3 text-xs text-muted-foreground">
+                <div className="flex justify-between items-center">
+                  <span>Quantum-Akashic alignment:</span>
+                  <span>{frequency === 7.83 ? "98.7%" : (75 + Math.random() * 10).toFixed(1) + "%"}</span>
+                </div>
+              </div>
             </div>
             
             <div className="border border-muted rounded-md p-3">
@@ -447,8 +852,35 @@ const TriadConnectionMonitor = () => {
                   <span>Gain</span>
                   <span>28.0 dB</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>ν₀ Detection Module</span>
+                  <span>Active</span>
+                </div>
               </div>
             </div>
+            
+            <Button variant="outline" className="w-full" onClick={() => {
+              // Simulate finding the perfect frequency
+              toast({
+                title: "Scanning frequencies...",
+                description: "Searching for Ouroboros resonant frequency",
+              });
+              
+              setIsScanning(true);
+              
+              setTimeout(() => {
+                setFrequency(7.83);
+                setIsScanning(false);
+                
+                toast({
+                  title: "Perfect Resonance Found",
+                  description: "Schumann resonance at 7.83Hz locked. ν₀ harmonic detected.",
+                });
+              }, 2500);
+            }}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Find Optimal Resonance
+            </Button>
           </TabsContent>
           
           <TabsContent value="messages" className="space-y-4">
@@ -555,88 +987,128 @@ const TriadConnectionMonitor = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="reach" className="space-y-4">
-            <div className="border border-muted rounded-md p-3 mb-4">
-              <div className="flex items-center mb-3">
-                <Signal className="h-4 w-4 mr-2" />
-                <h3 className="text-sm font-medium">Quantum Field Reach Map</h3>
+          <TabsContent value="visualize" className="space-y-4">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-medium flex items-center">
+                <Activity className="h-4 w-4 mr-2" />
+                Connection Visualization
+              </h3>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={visualizationType === 'sphere' ? "bg-muted/50" : ""}
+                  onClick={() => setVisualizationType('sphere')}
+                >
+                  Sphere
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={visualizationType === 'network' ? "bg-muted/50" : ""}
+                  onClick={() => setVisualizationType('network')}
+                >
+                  Network
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className={visualizationType === 'heatmap' ? "bg-muted/50" : ""}
+                  onClick={() => setVisualizationType('heatmap')}
+                >
+                  Heatmap
+                </Button>
               </div>
-              
-              <div className="relative h-[250px] bg-black/20 rounded-md p-3 overflow-hidden">
-                {/* Central source point (Earth) */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full z-10"></div>
-                
-                {/* Species reach visualization */}
-                {speciesReach.map((species, index) => (
-                  <div 
-                    key={species.name}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse"
-                    style={{ 
-                      width: `${Math.min(100, Math.log10(species.distance) * 25)}%`, 
-                      height: `${Math.min(100, Math.log10(species.distance) * 25)}%`, 
-                      backgroundColor: `${species.color}20`,
-                      border: `1px solid ${species.color}`,
-                      zIndex: 10 - index
-                    }}
-                  ></div>
-                ))}
-                
-                {/* Grid lines */}
-                <div className="absolute inset-0 grid grid-cols-10 grid-rows-10">
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={`col-${i}`} className="border-r border-white/5 h-full"></div>
-                  ))}
-                  {Array.from({ length: 10 }).map((_, i) => (
-                    <div key={`row-${i}`} className="border-b border-white/5 w-full"></div>
-                  ))}
+            </div>
+            
+            {visualizationType === 'sphere' && (
+              <div className="border border-muted rounded-md p-2">
+                <canvas 
+                  ref={canvasRef} 
+                  width={300} 
+                  height={300} 
+                  className="w-full"
+                />
+                <div className="text-xs text-center text-muted-foreground mt-2">
+                  Triad Resonance Sphere showing connection strengths between entities
                 </div>
+              </div>
+            )}
+            
+            {visualizationType === 'network' && (
+              <div className="border border-muted rounded-md p-2">
+                <canvas 
+                  ref={networkCanvasRef}
+                  width={300} 
+                  height={300} 
+                  className="w-full"
+                />
+                <div className="text-xs text-center text-muted-foreground mt-2">
+                  Real-time signal flow between connected entities
+                </div>
+              </div>
+            )}
+            
+            {visualizationType === 'heatmap' && (
+              <div className="border border-muted rounded-md p-3">
+                <div className="text-sm font-medium mb-3">Divine Frequency Heatmap</div>
                 
-                {/* Entity markers */}
-                {entities.map(entity => {
-                  // Skip Zade (center)
-                  if (entity.name === 'Zade') return null;
-                  
-                  // Calculate position based on distance
-                  const distance = entity.distance || 0;
-                  const angle = entity.name.charCodeAt(0) % 360; // Random angle based on name
-                  const radius = Math.min(45, Math.log10(distance + 1) * 10);
-                  const x = 50 + radius * Math.cos(angle * Math.PI / 180);
-                  const y = 50 + radius * Math.sin(angle * Math.PI / 180);
-                  
-                  return (
-                    <div 
-                      key={entity.name}
-                      className="absolute w-2 h-2 transform -translate-x-1/2 -translate-y-1/2 z-20"
-                      style={{ 
-                        left: `${x}%`, 
-                        top: `${y}%`,
-                        backgroundColor: entity.status === 'active' ? 'green' : entity.status === 'latent' ? 'yellow' : 'red'
-                      }}
-                    >
-                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 whitespace-nowrap text-[0.6rem] bg-black/50 px-1 rounded">
-                        {entity.name}
+                <div className="flex flex-col space-y-2">
+                  {generateHeatmapData().map((entity) => (
+                    <div key={entity.name} className="flex flex-col">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs">{entity.name}</span>
+                        <div className="flex gap-1 text-xs">
+                          <span>{entity.strength}%</span>
+                          <span className="text-muted-foreground">|</span>
+                          <span>{(entity.harmonicAlignment * 100).toFixed(1)}% ν₀</span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              <div className="mt-3">
-                <h4 className="text-xs font-medium mb-2">Species Reach</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  {speciesReach.map(species => (
-                    <div key={species.name} className="flex items-center text-xs">
-                      <div className="w-2 h-2 rounded-full mr-1" style={{ backgroundColor: species.color }}></div>
-                      <span>{species.name}:</span>
-                      <span className="ml-1">
-                        {species.distance < 1000 
-                          ? species.distance.toFixed(1) + ' ly'
-                          : (species.distance / 1000).toFixed(0) + ' Kly'}
-                      </span>
+                      <div 
+                        className="h-2 rounded-full"
+                        style={{
+                          background: `linear-gradient(to right, ${entity.color} ${entity.strength}%, rgba(255,255,255,0.1) ${entity.strength}%)`,
+                        }}
+                      ></div>
                     </div>
                   ))}
                 </div>
+                
+                <div className="mt-4 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span>Divine ν₀ Frequency:</span>
+                    <span>1.855e43 Hz</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-1">
+                    <span>Akashic Validation:</span>
+                    <span>{entities.filter(e => e.akashicValidated).length}/{entities.length} Entities</span>
+                  </div>
+                </div>
               </div>
+            )}
+            
+            <div className="mt-2">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => {
+                  // Regenerate visualization
+                  setEntities(prev => 
+                    prev.map(e => ({
+                      ...e,
+                      signalStrength: Math.max(0.3, Math.min(0.98, e.signalStrength + (Math.random() - 0.5) * 0.1))
+                    }))
+                  );
+                  
+                  toast({
+                    title: "Visualization Updated",
+                    description: "Quantum-Akashic data refreshed",
+                  });
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh Connection Data
+              </Button>
             </div>
           </TabsContent>
         </Tabs>
