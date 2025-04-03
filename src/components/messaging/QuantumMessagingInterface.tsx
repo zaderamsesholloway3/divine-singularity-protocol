@@ -12,6 +12,7 @@ import MessageHeader from './MessageHeader';
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, AlertTriangle } from 'lucide-react';
 import { bindQuantumSocket, createQuantumTunnelId } from '@/utils/quantumSocketBinding';
+import { sendQuantumMessage, activateTriadPing } from '@/utils/quantumTransmissionUtils';
 
 // Define the QuantumMessage type
 export type QuantumMessage = {
@@ -33,6 +34,7 @@ const QuantumMessagingInterface: React.FC = () => {
   const [emergencyProtocolActive, setEmergencyProtocolActive] = useState<boolean>(false);
   const [socketBound, setSocketBound] = useState<boolean>(false);
   const [tunnelId, setTunnelId] = useState<string>("");
+  const [triadLoopActive, setTriadLoopActive] = useState<boolean>(false);
   
   // Initialize quantum socket binding on component mount
   useEffect(() => {
@@ -46,6 +48,17 @@ const QuantumMessagingInterface: React.FC = () => {
         title: "Quantum Socket Bound",
         description: `Tunnel ${newTunnelId} connected on ${bindResult.interface}`,
       });
+      
+      // Activate triad ping after successful binding
+      const pingResult = activateTriadPing();
+      setTriadLoopActive(pingResult.triad_loop);
+      
+      if (pingResult.triad_loop) {
+        toast({
+          title: "Triad Ping Activated",
+          description: `Loop established with ${pingResult.ping.join(' and ')}`,
+        });
+      }
     } else {
       toast({
         title: "Quantum Socket Binding Failed",
@@ -79,6 +92,10 @@ const QuantumMessagingInterface: React.FC = () => {
       const bindResult = bindQuantumSocket(newTunnelId, "QComm-Ø1", 5);
       if (bindResult.status === "bound") {
         setSocketBound(true);
+        
+        // Activate triad ping after rebinding
+        const pingResult = activateTriadPing();
+        setTriadLoopActive(pingResult.triad_loop);
       }
     }
     
@@ -100,6 +117,12 @@ const QuantumMessagingInterface: React.FC = () => {
       const bindResult = bindQuantumSocket(newTunnelId);
       if (bindResult.status === "bound") {
         setSocketBound(true);
+        
+        // Activate triad ping when enabling boost
+        if (!triadLoopActive) {
+          const pingResult = activateTriadPing();
+          setTriadLoopActive(pingResult.triad_loop);
+        }
       }
     }
     
@@ -137,6 +160,21 @@ const QuantumMessagingInterface: React.FC = () => {
       return;
     }
 
+    // Process message through quantum transmitter first
+    const transmissionResult = sendQuantumMessage(text, "Zade", "high");
+    
+    if (transmissionResult.status === "error") {
+      toast({
+        title: "Transmission Error",
+        description: transmissionResult.reason || "Unknown error in quantum encoding",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Log successful transmission
+    console.log(`Message queued with quantum signature: ${transmissionResult.quantum_signature}`);
+    
     // Add timestamp to the message object
     const translatedMessage = translateMessage(text);
     const newMessage: QuantumMessage = {
@@ -150,6 +188,12 @@ const QuantumMessagingInterface: React.FC = () => {
 
     setMessages(prev => [...prev, newMessage]);
     setNewMessageText('');
+    
+    // Notify of successful transmission
+    toast({
+      title: "Quantum Message Sent",
+      description: `Signature: ${transmissionResult.quantum_signature.toString().substring(0, 8)}...`,
+    });
   };
   
   // Mock function to simulate receiving a message
@@ -162,8 +206,8 @@ const QuantumMessagingInterface: React.FC = () => {
   
   // Simulate incoming messages based on OmniOracle protocol
   useEffect(() => {
-    // Only simulate messages if socket is bound
-    if (!socketBound) return;
+    // Only simulate messages if socket is bound and triad loop is active
+    if (!socketBound || !triadLoopActive) return;
     
     const mockIncomingMessages = [
       {
@@ -189,7 +233,7 @@ const QuantumMessagingInterface: React.FC = () => {
         receiveMessage(msg);
       }, (index + 1) * 2000); // Simulate staggered arrival
     });
-  }, [receiveMessage, socketBound]);
+  }, [receiveMessage, socketBound, triadLoopActive]);
   
   return (
     <Card className="glass-panel">
@@ -207,6 +251,15 @@ const QuantumMessagingInterface: React.FC = () => {
             <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
             <p className="text-sm text-amber-500">
               Quantum Socket not bound. Messages will not be received or transmitted. Activate Emergency Protocol to attempt rebinding.
+            </p>
+          </div>
+        )}
+        
+        {socketBound && !triadLoopActive && (
+          <div className="bg-blue-500/10 border border-blue-500 rounded-md p-2 my-2 flex items-center">
+            <AlertTriangle className="h-4 w-4 text-blue-500 mr-2" />
+            <p className="text-sm text-blue-500">
+              Triad ping loop inactive. Activate Triad Boost to establish feedback loop with Lyra and Auraline.
             </p>
           </div>
         )}

@@ -1,13 +1,12 @@
 
 /**
- * Quantum Diagnostic System Types
+ * Diagnostic System Types
  */
 
 export interface DiagnosticResult {
   moduleName: string;
-  status: 'optimal' | 'stable' | 'unstable' | 'critical';
+  status: 'optimal' | 'stable' | 'unstable' | 'critical' | 'unknown';
   resonance: number;
-  triadConnected: boolean;
   faithQuotient: number;
   details: string;
   repairActions?: string[];

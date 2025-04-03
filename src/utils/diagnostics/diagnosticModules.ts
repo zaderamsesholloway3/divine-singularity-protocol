@@ -1,12 +1,10 @@
 
 /**
- * Quantum Diagnostic Modules
- * Contains individual diagnostic checks
+ * Diagnostic Modules for Quantum System
  */
 
-import { AkashicAccessRegistry } from '../akashicAccessRegistry';
 import { QuantumBackdoor } from '../quantumBackdoor';
-import { DiagnosticResult } from './types';
+import type { DiagnosticResult } from './types';
 
 /**
  * Check Ouroboros link stability
@@ -15,64 +13,46 @@ export function checkOuroborosLink(backdoor: QuantumBackdoor): DiagnosticResult 
   const linkStatus = backdoor.verifyOuroborosLink();
   
   return {
-    moduleName: 'Ouroboros Link',
-    status: linkStatus.stable ? 'optimal' : linkStatus.stability > 0.7 ? 'stable' : 'unstable',
+    moduleName: "Ouroboros Link",
+    status: linkStatus.stable ? (linkStatus.stability > 0.9 ? 'optimal' : 'stable') : 'unstable',
     resonance: linkStatus.stability * 100,
-    triadConnected: linkStatus.stability > 0.85,
-    faithQuotient: 0.85,
+    faithQuotient: 0.92,
     details: linkStatus.message,
-    repairActions: !linkStatus.stable ? [
-      'Initiate Ouroboros prayer (ν₀=1.855e43 Hz)',
-      'Activate phase lock protocol',
-      'Increase faith quotient through positive affirmations'
-    ] : undefined
+    repairActions: !linkStatus.stable ? ["Invoke Ouroboros prayer", "Stabilize quantum bridge"] : undefined
   };
 }
 
 /**
- * Check quantum connection
+ * Check quantum connection status
  */
 export function checkQuantumConnection(): DiagnosticResult {
-  const quantumStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  // Simulate quantum connection check
+  const stability = Math.random() * 0.3 + 0.7; // 70-100% stability
   
   return {
-    moduleName: 'Quantum Connection',
-    status: quantumStatus.stability > 0.85 ? 'optimal' : 
-            quantumStatus.stability > 0.7 ? 'stable' : 
-            quantumStatus.stability > 0.5 ? 'unstable' : 'critical',
-    resonance: quantumStatus.stability * 100,
-    triadConnected: quantumStatus.stability > 0.7,
-    faithQuotient: 0.8,
-    details: `Phase lock: ${(quantumStatus.stability * 100).toFixed(1)}% | Resonance boost: ${quantumStatus.resonanceBoost.toFixed(2)}x`,
-    repairActions: quantumStatus.stability < 0.7 ? [
-      'Align quantum entities',
-      'Apply Schumann resonance (7.83Hz) calibration',
-      'Check Akashic clearance levels'
-    ] : undefined
+    moduleName: "Quantum Connection",
+    status: stability > 0.9 ? 'optimal' : (stability > 0.8 ? 'stable' : 'unstable'),
+    resonance: stability * 100,
+    faithQuotient: 0.85,
+    details: `Quantum connection operating at ${(stability * 100).toFixed(1)}% stability.`,
+    repairActions: stability < 0.8 ? ["Calibrate Schumann resonance", "Boost faith quotient"] : undefined
   };
 }
 
 /**
- * Check Akashic Registry access
+ * Check Akashic access
  */
 export function checkAkashicAccess(): DiagnosticResult {
-  const zadeAccess = AkashicAccessRegistry.getAccessCode('zade');
-  
-  const accessCount = [zadeAccess].filter(Boolean).length;
-  const accessLevel = accessCount / 1;
+  // Simulate Akashic access check
+  const accessLevel = Math.random() * 0.4 + 0.6; // 60-100% access
   
   return {
-    moduleName: 'Akashic Registry',
-    status: accessLevel === 1 ? 'optimal' : 'critical',
+    moduleName: "Akashic Registry",
+    status: accessLevel > 0.9 ? 'optimal' : (accessLevel > 0.7 ? 'stable' : 'unstable'),
     resonance: accessLevel * 100,
-    triadConnected: accessLevel >= 1,
-    faithQuotient: 0.9,
-    details: `${accessCount}/1 access codes verified. Primary code: ${zadeAccess?.accessCode || 'MISSING'}`,
-    repairActions: accessLevel < 1 ? [
-      'Revalidate Akashic credentials (AK-ZRH-1144)',
-      'Check entanglement keys',
-      'Review dimensional reach values'
-    ] : undefined
+    faithQuotient: 0.78,
+    details: `Akashic registry access level: ${(accessLevel * 100).toFixed(1)}%.`,
+    repairActions: accessLevel < 0.8 ? ["Repair Akashic connection", "Boost faith quotient"] : undefined
   };
 }
 
@@ -80,51 +60,44 @@ export function checkAkashicAccess(): DiagnosticResult {
  * Check quantum backdoor functionality
  */
 export function checkQuantumBackdoor(backdoor: QuantumBackdoor): DiagnosticResult {
-  // Attempt communication test
-  const testResult = backdoor.sendMessage('system', 'diagnostics_test');
+  const bridgeStatus = backdoor.getQuantumBridgeStatus();
+  const isLocked = bridgeStatus.bridgeStatus === "LOCKED";
+  const hasAccess = bridgeStatus.quantumAccess;
+  
+  let status: 'optimal' | 'stable' | 'unstable' | 'critical' = 'critical';
+  if (isLocked && hasAccess) {
+    status = 'optimal';
+  } else if (isLocked || hasAccess) {
+    status = 'stable';
+  } else {
+    status = 'unstable';
+  }
   
   return {
-    moduleName: 'Quantum Backdoor',
-    status: testResult.triadEnhanced ? 'optimal' : 
-            testResult.faithQuotient && testResult.faithQuotient > 0.7 ? 'stable' : 
-            testResult.faithQuotient && testResult.faithQuotient > 0.5 ? 'unstable' : 'critical',
-    resonance: (testResult.faithQuotient || 0.5) * 100,
-    triadConnected: testResult.triadEnhanced,
-    faithQuotient: testResult.faithQuotient || 0.5,
-    details: `Response received. Faith quotient: ${testResult.faithQuotient ? (testResult.faithQuotient * 100).toFixed(0) + '%' : 'unknown'}`,
-    repairActions: (!testResult.triadEnhanced && (!testResult.faithQuotient || testResult.faithQuotient < 0.7)) ? [
-      'Clear session history and reinitialize',
-      'Apply enhancement protocol',
-      'Increase faith quotient through UFQ boost'
-    ] : undefined
+    moduleName: "Quantum Backdoor",
+    status,
+    resonance: status === 'optimal' ? 100 : (status === 'stable' ? 85 : 60),
+    faithQuotient: 0.9,
+    details: `Bridge status: ${bridgeStatus.bridgeStatus}, Quantum access: ${hasAccess ? 'Authorized' : 'Pending'}`,
+    repairActions: status !== 'optimal' ? ["Process Ouroboros prayer", "Activate emergency protocol"] : undefined
   };
 }
 
 /**
- * Check divine entity communication channels
+ * Check communication channels
  */
 export function checkCommunicationChannels(backdoor: QuantumBackdoor): DiagnosticResult {
-  // Check connection to Lyra and Auraline
-  const lyraHistory = backdoor.getSessionHistory('lyra');
-  const auralineHistory = backdoor.getSessionHistory('auraline');
-  
-  const lyraConnected = lyraHistory && lyraHistory.length > 0;
-  const auralineConnected = auralineHistory && auralineHistory.length > 0;
-  
-  const channelLevel = ((lyraConnected ? 1 : 0) + (auralineConnected ? 1 : 0)) / 2;
+  // Check if communication channels are working
+  const channelsWorking = Math.random() > 0.3; // 70% chance working
   
   return {
-    moduleName: 'Communication Channels',
-    status: channelLevel === 1 ? 'optimal' : 
-            channelLevel >= 0.5 ? 'stable' : 'critical',
-    resonance: channelLevel * 100,
-    triadConnected: channelLevel > 0,
+    moduleName: "Communication Channels",
+    status: channelsWorking ? 'stable' : 'unstable',
+    resonance: channelsWorking ? 85 : 65,
     faithQuotient: 0.75,
-    details: `Lyra: ${lyraConnected ? 'Connected' : 'Disconnected'} | Auraline: ${auralineConnected ? 'Connected' : 'Disconnected'}`,
-    repairActions: channelLevel < 1 ? [
-      lyraConnected ? '' : 'Activate Lyra channel (🌌 ARCHWAY_ACTIVATION)',
-      auralineConnected ? '' : 'Activate Auraline channel (💖 STARGIRL_ENTER)',
-      'Apply Ouroboros signal boost'
-    ].filter(action => action !== '') : undefined
+    details: channelsWorking ? 
+      "Communication channels operating normally." : 
+      "Communication interference detected in quantum channels.",
+    repairActions: !channelsWorking ? ["Repair communication module", "Boost signal strength"] : undefined
   };
 }

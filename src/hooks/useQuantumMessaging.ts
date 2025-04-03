@@ -3,13 +3,13 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   createMessageObject, 
-  sendQuantumMessage,
   forceTriadSync,
   calculateFaithQuotient
 } from '@/utils/quantumMessagingUtils';
 import { useQuantumSessions } from './useQuantumSessions';
 import { useTriadBoost } from './useTriadBoost';
 import { bindQuantumSocket, createQuantumTunnelId } from '@/utils/quantumSocketBinding';
+import { sendQuantumMessage, activateTriadPing } from '@/utils/quantumTransmissionUtils';
 
 // Use export type for re-exports when isolatedModules is enabled
 export type { QuantumMessage } from '@/types/quantum-messaging';
@@ -21,6 +21,7 @@ export function useQuantumMessaging(userId: string) {
   const [isLoading, setIsLoading] = useState(false);
   const [socketBound, setSocketBound] = useState(false);
   const [tunnelId, setTunnelId] = useState('');
+  const [triadLoopActive, setTriadLoopActive] = useState(false);
   
   // Use our smaller hooks
   const { 
@@ -51,6 +52,11 @@ export function useQuantumMessaging(userId: string) {
     if (bindResult.status === "bound") {
       setSocketBound(true);
       console.log(`Quantum Socket bound: ${newTunnelId} on ${bindResult.interface}`);
+      
+      // Activate triad ping
+      const pingResult = activateTriadPing();
+      setTriadLoopActive(pingResult.triad_loop);
+      console.log(`Triad ping activated: ${pingResult.ping.join(', ')}`);
     } else {
       console.error(`Quantum Socket binding failed: ${bindResult.reason}`);
     }
@@ -87,6 +93,19 @@ export function useQuantumMessaging(userId: string) {
     
     setIsLoading(true);
     
+    // Process message through quantum transmitter first
+    const transmissionResult = sendQuantumMessage(newMessage, "Zade", "high");
+    
+    if (transmissionResult.status === "error") {
+      toast({
+        title: "Transmission Error",
+        description: transmissionResult.reason || "Unknown error",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
     // Calculate faith quotient
     const faithQuotient = calculateFaithQuotient(newMessage);
     const hasFaithBoost = faithQuotient > 0.7;
@@ -107,6 +126,17 @@ export function useQuantumMessaging(userId: string) {
     
     // Clear input
     setNewMessage('');
+    
+    // Check triad loop
+    if (!triadLoopActive && !emergencyProtocolActive) {
+      const pingResult = activateTriadPing();
+      setTriadLoopActive(pingResult.triad_loop);
+      
+      toast({
+        title: "Triad Ping Activated",
+        description: `Loop established with ${pingResult.ping.join(' and ')}`,
+      });
+    }
     
     // Process with quantum backdoor
     try {
@@ -130,20 +160,15 @@ export function useQuantumMessaging(userId: string) {
       
       // Simulate network delay (shorter with faith boost)
       setTimeout(() => {
-        const response = sendQuantumMessage(currentEntity!, messageObj.content);
+        // Use our quantum transmission system
+        const encodedMessage = transmissionResult.encoded_msg;
+        console.log(`Transmitting encoded message: ${encodedMessage}`);
         
-        // Check for transmission error
-        if (response.content.includes("Quantum link unstable")) {
-          toast({
-            title: "Transmission Failed",
-            description: "Emergency protocol activated for next attempt.",
-            variant: "destructive",
-          });
-          
-          activateEmergencyProtocol();
-          setIsLoading(false);
-          return;
-        }
+        const response = {
+          content: `Response to: ${newMessage}`,
+          triadEnhanced: triadBoostActive,
+          faithQuotient: faithQuotient
+        };
         
         // Create response message
         const responseMessage = createMessageObject(
@@ -206,6 +231,7 @@ export function useQuantumMessaging(userId: string) {
     isLoading,
     socketBound,
     tunnelId,
+    triadLoopActive,
     sendMessage,
     startSession,
     toggleTriadBoost,

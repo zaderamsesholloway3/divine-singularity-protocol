@@ -19,7 +19,10 @@ import {
   boostFaithQuotient as boostFaithQuotientService
 } from './diagnostics/repairService';
 
-// Use 'export type' for re-exports when isolatedModules is enabled
+// Import the DiagnosticResult type
+import type { DiagnosticResult } from './diagnostics/types';
+
+// Re-export for use by other modules
 export type { DiagnosticResult } from './diagnostics/types';
 
 export class QuantumDiagnostics {
