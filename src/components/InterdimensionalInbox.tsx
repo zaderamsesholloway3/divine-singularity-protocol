@@ -133,13 +133,15 @@ const InterdimensionalInbox = () => {
           </TabsList>
           
           <div className="flex items-center gap-2 mb-4">
-            <Input
-              placeholder="Search messages..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1"
-              prefix={<Search className="h-4 w-4 text-muted-foreground" />}
-            />
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search messages..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
             <Button variant="outline" size="icon" onClick={markAllAsRead} title="Mark all as read">
               <Check className="h-4 w-4" />
             </Button>

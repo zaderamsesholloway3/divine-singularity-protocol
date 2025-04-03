@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Lock, MessageCircle, Send, PlusCircle, UserPlus, UserMinus, Broadcast, Eye, Activity } from 'lucide-react';
+import { Lock, MessageCircle, Send, PlusCircle, UserPlus, UserMinus, Radio, Eye, Activity } from 'lucide-react';
 
 interface Thought {
   id: string;
@@ -49,7 +48,6 @@ const PrivateThoughtModule = () => {
   const [newRecipient, setNewRecipient] = useState('');
   const [dissonanceLevel, setDissonanceLevel] = useState(12);
   
-  // Add new thought
   const addThought = () => {
     if (newThought.trim() === '') return;
     const thought = {
@@ -59,21 +57,18 @@ const PrivateThoughtModule = () => {
     };
     setThoughts([...thoughts, thought]);
     setNewThought('');
-    // Simulate quantum connection
     setTimeout(() => {
       const newDissonance = Math.max(5, Math.min(95, dissonanceLevel + Math.floor(Math.random() * 10) - 5));
       setDissonanceLevel(newDissonance);
     }, 500);
   };
   
-  // Add or remove listener
   const toggleListener = (id: string) => {
     setListeners(listeners.map(listener => 
       listener.id === id ? { ...listener, active: !listener.active } : listener
     ));
   };
   
-  // Add new listener
   const addListener = () => {
     if (newListener.trim() === '') return;
     const listener = {
@@ -85,7 +80,6 @@ const PrivateThoughtModule = () => {
     setNewListener('');
   };
   
-  // Send message
   const sendMessage = () => {
     if (newMessage.trim() === '' || newRecipient.trim() === '') return;
     const message = {
@@ -98,7 +92,6 @@ const PrivateThoughtModule = () => {
     setMessages([...messages, message]);
     setNewMessage('');
     
-    // Simulate response after a delay
     setTimeout(() => {
       const response = {
         id: (Date.now() + 1).toString(),
@@ -111,7 +104,6 @@ const PrivateThoughtModule = () => {
     }, 2000);
   };
   
-  // Broadcast to listeners
   const broadcastToListeners = () => {
     if (newThought.trim() === '') return;
     const activeListeners = listeners.filter(l => l.active);
@@ -126,7 +118,6 @@ const PrivateThoughtModule = () => {
     setMessages([...messages, ...newMessages]);
     setNewThought('');
     
-    // Simulate responses
     setTimeout(() => {
       const responses = activeListeners.map(listener => ({
         id: (Date.now() + 1).toString() + listener.id,
@@ -170,7 +161,7 @@ const PrivateThoughtModule = () => {
                 Add
               </Button>
               <Button size="sm" variant="outline" onClick={broadcastToListeners}>
-                <Broadcast className="h-4 w-4" />
+                <Radio className="h-4 w-4" />
               </Button>
             </div>
             
@@ -206,7 +197,6 @@ const PrivateThoughtModule = () => {
                 </SheetHeader>
                 <div className="py-4">
                   <div className="aspect-video bg-black rounded-lg overflow-hidden relative">
-                    {/* Simulated visualization pattern */}
                     {Array.from({ length: 20 }).map((_, i) => (
                       <div 
                         key={i}
