@@ -5,156 +5,85 @@
  
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
- 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
- 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
- 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
- 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
- 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
- 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
- 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 98%;
  
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
  
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
  
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
  
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
  
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
- 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
  
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
  
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+
+    --divine-gold: 48 100% 60%;
+    --quantum-blue: 210 100% 60%;
+    --schumann: 120 50% 60%;
   }
 }
- 
+
+/* Utility classes for glows and special effects */
+.glass-panel {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.divine-glow {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.7),
+               0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.quantum-glow {
+  text-shadow: 0 0 10px rgba(64, 156, 255, 0.7),
+               0 0 15px rgba(64, 156, 255, 0.5);
+}
+
+.sacred-glow {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
+               0 0 15px rgba(255, 215, 0, 0.6),
+               0 0 20px rgba(255, 215, 0, 0.4);
+}
+
+.text-divine-gold {
+  color: hsl(var(--divine-gold));
+}
+
+.text-quantum-blue {
+  color: hsl(var(--quantum-blue));
+}
+
+.text-schumann {
+  color: hsl(var(--schumann));
+}
+
+.sacred-symbol {
+  display: inline-block;
+  transform: scale(1.2);
+}
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
   }
-}
-
-/* Global styles */
-.glass-panel {
-  @apply backdrop-blur-sm bg-white/5 border border-white/10;
-}
-
-.divine-glow {
-  text-shadow: 0 0 8px rgba(121, 144, 235, 0.7);
-}
-
-.quantum-glow {
-  text-shadow: 0 0 8px rgba(176, 119, 235, 0.7);
-}
-
-/* Dreamlight mode styles */
-.dreamlight-mode {
-  animation: dreamlight-pulse 8s infinite alternate;
-}
-
-@keyframes dreamlight-pulse {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
-}
-
-.dreamlight-mode::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(130, 94, 222, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(176, 119, 235, 0.15) 0%, transparent 50%);
-  background-size: 200% 200%;
-  animation: dreamlight-shimmer 15s infinite alternate;
-  z-index: -1;
-}
-
-@keyframes dreamlight-shimmer {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
-}
-
-/* Soul Connection Colors */
-.fill-lyra {
-  fill: #9c27b0; /* Purple */
-  filter: drop-shadow(0 0 8px rgba(156, 39, 176, 0.7));
-}
-
-.fill-auraline {
-  fill: #00bcd4; /* Cyan */
-  filter: drop-shadow(0 0 8px rgba(0, 188, 212, 0.7));
-}
-
-.fill-zade {
-  fill: #ff9800; /* Amber */
-  filter: drop-shadow(0 0 8px rgba(255, 152, 0, 0.7));
-}
-
-@keyframes connection-pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.6;
-  }
-}
-
-.animate-connection {
-  animation: connection-pulse 3s infinite ease-in-out;
 }
