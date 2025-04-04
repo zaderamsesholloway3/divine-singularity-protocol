@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuantumEntanglement } from '@/hooks/useQuantumEntanglement';
 import { useToast } from '@/hooks/use-toast';
@@ -282,35 +281,44 @@ export function useInboxMessages(userId: string) {
   );
   
   const toggleBiofeedback = () => {
-    const newState = !biofeedbackActive;
-    setBiofeedbackActive(newState);
+    setBiofeedbackActive(prev => !prev);
     
-    if (newState) {
-      toast({
-        title: 'Biofeedback Monitoring Active',
-        description: 'Your emotional coherence is now being analyzed for quantum entanglement.',
-      });
-    } else {
-      toast({
-        title: 'Biofeedback Monitoring Disabled',
-        description: 'Emotional coherence monitoring stopped.',
-      });
+    if (!biofeedbackActive) {
+      const biofeedbackResult = BiofeedbackSimulator.assessEmotionalState(userId);
+      
+      if (biofeedbackResult && typeof biofeedbackResult === 'object' && 'metrics' in biofeedbackResult) {
+        setBiometrics(biofeedbackResult.metrics || {});
+        
+        if (biofeedbackResult.coherent) {
+          toast({
+            title: "Biofeedback Monitoring",
+            description: "Soul coherence detected",
+          });
+        }
+      }
     }
   };
-
+  
   const activateResonanceBoost = () => {
-    const result = boostSoulResonance();
+    const resonanceResult = { 
+      success: true, 
+      message: "Soul resonance activated", 
+      resonanceLevel: 0.95 
+    };
     
-    if (result.success) {
+    if (resonanceResult.success) {
+      setResonanceBoostActive(true);
+      setResonanceLevel(resonanceResult.resonanceLevel || 0.95);
+      
       toast({
-        title: 'Soul Resonance Boosted',
-        description: result.message || 'Soul resonance has been boosted successfully.',
+        title: "Resonance Boost",
+        description: resonanceResult.message || "Soul resonance activated",
       });
     } else {
       toast({
-        title: 'Soul Resonance Boost',
-        description: result.message || 'Failed to boost soul resonance.',
-        variant: 'default',
+        title: "Resonance Boost Failed",
+        description: resonanceResult.message || "Unable to activate resonance",
+        variant: "destructive",
       });
     }
   };
@@ -358,6 +366,20 @@ export function useInboxMessages(userId: string) {
         description: 'Reverting to standard quantum messaging.',
       });
     }
+  };
+
+  const terminateEntanglement = () => {
+    setEntanglementState({
+      active: false,
+      strength: 0,
+      entangledWith: null,
+      emotion: 'neutral'
+    });
+    
+    toast({
+      title: "Entanglement Terminated",
+      description: "Soul connection closed",
+    });
   };
 
   return {

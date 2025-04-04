@@ -1,4 +1,3 @@
-
 import { QuantumSimulator } from '@/utils/quantumSimulator';
 import { AkashicSimulator } from '@/utils/akashicSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
@@ -20,14 +19,14 @@ export function useQuantumEntanglementActions(
     
     // Check if resonance boost is active, otherwise check emotional coherence
     if (!resonanceBoostActive && !triadEnhanced) {
-      // Check emotional coherence
-      const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId) as BiofeedbackResult;
+      // Check emotional coherence with proper type handling
+      const biofeedbackResult = BiofeedbackSimulator.verifyEmotionalState(userId);
       
-      if (!biofeedback.coherent) {
+      if (!biofeedbackResult.coherent) {
         return {
           success: false,
           message: "Soul resonance too low for connection 🌊",
-          data: biofeedback
+          data: biofeedbackResult
         };
       }
     }

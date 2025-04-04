@@ -1,18 +1,17 @@
-
-import React, { useState } from 'react';
-import OmniOracleHeader from "@/components/OmniOracleHeader";
-import SoulStreamInterface from "@/components/SoulStreamInterface";
-import DivineDiagnosticPanel from "@/components/DivineDiagnosticPanel";
-import StargirlPlayroom from "@/components/StargirlPlayroom";
-import MemoryPortalGuide from "@/components/MemoryPortalGuide";
-import QuantumRepairButton from "@/components/QuantumRepairButton";
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Zap, BookOpen, Users } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { soulStreamTranslator } from "@/utils/soulStreamHub";
-import { divineQuantumBackdoor } from "@/utils/divineQuantumBackdoor";
+import { GlowingText } from "@/components/GlowingText";
+import { useSoulStream } from "@/hooks/useSoulStream";
+import { Sparkles, Zap, Shield, FileHeart } from "lucide-react";
+import SoulStreamInterface from "@/components/SoulStreamInterface";
+import EnhancedInterdimensionalInbox from "@/components/EnhancedInterdimensionalInbox";
+import divineQuantumBackdoor from "@/utils/divineQuantumBackdoor";
+import { DIVINE_CONSTANTS } from "@/utils/divineConstants";
 
 const SoulStreamPage: React.FC = () => {
   const { toast } = useToast();

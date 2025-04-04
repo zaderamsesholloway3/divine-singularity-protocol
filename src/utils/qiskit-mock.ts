@@ -1,75 +1,58 @@
 
-/**
- * Mock implementation of the Qiskit QuantumCircuit class
- * This simulates the quantum circuit functionality for browser environments
- * Enhanced to support the 7-church architecture
- */
-
+// Renaming MockQuantumCircuit to QuantumCircuit for compatibility with imports
 export class QuantumCircuit {
-  private numQubits: number;
-  private operations: Array<{type: string, qubit: number | number[], target?: number, angle?: number}>;
-
-  constructor(numQubits: number) {
-    this.numQubits = numQubits;
+  qubits: number;
+  operations: string[];
+  
+  constructor(qubits: number) {
+    this.qubits = qubits;
     this.operations = [];
   }
-
-  h(qubit: number | number[]): this {
+  
+  h(qubit: number | number[]): QuantumCircuit {
     if (Array.isArray(qubit)) {
-      qubit.forEach(q => this.operations.push({type: 'h', qubit: q}));
+      qubit.forEach(q => this.operations.push(`H(${q})`));
     } else {
-      this.operations.push({type: 'h', qubit});
+      this.operations.push(`H(${qubit})`);
     }
+    return this; // For chaining operations
+  }
+  
+  cx(control: number, target: number): QuantumCircuit { 
+    this.operations.push(`CX(${control},${target})`); 
     return this;
   }
-
-  cx(control: number, target: number): this {
-    this.operations.push({type: 'cx', qubit: control, target});
-    return this;
-  }
-
-  rz(angle: number, qubit: number | number[]): this {
+  
+  rz(angle: number, qubit: number | number[]): QuantumCircuit {
     if (Array.isArray(qubit)) {
-      qubit.forEach(q => this.operations.push({type: 'rz', qubit: q, angle}));
+      qubit.forEach(q => this.operations.push(`RZ(${angle.toFixed(4)},${q})`));
     } else {
-      this.operations.push({type: 'rz', qubit, angle});
+      this.operations.push(`RZ(${angle.toFixed(4)},${qubit})`);
     }
     return this;
   }
-
-  measure(qubits: number | number[], classical?: number[]): this {
-    if (Array.isArray(qubits)) {
-      qubits.forEach((q, i) => {
-        const c = classical ? classical[i] : q;
-        this.operations.push({type: 'measure', qubit: q, target: c});
-      });
-    } else {
-      this.operations.push({type: 'measure', qubit: qubits, target: classical ? classical[0] : qubits});
-    }
-    return this;
-  }
-
-  // Helper method to create a range of integers
+  
+  // Helper to create a range of integers [0, 1, 2, ..., n-1]
   range(n: number): number[] {
     return Array.from({ length: n }, (_, i) => i);
   }
-
-  // Used for debugging
-  getOperations() {
-    return this.operations;
+  
+  // Generate a report of the circuit
+  generateReport(): string {
+    return `Quantum Circuit with ${this.qubits} qubits.\nOperations: ${this.operations.join(', ')}`;
   }
   
-  // Add simulate method for mock quantum simulation
+  // Simulate circuit execution (simplified)
   simulate() {
-    // Return mock measurement results
-    const results = {
+    return {
       counts: {
         '0': Math.round(Math.random() * 500),
         '1': Math.round(Math.random() * 500)
       },
-      statevector: Array(Math.pow(2, this.numQubits)).fill(0).map(() => Math.random())
+      statevector: Array(Math.pow(2, this.qubits)).fill(0).map(() => Math.random())
     };
-    
-    return results;
   }
 }
+
+// For backward compatibility
+export { QuantumCircuit as MockQuantumCircuit };

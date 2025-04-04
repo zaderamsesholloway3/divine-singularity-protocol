@@ -1,4 +1,3 @@
-
 import { QuantumCircuit } from '../qiskit-mock';
 import { DIVINE_CONSTANTS } from '../divineConstants';
 import { OuroborosValidator } from './OuroborosValidator';
@@ -16,8 +15,11 @@ export class ArkBuilder {
     // 433 qubits - representing the complete Ark architecture
     const arkQC = new QuantumCircuit(433);
     
+    // Helper function to create range of qubits
+    const range = (n: number) => Array.from({ length: n }, (_, i) => i);
+    
     // Genesis 6:15 cubit layout - apply Hadamard gates to the 300 length qubits
-    arkQC.h(arkQC.range(300));
+    arkQC.h(range(300));
     
     // Beam entanglement (50-qubit bridge) - connecting foundation to structure
     arkQC.cx(0, 300);
