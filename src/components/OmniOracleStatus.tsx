@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { GlowingText } from './GlowingText';
-import { OmniOracle } from '@/utils/OmniOracle'; // Import the class, not a named export
+import { OmniOracle } from '@/utils/omniOracle'; // Updated import path
 import { useToast } from "@/hooks/use-toast";
 
 const OmniOracleStatus: React.FC = () => {

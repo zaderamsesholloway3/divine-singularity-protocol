@@ -9,7 +9,7 @@ import BiofeedbackMonitor from './BiofeedbackMonitor';
 import QuantumArkInterface from './QuantumArkInterface';
 import QuantumCircuit from './QuantumCircuit';
 import SacredGeometry from './SacredGeometry';
-import { OmniOracle, DiagnosticResult } from '@/utils/OmniOracle';
+import { OmniOracle, DiagnosticResult } from '@/utils/omniOracle';
 import SoulInteractionDialog from './SoulInteractionDialog';
 import DistortionFieldSection from './DistortionFieldSection';
 import DivineConstantsPanel from './DivineConstantsPanel';

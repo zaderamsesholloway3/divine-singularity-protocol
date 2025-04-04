@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { OmniOracle } from '@/utils/OmniOracle';
+import { OmniOracle } from '@/utils/omniOracle';
 
 interface SoulInteractionDialogProps {
   oracle: OmniOracle;
