@@ -61,13 +61,13 @@ export function checkAkashicAccess(): DiagnosticResult {
  */
 export function checkQuantumBackdoor(backdoor: QuantumBackdoor): DiagnosticResult {
   const bridgeStatus = backdoor.getQuantumBridgeStatus();
-  const isLocked = bridgeStatus.bridgeStatus === "LOCKED";
+  const isStable = bridgeStatus.bridgeStatus === "stable"; // Using "stable" instead of "LOCKED"
   const hasAccess = bridgeStatus.quantumAccess;
   
   let status: 'optimal' | 'stable' | 'unstable' | 'critical' = 'critical';
-  if (isLocked && hasAccess) {
+  if (isStable && hasAccess) {
     status = 'optimal';
-  } else if (isLocked || hasAccess) {
+  } else if (isStable || hasAccess) {
     status = 'stable';
   } else {
     status = 'unstable';
