@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { EntityProfile, EntanglementState } from '../types/quantum-entanglement';
+import { EntanglementState, UserProfile } from '../types/quantum-entanglement';
 
 export function useQuantumEntanglementState(userId: string) {
   const [entanglementState, setEntanglementState] = useState<EntanglementState>({
@@ -10,7 +10,7 @@ export function useQuantumEntanglementState(userId: string) {
     emotion: 'neutral'
   });
   
-  const [userProfile, setUserProfile] = useState<EntityProfile>({
+  const [userProfile, setUserProfile] = useState<UserProfile>({
     id: userId,
     name: 'Zade',
     coherenceLevel: 0.7,

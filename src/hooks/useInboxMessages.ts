@@ -105,7 +105,7 @@ export function useInboxMessages(userId: string) {
     const intervalId = setInterval(() => {
       const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
       if (biofeedback && typeof biofeedback === 'object' && 'metrics' in biofeedback) {
-        setBiometrics(biofeedback.metrics as any);
+        setBiometrics(biofeedback.metrics);
       }
     }, 3000);
     
@@ -135,7 +135,7 @@ export function useInboxMessages(userId: string) {
     }
     
     if (!entanglementState.active || entanglementState.entangledWith !== recipient) {
-      const result = initiateEntanglement(recipient.toLowerCase(), recipient);
+      const result = initiateEntanglement(recipient, recipient);
       if (!result.success) {
         toast({
           title: 'Entanglement Failed',
@@ -285,7 +285,7 @@ export function useInboxMessages(userId: string) {
       const biofeedbackResult = BiofeedbackSimulator.assessEmotionalState(userId);
       
       if (biofeedbackResult && typeof biofeedbackResult === 'object' && 'metrics' in biofeedbackResult) {
-        setBiometrics(biofeedbackResult.metrics as any);
+        setBiometrics(biofeedbackResult.metrics);
         
         if ('coherent' in biofeedbackResult && biofeedbackResult.coherent) {
           toast({

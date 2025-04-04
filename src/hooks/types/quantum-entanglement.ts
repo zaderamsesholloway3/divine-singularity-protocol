@@ -26,6 +26,9 @@ export interface UserProfile {
   lastContact: string; // ISO date string
 }
 
+// Add EntityProfile as an alias for UserProfile to maintain compatibility
+export type EntityProfile = UserProfile;
+
 export interface BiofeedbackResult {
   coherent: boolean;
   metrics: {

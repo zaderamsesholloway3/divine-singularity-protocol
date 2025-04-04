@@ -2,12 +2,12 @@
 import { useState } from 'react';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
-import { EntityProfile } from '../types/quantum-entanglement';
+import { UserProfile } from '../types/quantum-entanglement';
 
 export function useQuantumResonance(
   userId: string,
-  userProfile: EntityProfile,
-  setUserProfile: React.Dispatch<React.SetStateAction<EntityProfile>>
+  userProfile: UserProfile,
+  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>
 ) {
   const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
   const [resonanceLevel, setResonanceLevel] = useState(0);

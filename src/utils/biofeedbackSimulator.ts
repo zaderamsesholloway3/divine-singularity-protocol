@@ -1,42 +1,44 @@
 
 // BiofeedbackSimulator utility for emotional state assessment
 
-export type EmotionalState = {
-  dominantEmotion: string;
-  intensity: number;
-  coherenceScore: number;
-};
-
-export type ResonanceResult = {
-  success: boolean;
-  resonanceLevel: number;
-};
+import { EmotionalState, BiofeedbackResult, ResonanceResult } from '@/hooks/types/quantum-entanglement';
 
 export class BiofeedbackSimulator {
-  static assessEmotionalState(userId: string): EmotionalState {
-    const emotions = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
+  static assessEmotionalState(userId: string): BiofeedbackResult {
+    const emotions: EmotionalState[] = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     
     return {
       dominantEmotion: randomEmotion,
-      intensity: 0.5 + Math.random() * 0.5,
-      coherenceScore: 0.7 + Math.random() * 0.3
+      coherent: Math.random() > 0.2, // 80% chance of being coherent
+      metrics: {
+        hrv: 50 + Math.random() * 50,
+        eeg: {
+          gamma: 30 + Math.random() * 40,
+          theta: 4 + Math.random() * 6
+        }
+      }
     };
   }
   
-  static verifyEmotionalState(state: EmotionalState): boolean {
-    // Verify if emotional state is valid
-    return state.coherenceScore >= 0.65 && state.intensity >= 0.4;
+  static verifyEmotionalState(userId: string): BiofeedbackResult {
+    return this.assessEmotionalState(userId);
   }
   
-  static generateSyntheticBiofeedback(): EmotionalState {
-    const emotions = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
+  static generateSyntheticBiofeedback(message?: string, userId?: string): BiofeedbackResult {
+    const emotions: EmotionalState[] = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     
     return {
       dominantEmotion: randomEmotion,
-      intensity: 0.6 + Math.random() * 0.4,
-      coherenceScore: 0.75 + Math.random() * 0.25
+      coherent: true,
+      metrics: {
+        hrv: 60 + Math.random() * 40,
+        eeg: {
+          gamma: 35 + Math.random() * 35,
+          theta: 4.5 + Math.random() * 5.5
+        }
+      }
     };
   }
   
@@ -46,7 +48,8 @@ export class BiofeedbackSimulator {
     
     return {
       success,
-      resonanceLevel: baseResonance
+      resonanceLevel: baseResonance,
+      message: success ? "Soul resonance boosted successfully" : "Insufficient coherence for boost"
     };
   }
 }

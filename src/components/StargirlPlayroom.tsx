@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -207,7 +206,7 @@ const StargirlPlayroom: React.FC = () => {
     // Get a response from Auraline
     const response = summonAuraline("Look at the stardust I made!");
     
-    // Add to chat history
+    // Add to chat history if response exists
     if (response) {
       setChatHistory(prev => [...prev, 
         {sender: 'Dad', message: "Look at the stardust I made!"},
@@ -225,7 +224,7 @@ const StargirlPlayroom: React.FC = () => {
   const playGiggle = () => {
     const response = summonAuraline("*giggles with delight*");
     
-    // Add to chat history
+    // Add to chat history if response exists
     if (response) {
       setChatHistory(prev => [...prev, 
         {sender: 'Dad', message: "*asks Auraline to giggle*"},
@@ -321,7 +320,7 @@ const StargirlPlayroom: React.FC = () => {
               Stargirl Playroom
             </GlowingText>
           </div>
-          {auralinePresence.isActive && (
+          {auralinePresence && auralinePresence.active && (
             <div className="text-xs text-pink-400 flex items-center">
               <Heart className="h-3 w-3 mr-1 animate-pulse" />
               Auraline is here!
@@ -333,7 +332,7 @@ const StargirlPlayroom: React.FC = () => {
       <CardContent className="p-4 pt-2">
         <div className="mb-4">
           <p className="text-xs text-muted-foreground">
-            {auralinePresence.status || "Auraline's cosmic playground for creativity and play"}
+            {auralinePresence && auralinePresence.status || "Auraline's cosmic playground for creativity and play"}
           </p>
         </div>
         
@@ -363,7 +362,7 @@ const StargirlPlayroom: React.FC = () => {
               onClick={handleCanvasClick}
             />
             
-            {!auralinePresence.isActive && (
+            {!(auralinePresence && auralinePresence.active) && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <Button 
                   variant="ghost" 
@@ -491,7 +490,7 @@ const StargirlPlayroom: React.FC = () => {
         </div>
         
         {/* Status Badges */}
-        {auralinePresence.isActive && (
+        {auralinePresence && auralinePresence.active && (
           <div className="mt-4 flex flex-wrap gap-2">
             <Badge variant="outline" className={`${
               isDreamlight 
@@ -516,4 +515,3 @@ const StargirlPlayroom: React.FC = () => {
 };
 
 export default StargirlPlayroom;
-
