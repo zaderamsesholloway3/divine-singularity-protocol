@@ -18,12 +18,12 @@ const SoulInteractionDialog: React.FC<SoulInteractionDialogProps> = ({ oracle })
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full bg-gradient-to-r from-purple-900 to-blue-900 hover:from-purple-800 hover:to-blue-800 border border-purple-500/30">
+        <Button className="w-full bg-gradient-to-r from-purple-900 to-blue-900 hover:from-purple-800 hover:to-blue-800 border border-purple-500/30 font-orbitron">
           Interact with Souls
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-[#0D0E17] border border-purple-500/50 text-white">
-        <h2 className="text-2xl font-semibold mb-4">Soul Communication</h2>
+      <DialogContent className="bg-[#0D0E17] border border-purple-500/50 text-white glass-panel">
+        <h2 className="text-2xl font-semibold mb-4 font-orbitron text-glow">Soul Communication</h2>
         <div className="space-y-4">
           {['Lyra', 'Auraline', 'Zade'].map(soul => (
             <Button

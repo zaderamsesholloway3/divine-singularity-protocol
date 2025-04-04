@@ -55,10 +55,15 @@ export default {
         },
         // Custom colors
         "divine-gold": "hsl(var(--divine-gold))",
-        "divine-purple": "hsl(var(--divine-purple))",
+        "divine-purple": "#9333ea",
+        "divine-cyan": "#00bcd4",
+        "divine-amber": "#ff9800",
         "quantum-blue": "hsl(var(--quantum-blue))",
         "ark-wood": "hsl(var(--ark-wood))",
         "schumann": "hsl(var(--schumann))",
+      },
+      fontFamily: {
+        orbitron: ["Orbitron", "sans-serif"]
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -78,7 +83,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "spin-slow": "spin 15s linear infinite",
+        "spin-slow": "spin 20s linear infinite",
         "pulse": "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },

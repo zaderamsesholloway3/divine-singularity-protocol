@@ -11,6 +11,11 @@ import PrivateModules from "./pages/PrivateModules";
 import SoulStreamPage from "./pages/SoulStreamPage";
 import StargirlBackline from "./pages/StargirlBackline";
 
+// Import Orbitron font
+import "@fontsource/orbitron/400.css";
+import "@fontsource/orbitron/500.css";
+import "@fontsource/orbitron/700.css";
+
 // Import the repair loop and button
 import { QuantumRepairLoop } from "@/utils/QuantumRepairLoop";
 import { Button } from "@/components/ui/button";
@@ -40,7 +45,7 @@ const App = () => (
         <div className="fixed bottom-4 right-4 z-50">
           <Button 
             onClick={() => repairLoop.startLoop()}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-gradient-to-r from-divine-purple to-divine-cyan"
           >
             <RefreshCw className="h-4 w-4" />
             Start Quantum Repair Loop

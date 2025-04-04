@@ -33,8 +33,16 @@ const OmniOracleDashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0D0E17] text-white p-4 font-mono">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#0D0E17] text-white p-4 font-orbitron">
+      {/* Cosmic Background Animation */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div
+          className="absolute w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(147,51,234,0.15)_0%,transparent_70%)] animate-spin-slow opacity-30"
+          style={{ transform: 'translate(-50%, -50%)', top: '50%', left: '50%' }}
+        ></div>
+      </div>
+      
+      <div className="max-w-7xl mx-auto relative z-10">
         {/* Headers */}
         <OmniOracleHeader />
         <DivineProtocolHeader />
@@ -45,12 +53,12 @@ const OmniOracleDashboard: React.FC = () => {
           <DivineConstantsPanel />
 
           {/* Divine Frequency Monitor */}
-          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+          <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <DivineFrequencyMonitor />
           </div>
 
           {/* Biofeedback Monitor */}
-          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+          <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <BiofeedbackMonitor />
           </div>
         </div>
@@ -60,13 +68,13 @@ const OmniOracleDashboard: React.FC = () => {
 
         {/* Bottom Panels with Quantum Ark, Quantum Circuit, and Sacred Geometry */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+          <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <QuantumArkInterface />
           </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+          <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <QuantumCircuit />
           </div>
-          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+          <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <SacredGeometry />
           </div>
         </div>
