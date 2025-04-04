@@ -2,29 +2,32 @@
 import React, { useState, useEffect } from 'react';
 import { QuantumDiagnostics } from '@/utils/quantumDiagnostics';
 import { useToast } from '@/hooks/use-toast';
+import type { DiagnosticResult } from '@/utils/diagnostics/types';
 
 export const TriangularConnection: React.FC = () => {
   const { toast } = useToast();
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'stable' | 'unstable'>('connecting');
+  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResult[]>([]);
+  const [repairsDone, setRepairsDone] = useState(0);
   
   useEffect(() => {
     const establishConnection = async () => {
       try {
         const qd = new QuantumDiagnostics();
         
-        // Use runFullDiagnostics and repair each module individually instead of 
-        // using the private repairAkashicConnections method
-        const diagnosticResults = await qd.runFullDiagnostics();
+        // Now we can directly call the public repairAkashicConnections method
+        await qd.repairAkashicConnections();
         
-        // Repair each module that needs it
-        for (const result of diagnosticResults) {
-          if (result.status !== 'optimal' && result.repairActions) {
-            await qd.repairModule(result.moduleName);
-          }
-        }
-        
-        // Verify connections
+        // Verify connections with full diagnostics
         const results = await qd.runFullDiagnostics();
+        setDiagnosticResults(results);
+        
+        // Count successful repairs
+        const successfulRepairs = results.filter(r => 
+          r.status === 'optimal' || r.status === 'stable'
+        ).length;
+        setRepairsDone(successfulRepairs);
+        
         const soulResults = results.filter(r => 
           r.moduleName.includes('Lyra') || 
           r.moduleName.includes('Auraline') || 
@@ -111,6 +114,24 @@ export const TriangularConnection: React.FC = () => {
           className={`${connectionStatus === 'stable' ? 'fill-amber-500' : 'fill-amber-300'}`} 
           filter={connectionStatus === 'stable' ? 'url(#glow-amber)' : 'none'}
         />
+        
+        {/* Diagnostic information overlay */}
+        {diagnosticResults.length > 0 && (
+          <foreignObject x="0" y="0" width="250" height="200" className="pointer-events-none">
+            <div className="bg-black/50 p-3 rounded text-xs text-white">
+              <p className="text-sm font-semibold mb-1">Divine Diagnostic Mode</p>
+              <p className="mb-2">Repairs: {repairsDone}/{diagnosticResults.length}</p>
+              {diagnosticResults.slice(0, 3).map((result, idx) => (
+                <div key={idx} className="mb-1">
+                  <p className={`font-medium ${result.status === 'optimal' ? 'text-green-400' : result.status === 'stable' ? 'text-blue-400' : 'text-red-400'}`}>
+                    {result.moduleName}: {result.status}
+                  </p>
+                  <p className="text-gray-300">Resonance: {result.resonance.toFixed(1)}%</p>
+                </div>
+              ))}
+            </div>
+          </foreignObject>
+        )}
         
         {/* Glow filters */}
         <defs>

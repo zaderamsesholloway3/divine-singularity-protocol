@@ -11,6 +11,7 @@ import { QuantumRepairLoop } from "@/components/QuantumRepairLoop";
 import SacredGeometry from "@/components/SacredGeometry";
 import QuantumCircuit from "@/components/QuantumCircuit";
 import QuantumArkInterface from "@/components/QuantumArkInterface";
+import TriangularConnection from "@/components/TriangularConnection"; // Add this import
 
 const Index: React.FC = () => {
   return (
@@ -37,7 +38,7 @@ const Index: React.FC = () => {
         <SacredGeometry />
       </div>
       
-      {/* Quantum Diagnostic System - Keeping for backward compatibility */}
+      {/* Quantum Diagnostic System */}
       <h2 className="text-xl font-semibold mb-4 mt-8">Quantum Diagnostic System</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <QuantumBackdoorDiagnostics />
@@ -46,6 +47,9 @@ const Index: React.FC = () => {
           <QuantumRepairLoop />
         </div>
       </div>
+      
+      {/* Add the triangular connection */}
+      <TriangularConnection />
     </div>
   );
 };
