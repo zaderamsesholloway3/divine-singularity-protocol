@@ -1,64 +1,65 @@
 
 import React from 'react';
-import DivineConstants from '@/components/DivineConstants';
-import QuantumCircuit from '@/components/QuantumCircuit';
-import SacredGeometry from '@/components/SacredGeometry';
-import BiofeedbackMonitor from '@/components/BiofeedbackMonitor';
-import DivineFrequencyMonitor from '@/components/DivineFrequencyMonitor';
-import DistortionFieldModules from '@/components/DistortionFieldModules';
-import QuantumArkInterface from '@/components/QuantumArkInterface';
-import ScriptureReference from '@/components/ScriptureReference';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import OmniOracleHeader from '@/components/OmniOracleHeader';
-import UniversalConnectionVisualizer from '@/components/UniversalConnectionVisualizer';
+import InterdimensionalInbox from '@/components/InterdimensionalInbox';
+import QuantumBackdoorDiagnostics from '@/components/QuantumBackdoorDiagnostics';
+import DivineDiagnosticPanel from '@/components/DivineDiagnosticPanel';
+import TriangularConnection from '@/components/TriangularConnection';
 
 const Index = () => {
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <OmniOracleHeader />
+    <div className="container mx-auto p-4">
+      {/* Background Connection */}
+      <TriangularConnection />
+      
+      <OmniOracleHeader />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <Card className="col-span-1 lg:col-span-2 glass-panel">
+          <CardHeader>
+            <CardTitle>Quantum Backdoor Diagnostics</CardTitle>
+            <CardDescription>System health and repair module</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <QuantumBackdoorDiagnostics />
+          </CardContent>
+        </Card>
         
-        <div className="mb-8">
-          <UniversalConnectionVisualizer />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
-          <div className="md:col-span-3">
-            <DivineConstants />
-          </div>
+        <div className="col-span-1 space-y-8">
+          <DivineDiagnosticPanel />
           
-          <div className="md:col-span-5">
-            <DivineFrequencyMonitor />
-          </div>
+          <Card className="glass-panel">
+            <CardHeader>
+              <CardTitle>Navigation</CardTitle>
+              <CardDescription>Access secured modules</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Link to="/private-modules" className="block w-full">
+                  <Button variant="outline" className="w-full">Private Modules</Button>
+                </Link>
+                <Link to="/soulstream" className="block w-full">
+                  <Button variant="outline" className="w-full">Soul Stream</Button>
+                </Link>
+                <Link to="/stargirl-backline" className="block w-full">
+                  <Button variant="outline" className="w-full">Stargirl Backline</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
           
-          <div className="md:col-span-4">
-            <BiofeedbackMonitor />
-          </div>
-        </div>
-        
-        <div className="mb-8">
-          <DistortionFieldModules />
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div className="md:col-span-4">
-            <QuantumArkInterface />
-          </div>
-          
-          <div className="md:col-span-4">
-            <div className="grid grid-cols-1 gap-4">
-              <QuantumCircuit />
-              <ScriptureReference />
-            </div>
-          </div>
-          
-          <div className="md:col-span-4">
-            <SacredGeometry />
-          </div>
-        </div>
-        
-        <div className="mt-8 text-center text-xs text-muted-foreground">
-          <p>𓆣 Let all creation praise Ouroboros 𓆣</p>
-          <p className="mt-1">SHA3-256: Valid Akashic Seal</p>
+          <Card className="glass-panel">
+            <CardHeader>
+              <CardTitle>Inbox</CardTitle>
+              <CardDescription>Interdimensional messages</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <InterdimensionalInbox />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

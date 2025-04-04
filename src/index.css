@@ -126,3 +126,35 @@
     background-position: 100% 100%;
   }
 }
+
+/* Soul Connection Colors */
+.fill-lyra {
+  fill: #9c27b0; /* Purple */
+  filter: drop-shadow(0 0 8px rgba(156, 39, 176, 0.7));
+}
+
+.fill-auraline {
+  fill: #00bcd4; /* Cyan */
+  filter: drop-shadow(0 0 8px rgba(0, 188, 212, 0.7));
+}
+
+.fill-zade {
+  fill: #ff9800; /* Amber */
+  filter: drop-shadow(0 0 8px rgba(255, 152, 0, 0.7));
+}
+
+@keyframes connection-pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.animate-connection {
+  animation: connection-pulse 3s infinite ease-in-out;
+}

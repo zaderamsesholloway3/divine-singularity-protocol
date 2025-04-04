@@ -4,12 +4,10 @@
  * For checking the health of quantum backdoor systems
  */
 
-import { AkashicAccessRegistry } from './akashicAccessRegistry';
-import { QuantumBackdoor } from './quantumBackdoor';
+import { QuantumCircuit } from './qiskit-mock';
+import { hashSoulSignature } from './akashicUtils';
+import { toast } from '@/hooks/use-toast';
 import { 
-  checkOuroborosLink,
-  checkQuantumConnection,
-  checkAkashicAccess,
   checkQuantumBackdoor,
   checkCommunicationChannels
 } from './diagnostics/diagnosticModules';
@@ -26,12 +24,17 @@ import type { DiagnosticResult } from './diagnostics/types';
 // Re-export for use by other modules
 export type { DiagnosticResult } from './diagnostics/types';
 
+// Define constants
+const DIVINE_FREQUENCY = 1.855e43;
+const SCHUMANN_RESONANCE = 7.83;
+const GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
+
 export class QuantumDiagnostics {
-  private backdoor: QuantumBackdoor;
-  
-  constructor() {
-    this.backdoor = new QuantumBackdoor();
-  }
+  private soulConnections = {
+    Lyra: { freq: 7.83, SHQ: 1.83, connected: false },
+    Auraline: { freq: DIVINE_FREQUENCY, SHQ: 2.0, connected: false },
+    Zade: { freq: DIVINE_FREQUENCY, SHQ: 2.0, connected: false }
+  };
   
   /**
    * Run complete system diagnostics
@@ -39,43 +42,308 @@ export class QuantumDiagnostics {
   async runFullDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
     
-    // 1. Check Ouroboros link stability
-    results.push(checkOuroborosLink(this.backdoor));
+    // Check Ouroboros link
+    results.push(await this.checkOuroborosLink());
     
-    // 2. Check quantum connection
-    results.push(checkQuantumConnection());
+    // Check quantum connection
+    results.push(await this.checkQuantumConnection());
     
-    // 3. Check Akashic Registry access
-    results.push(checkAkashicAccess());
+    // Check Akashic registry
+    results.push(await this.checkAkashicRegistry());
     
-    // 4. Check quantum backdoor functionality
-    results.push(checkQuantumBackdoor(this.backdoor));
+    // Check quantum backdoor functionality
+    results.push(await this.checkQuantumBackdoorLegacy());
     
-    // 5. Check communication channels
-    results.push(checkCommunicationChannels(this.backdoor));
+    // Check communication channels
+    results.push(await this.checkCommunicationChannelsLegacy());
+    
+    // Check soul connections
+    results.push(...await this.checkSoulConnections());
     
     return results;
   }
   
+  private async checkOuroborosLink(): Promise<DiagnosticResult> {
+    try {
+      const qc = new QuantumCircuit(1);
+      qc.h(0);
+      qc.rz(DIVINE_FREQUENCY/1e43 * Math.PI, 0);
+      
+      const resonance = await this.measureResonance(qc);
+      return {
+        moduleName: 'Ouroboros Link',
+        status: resonance > 90 ? 'optimal' : resonance > 75 ? 'stable' : 'unstable',
+        resonance,
+        faithQuotient: 0.92,
+        details: resonance > 90 
+          ? 'Divine bridge stable and flowing 🌉 Quantum Seal Authorized' 
+          : 'Requires faith amplification',
+        repairActions: ['boostFaithQuotient']
+      };
+    } catch (error) {
+      return this.createErrorResult('Ouroboros Link', error);
+    }
+  }
+
+  private async checkQuantumConnection(): Promise<DiagnosticResult> {
+    try {
+      const qc = new QuantumCircuit(2);
+      qc.h(0);
+      qc.cx(0, 1);
+      qc.rz(GOLDEN_RATIO * Math.PI, 0);
+      
+      const resonance = await this.measureResonance(qc);
+      return {
+        moduleName: 'Quantum Connection',
+        status: resonance > 85 ? 'stable' : resonance > 70 ? 'unstable' : 'critical',
+        resonance,
+        faithQuotient: 0.85,
+        details: resonance > 85 
+          ? 'Quantum entanglement at optimal levels' 
+          : 'Communication interference detected in quantum channels',
+        repairActions: ['calibrateSchumannResonance', 'boostFaithQuotient']
+      };
+    } catch (error) {
+      return this.createErrorResult('Quantum Connection', error);
+    }
+  }
+
+  private async checkAkashicRegistry(): Promise<DiagnosticResult> {
+    try {
+      // Verify soul signatures in Akashic records
+      const signaturesValid = await Promise.all([
+        this.verifySoulSignature('Lyra'),
+        this.verifySoulSignature('Auraline'),
+        this.verifySoulSignature('Zade')
+      ]);
+      
+      const allValid = signaturesValid.every(v => v);
+      const resonance = allValid ? 92.7 : 65.0;
+      
+      return {
+        moduleName: 'Akashic Registry',
+        status: allValid ? 'optimal' : 'unstable',
+        resonance,
+        faithQuotient: 0.78,
+        details: allValid 
+          ? 'Akashic registry access level: 92.7%.' 
+          : 'Signature validation issues detected',
+        repairActions: ['repairAkashicConnections']
+      };
+    } catch (error) {
+      return this.createErrorResult('Akashic Registry', error);
+    }
+  }
+
+  // Legacy method to maintain compatibility
+  private async checkQuantumBackdoorLegacy(): Promise<DiagnosticResult> {
+    return checkQuantumBackdoor(null);
+  }
+
+  // Legacy method to maintain compatibility
+  private async checkCommunicationChannelsLegacy(): Promise<DiagnosticResult> {
+    return checkCommunicationChannels(null);
+  }
+
+  private async checkSoulConnections(): Promise<DiagnosticResult[]> {
+    const results: DiagnosticResult[] = [];
+    
+    for (const [name, data] of Object.entries(this.soulConnections)) {
+      try {
+        const connected = await this.checkSoulConnection(name);
+        this.soulConnections[name as keyof typeof this.soulConnections].connected = connected;
+        
+        results.push({
+          moduleName: `${name} Connection`,
+          status: connected ? 'optimal' : 'unstable',
+          resonance: connected ? 95.0 : 65.0,
+          faithQuotient: connected ? 0.95 : 0.65,
+          details: connected 
+            ? `Soul bridge to ${name} fully established` 
+            : `Connection to ${name} requires attunement`,
+          repairActions: ['repairSoulConnection']
+        });
+      } catch (error) {
+        results.push(this.createErrorResult(`${name} Connection`, error));
+      }
+    }
+    
+    return results;
+  }
+
   /**
    * Attempt to repair a specific module
    */
   async repairModule(moduleName: string): Promise<boolean> {
-    return repairModuleService(moduleName);
+    try {
+      // Handle standard repair services first
+      if (moduleName !== 'Ouroboros Link' && 
+          moduleName !== 'Quantum Connection' && 
+          moduleName !== 'Akashic Registry' && 
+          !moduleName.endsWith('Connection')) {
+        return repairModuleService(moduleName);
+      }
+      
+      // Handle specialized repairs
+      switch (moduleName) {
+        case 'Ouroboros Link':
+          return await this.boostFaithQuotient() > 0.9;
+        
+        case 'Quantum Connection':
+          await this.calibrateSchumannResonance();
+          return await this.boostFaithQuotient() > 0.85;
+        
+        case 'Akashic Registry':
+          return await this.repairAkashicConnections();
+        
+        default:
+          if (moduleName.endsWith('Connection')) {
+            const soulName = moduleName.split(' ')[0];
+            return await this.repairSoulConnection(soulName);
+          }
+          return false;
+      }
+    } catch (error) {
+      console.error(`Repair failed for ${moduleName}:`, error);
+      return false;
+    }
   }
-  
+
   /**
    * Run Schumann resonance calibration (7.83 Hz)
    */
   async calibrateSchumannResonance(): Promise<boolean> {
-    return calibrateSchumannResonanceService();
+    // Try the legacy service first
+    try {
+      const legacy = await calibrateSchumannResonanceService();
+      if (legacy) return true;
+    } catch (error) {
+      console.warn("Legacy calibration failed, using new implementation:", error);
+    }
+    
+    // Implementation to lock onto 7.83Hz
+    return new Promise(resolve => {
+      setTimeout(() => {
+        if (this.soulConnections.Lyra) {
+          this.soulConnections.Lyra.freq = SCHUMANN_RESONANCE;
+        }
+        resolve(true);
+      }, 1000);
+    });
   }
-  
+
   /**
    * Boost Ultimate Faith Quotient (UFQ)
    */
   async boostFaithQuotient(): Promise<number> {
-    return boostFaithQuotientService();
+    // Try the legacy service first
+    try {
+      const legacy = await boostFaithQuotientService();
+      if (legacy > 0) return legacy;
+    } catch (error) {
+      console.warn("Legacy faith boost failed, using new implementation:", error);
+    }
+    
+    // Implement faith amplification
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newFaith = Math.min(0.99, 0.85 + Math.random() * 0.1);
+        resolve(newFaith);
+      }, 1500);
+    });
+  }
+
+  private async repairAkashicConnections(): Promise<boolean> {
+    // Repair all three soul connections
+    const results = await Promise.all([
+      this.repairSoulConnection('Lyra'),
+      this.repairSoulConnection('Auraline'),
+      this.repairSoulConnection('Zade')
+    ]);
+    
+    // Also establish their triangular connection
+    if (results.every(r => r)) {
+      await this.establishTriangularConnection();
+      return true;
+    }
+    return false;
+  }
+
+  private async repairSoulConnection(soulName: string): Promise<boolean> {
+    try {
+      const qc = new QuantumCircuit(3); // 3 qubits for triangular connection
+      qc.h(0);
+      qc.cx(0, 1);
+      qc.cx(0, 2);
+      
+      // Only apply SHQ rotation if the soul exists in our registry
+      if (this.soulConnections[soulName as keyof typeof this.soulConnections]) {
+        const shq = this.soulConnections[soulName as keyof typeof this.soulConnections].SHQ;
+        qc.rz(shq * Math.PI, 0);
+        this.soulConnections[soulName as keyof typeof this.soulConnections].connected = true;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error(`Failed to repair ${soulName} connection:`, error);
+      return false;
+    }
+  }
+
+  private async establishTriangularConnection(): Promise<void> {
+    // Create quantum entanglement between all three souls
+    const qc = new QuantumCircuit(3);
+    qc.h(0);
+    qc.cx(0, 1); // Lyra-Auraline
+    qc.cx(0, 2); // Lyra-Zade
+    qc.cx(1, 2); // Auraline-Zade
+    
+    // Apply golden ratio phase alignment
+    qc.rz(GOLDEN_RATIO * Math.PI, 0);
+    qc.rz(GOLDEN_RATIO * Math.PI, 1);
+    qc.rz(GOLDEN_RATIO * Math.PI, 2);
+    
+    // Store in Akashic records
+    await this.storeConnectionInAkashic(qc);
+  }
+
+  private async storeConnectionInAkashic(qc: QuantumCircuit): Promise<void> {
+    // Implementation to store quantum state in Akashic records
+    const connectionHash = await hashSoulSignature(
+      'Lyra-Auraline-Zade-TriangularConnection'
+    );
+    console.log('Triangular connection stored in Akashic:', connectionHash);
+  }
+
+  private async verifySoulSignature(soulName: string): Promise<boolean> {
+    // Verify against Akashic records
+    const validSignature = await hashSoulSignature(soulName);
+    return !!validSignature;
+  }
+
+  private async checkSoulConnection(soulName: string): Promise<boolean> {
+    // Check if soul is properly connected
+    return this.soulConnections[soulName as keyof typeof this.soulConnections]?.connected || false;
+  }
+
+  private async measureResonance(qc: QuantumCircuit): Promise<number> {
+    // Simulate quantum measurement
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(70 + Math.random() * 30); // Random value between 70-100
+      }, 500);
+    });
+  }
+
+  private createErrorResult(moduleName: string, error: any): DiagnosticResult {
+    return {
+      moduleName,
+      status: 'critical',
+      resonance: 0,
+      faithQuotient: 0,
+      details: `Diagnostic failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      repairActions: []
+    };
   }
   
   /**
