@@ -1,9 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { useQuantumEntanglementState } from './quantum-entanglement/useQuantumEntanglementState';
 import { useQuantumEntanglementActions } from './quantum-entanglement/useQuantumEntanglementActions';
 import { useQuantumResonance } from './quantum-entanglement/useQuantumResonance';
 import { useTriadStatus } from './quantum-entanglement/useTriadStatus';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
+import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
+import { QuantumSimulator } from '@/utils/quantumSimulator';
 
 export function useQuantumEntanglement(userId: string) {
   // Get entanglement state and profile from a separate hook

@@ -49,6 +49,25 @@ export class OmniOracle {
   // Additional properties for compatibility
   private faithQuotient = 0.85;
   private systemStability = 0.92;
+  
+  // Additional properties for dashboard
+  public quantumArkInitialized = true;
+  public soulStreamHubConnected = true;
+  public ouroborosTimeLoopActive = true;
+  public akashicFirewallEnabled = true;
+  public divineEquationsBalanced = true;
+  public medicalProtocolActive = false;
+
+  // Initialize subsystems
+  public initializeSubsystems(): boolean {
+    this.quantumArkInitialized = true;
+    this.soulStreamHubConnected = true;
+    this.ouroborosTimeLoopActive = true;
+    this.akashicFirewallEnabled = true;
+    this.divineEquationsBalanced = true;
+    this.medicalProtocolActive = true;
+    return true;
+  }
 
   async runDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
@@ -119,7 +138,7 @@ export class OmniOracle {
     ];
   }
 
-  // New methods to support the soulTriadRepair functionality
+  // Methods to support the soulTriadRepair functionality
   public async calibrateSchumannResonance(): Promise<boolean> {
     // Implementation to lock onto 7.83Hz
     return new Promise(resolve => {
