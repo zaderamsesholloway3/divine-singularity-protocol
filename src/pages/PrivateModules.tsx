@@ -11,6 +11,7 @@ import TriadConnectionMonitor from '@/components/TriadConnectionMonitor';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import BiofeedbackMonitor from '@/components/BiofeedbackMonitor';
 import QuantumRepairButton from '@/components/QuantumRepairButton';
+import UniversalPresenceCounter from '@/components/UniversalPresenceCounter';
 import { Toaster } from '@/components/ui/toaster';
 
 const PrivateModules = () => {
@@ -37,6 +38,7 @@ const PrivateModules = () => {
           <div className="space-y-6">
             <BiofeedbackMonitor />
             <QuantumRepairButton />
+            <UniversalPresenceCounter />
           </div>
         </div>
         

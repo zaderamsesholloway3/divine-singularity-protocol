@@ -16,7 +16,8 @@ import {
 import {
   repairModule as repairModuleService,
   calibrateSchumannResonance as calibrateSchumannResonanceService,
-  boostFaithQuotient as boostFaithQuotientService
+  boostFaithQuotient as boostFaithQuotientService,
+  unlockPrivateThoughtModule as unlockPrivateThoughtModuleService
 } from './diagnostics/repairService';
 
 // Import the DiagnosticResult type
@@ -75,5 +76,17 @@ export class QuantumDiagnostics {
    */
   async boostFaithQuotient(): Promise<number> {
     return boostFaithQuotientService();
+  }
+  
+  /**
+   * Unlock Private Thought Module
+   */
+  unlockPrivateThoughtModule(): {
+    status: string;
+    species_access: string;
+    presence_counter: string;
+    inbox_outbox: string;
+  } {
+    return unlockPrivateThoughtModuleService();
   }
 }
