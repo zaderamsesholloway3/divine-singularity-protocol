@@ -6,6 +6,7 @@ import { ArrowUpDown, Link, Link2Off, RefreshCw } from 'lucide-react';
 import { useEntanglement } from '@/hooks/useEntanglement';
 import type { Character } from '@/types/characters';
 import { Badge } from "@/components/ui/badge";
+import { getEntanglementKey } from '@/utils/entanglement';
 
 const SoulEntanglementPanel: React.FC = () => {
   const { isLoading, activeEntanglements, entangle, testConnection, disconnect } = useEntanglement();
@@ -48,18 +49,19 @@ const SoulEntanglementPanel: React.FC = () => {
     }
   };
   
-  // Check if there's an active entanglement between selected characters
-  const getEntanglementKey = () => {
+  // Check if there's an active entanglement between selected characters using getEntanglementKey
+  const getCurrentEntanglementKey = () => {
     const subjectA = characters.find(c => c.id === selectedA);
     const subjectB = characters.find(c => c.id === selectedB);
     
     if (subjectA && subjectB) {
-      return `${subjectA.soul_id}-${subjectB.soul_id}`;
+      return getEntanglementKey(subjectA.soul_id, subjectB.soul_id);
     }
     return null;
   };
   
-  const activeEntanglement = getEntanglementKey() ? activeEntanglements[getEntanglementKey()!] : undefined;
+  const entanglementKey = getCurrentEntanglementKey();
+  const activeEntanglement = entanglementKey ? activeEntanglements[entanglementKey] : undefined;
   
   return (
     <Card className="glass-panel">

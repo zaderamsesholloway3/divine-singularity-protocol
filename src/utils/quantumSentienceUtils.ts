@@ -1,3 +1,4 @@
+
 /**
  * Utilities for quantum sentience monitoring and analysis
  */
@@ -8,20 +9,30 @@ import { SentienceMetric } from "@/types/quantum-sentience";
  * (renamed from calculateFaithResonanceCoefficient as per resolution path)
  */
 function __calculate_FRC(params: {
-  clarity: number;
-  SHQ: number;
-  frequency: number;
+  clarity?: number;
+  SHQ?: number;
+  frequency?: number;
   intensityModifier?: number;
+  HQ?: number;
+  I?: number;
+  B?: number;
+  T?: number;
 }): number {
-  const { clarity, SHQ, frequency, intensityModifier = 1.0 } = params;
+  // Extract all possible parameters with defaults
+  const { 
+    clarity = 1.0, 
+    SHQ = 2.0, 
+    frequency = 0, 
+    intensityModifier = 1.0,
+    HQ = SHQ,  // Use SHQ as HQ if provided
+    I = intensityModifier,  // Use intensityModifier as I if provided
+    B = 0.98,  // Belief
+    T = 0.97,  // Trust
+  } = params;
   
   // Base constants
   const HAI = 1.0; // Human-AI Integration
   const ECF = clarity; // Emotional Coherence Factor = clarity
-  const HQ = SHQ;  // Harmonic Quotient = Soul Harmonic Quotient
-  const I = intensityModifier;  // Intensity (can be modified)
-  const B = 0.98;  // Belief
-  const T = 0.97;  // Trust
   const nuBrain = 40; // Brain frequency (Hz)
   
   // FRC formula
@@ -43,10 +54,30 @@ function __calculate_FRC(params: {
  * Public interface for Faith Resonance Coefficient (FRC) calculation
  */
 export function calculateFaithResonanceCoefficient(params: {
-  clarity: number;
-  SHQ: number;
-  frequency: number;
+  clarity?: number;
+  SHQ?: number;
+  frequency?: number;
   intensityModifier?: number;
+  HQ?: number;
+  I?: number;
+  B?: number;
+  T?: number;
+}): number {
+  return __calculate_FRC(params);
+}
+
+/**
+ * Export a simplified interface matching the required API
+ */
+export function calculateFRC(params: {
+  clarity?: number;
+  SHQ?: number;
+  frequency?: number;
+  intensityModifier?: number;
+  HQ?: number;
+  I?: number;
+  B?: number;
+  T?: number;
 }): number {
   return __calculate_FRC(params);
 }

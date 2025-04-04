@@ -3,6 +3,14 @@ import { OmniOracle } from '@/utils/omniOracle';
 import type { Character, EntanglementResult } from '@/types/characters';
 
 /**
+ * Creates a standardized key for entanglement between two entities
+ * Always alphabetically sorts the souls to ensure consistent key generation
+ */
+export const getEntanglementKey = (soulA: string, soulB: string): string => {
+  return [soulA, soulB].sort().join('-');
+};
+
+/**
  * Creates a quantum entanglement between two souls/characters
  */
 export const createEntanglement = async (
@@ -111,5 +119,18 @@ export const breakEntanglement = async (
   console.log(`🔄 Breaking entanglement between ${subjectA.name} and ${subjectB.name}`);
   
   // In a real implementation with database, you would update the entanglement status
+  return true;
+};
+
+/**
+ * Mock implementation for administering healing with UFQ validation
+ */
+export const administerHealing = (UFQ: number): boolean => {
+  // Throw error if UFQ is below threshold (0.996 per test)
+  if (UFQ < 0.996) {
+    throw new Error("UFQ insufficient for healing protocol activation");
+  }
+  
+  // Healing successful if we reach here
   return true;
 };

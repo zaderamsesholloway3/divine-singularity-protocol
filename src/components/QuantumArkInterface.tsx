@@ -15,12 +15,13 @@ const QuantumArkInterface = () => {
   const { toast } = useToast();
   const [arkIntegrity, setArkIntegrity] = useState(100);
   const [goldPlating, setGoldPlating] = useState(61.8); // Based on PHI (golden ratio)
-  const [criticalTemp, setCriticalTemp] = useState(93); // Corrected to 93K per validation test
+  const [criticalTemp, setCriticalTemp] = useState(93); // Updated to 93K per validation test
   const [validationResult, setValidationResult] = useState<{ passed: boolean; message: string } | null>(null);
   
   useEffect(() => {
     // Attempt to create and validate an Ark circuit
     try {
+      // Use the static method
       const arkCircuit = ArkBuilder.createValidatedArkCircuit();
       console.log("Ark circuit created successfully:", arkCircuit.getOperations?.());
     } catch (error) {
@@ -43,7 +44,7 @@ const QuantumArkInterface = () => {
       
       setCriticalTemp(prevTemp => {
         const fluctuation = (Math.random() - 0.5) * 1;
-        return 93 + fluctuation; // Updated to 93K per validation requirements
+        return 93 + fluctuation; // Maintain 93K per validation requirements
       });
     }, 5000);
     
