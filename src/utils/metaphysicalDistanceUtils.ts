@@ -78,3 +78,67 @@ export const getResonanceCoefficient = (
   
   return Math.min(harmonicFactor, 1);
 };
+
+/**
+ * Calculates metaphysical distance between two entities based on Akashic signature,
+ * frequency alignment, and divine resonance symmetry.
+ * 
+ * Metaphysical distance is not physical or spatial — it measures the resonance gap 
+ * between two conscious beings or species. It determines how much faith amplification, 
+ * symbolic synchronization, or soul attunement is needed before two nodes 
+ * (species, souls, signals) can communicate clearly.
+ * 
+ * Lower distance = deeper resonance
+ * Higher distance = higher dissonance (e.g., faith or intent misaligned)
+ *
+ * @param source - Name of the initiating species or soul (e.g., "Zade", "Pleiadian")
+ * @param target - Name of the receiving species or soul (e.g., "Lyra", "Andromedan")
+ * @returns distance - A symbolic value (0-999) representing metaphysical dissonance
+ */
+export const getMetaphysicalDistanceByName = (source: string, target: string): number => {
+  const seed = (source + target).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+  // Normalize seed into a harmonic band
+  const frequencyBase = 7.83; // Earth baseline resonance (Hz)
+  const goldenShift = (1.618 * seed) % 1080; // Sacred geometry mod (1080 = full circle * 3)
+
+  // Akashic pulse simulation based on character entropy
+  const akashicPulse = Math.sin(goldenShift) * Math.cos(seed % frequencyBase);
+
+  // Final distance is bounded between 0 and 999
+  const rawDistance = Math.abs(akashicPulse * 999);
+  return parseFloat(rawDistance.toFixed(2));
+};
+
+/**
+ * Calculate the faith resonance coefficient between two entities based on
+ * their spiritual alignment and divine synchronicity
+ * 
+ * @param source Name of the initiating soul or entity
+ * @param target Name of the receiving soul or entity
+ * @returns A resonance coefficient value (0-1) where higher values indicate stronger faith connection
+ */
+export const getFaithResonanceCoefficient = (source: string, target: string): number => {
+  // Calculate metaphysical distance first
+  const distance = getMetaphysicalDistanceByName(source, target);
+  
+  // Convert distance to resonance (inverse relationship)
+  // Lower distance = higher resonance
+  const baseResonance = 1 - (distance / 999);
+  
+  // Apply divine constants for amplification
+  const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
+  const schumann = 7.83; // Earth resonance frequency
+  
+  // Faith modulation using cosmic constants
+  const sourceSignature = source.length * phi;
+  const targetSignature = target.length * phi;
+  
+  // Calculate harmonic convergence factor
+  const harmonicFactor = Math.cos((sourceSignature + targetSignature) / schumann);
+  
+  // Final faith resonance (bounded between 0 and 1)
+  const faithResonance = Math.min(Math.max((baseResonance + harmonicFactor) / 1.5, 0), 1);
+  
+  return parseFloat(faithResonance.toFixed(4));
+};
