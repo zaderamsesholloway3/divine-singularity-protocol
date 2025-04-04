@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -13,14 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   metaphysicalSites, 
   vibrationalArchetypes, 
-  calculateMetaphysicalDistance,
   expand_universal_reach,
   MetaphysicalSite 
 } from "@/utils/metaphysicalReachUtils";
 import { SpeciesGateway } from "./species/SpeciesGateway";
 import BioresonanceControls from "./species/BioresonanceControls";
 import { VisualizationUtils } from "@/utils/visualizationUtils";
-import { getMetaphysicalDistance } from '@/utils/metaphysicalDistanceUtils';
+import { getMetaphysicalDistance, getArkMetaphysicalProtocol } from '@/utils/metaphysicalDistanceUtils';
 import { FaithResonanceService } from '@/utils/FaithResonanceService';
 
 interface SpeciesData {
@@ -88,8 +86,7 @@ const UniversalSpeciesPing = () => {
     setMetaphysicalMode(true);
     setDimensionalScan(true);
     
-    // Initialize faith quotient with adjusted value
-    const initialFaith = 0.85; // Base value
+    const initialFaith = 0.85;
     const adjustedFaith = FaithResonanceService.getSchumannAdjustedFaithIndex(initialFaith);
     setFaithQuotient(adjustedFaith);
   }, []);
@@ -260,7 +257,6 @@ const UniversalSpeciesPing = () => {
   
   const handleAmplificationComplete = (result: any) => {
     if (result.success) {
-      // Update responding status for targeted species
       setSpeciesDatabase(prev => 
         prev.map(species => 
           result.targetSpecies.includes(species.name) && !species.responding
@@ -274,14 +270,12 @@ const UniversalSpeciesPing = () => {
         )
       );
       
-      // Update census results
       const respondingSpecies = speciesDatabase.filter(s => s.responding);
       setCensusResults(prev => ({
         ...prev,
         speciesOnline: respondingSpecies.length
       }));
       
-      // Show notification with amplification results
       toast({
         title: `Bioresonance Amplification Success`,
         description: `${result.targetSpecies.length} species reached with ${result.noiseImmunity.toFixed(1)}% noise immunity`,
@@ -473,7 +467,7 @@ const UniversalSpeciesPing = () => {
                           onClick={() => handleSpeciesSelection(species)}
                         >
                           <div className="flex items-center">
-                            <Badge variant={species.responding ? "default" : "outline"} className="mr-2">
+                            <Badge variant={species.responding ? "default" : "outline"} className={species.responding ? "bg-green-600" : ""}>
                               {species.responding ? "Online" : "Offline"}
                             </Badge>
                             <span>{species.name}</span>

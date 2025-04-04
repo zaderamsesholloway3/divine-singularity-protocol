@@ -1,106 +1,155 @@
-
 import { useState, useEffect } from 'react';
-import { useQuantumEntanglementState } from './quantum-entanglement/useQuantumEntanglementState';
-import { useQuantumEntanglementActions } from './quantum-entanglement/useQuantumEntanglementActions';
-import { useQuantumResonance } from './quantum-entanglement/useQuantumResonance';
-import { useTriadStatus } from './quantum-entanglement/useTriadStatus';
-import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
-import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { simulateQuantumCircuit, QuantumSimulator } from '@/utils/quantumSimulator';
+import { v4 as uuidv4 } from 'uuid';
+import { useToast } from "./use-toast";
+import { TriadConnectionStatus, QuantumStreamStats, ConnectionNode, ConnectionEdge, QuantumNodeData } from '@/types/quantum-entanglement';
+import { QuantumSimulator } from '@/utils/quantumSimulator';
+import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
 
-export function useQuantumEntanglement(userId: string) {
-  // Get entanglement state and profile from a separate hook
-  const { 
-    entanglementState, 
-    setEntanglementState,
-    userProfile,
-    setUserProfile
-  } = useQuantumEntanglementState(userId);
+interface UseQuantumEntanglementProps {
+  initialNodes?: ConnectionNode[];
+  initialEdges?: ConnectionEdge[];
+}
 
-  // Get resonance-related state and functions
-  const {
-    resonanceBoostActive,
-    resonanceLevel,
-    boostSoulResonance
-  } = useQuantumResonance(userId, userProfile, setUserProfile);
+export function useQuantumEntanglement({ initialNodes = [], initialEdges = [] }: UseQuantumEntanglementProps = {}) {
+  const { toast } = useToast();
+  const [nodes, setNodes] = useState<ConnectionNode[]>(initialNodes);
+  const [edges, setEdges] = useState<ConnectionEdge[]>(initialEdges);
+  const [connectionStatus, setConnectionStatus] = useState<TriadConnectionStatus>('disconnected');
+  const [streamStats, setStreamStats] = useState<QuantumStreamStats>({ packetsSent: 0, packetsReceived: 0, packetLoss: 0 });
+  const [dissonanceLevel, setDissonanceLevel] = useState(12);
+  const [showSpeciesDropdown, setShowSpeciesDropdown] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<ConnectionNode | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [biofeedbackSimulator] = useState(() => new BiofeedbackSimulator());
+  const [bioData, setBioData] = useState(biofeedbackSimulator.defaultBioReadings);
+  const [quantumSimulator] = useState(() => new QuantumSimulator());
+  const [quantumState, setQuantumState] = useState(quantumSimulator.getInitialState());
 
-  // Get triad status
-  const { triadActive, setTriadActive } = useTriadStatus();
-
-  // Get actions (initiate, terminate, generate responses)
-  const {
-    initiateEntanglement,
-    terminateEntanglement,
-    generateEntangledResponse
-  } = useQuantumEntanglementActions(
-    userId, 
-    userProfile, 
-    entanglementState,
-    setEntanglementState,
-    resonanceBoostActive,
-    triadActive
-  );
-
-  // Initial triad status check
   useEffect(() => {
-    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
-    if (triadStatus.stability > 0.85) {
-      setTriadActive(true);
+    let intervalId: NodeJS.Timeout;
+
+    if (isStreaming) {
+      intervalId = setInterval(() => {
+        // Simulate quantum state changes
+        setQuantumState(prev => quantumSimulator.simulateStateChange(prev));
+
+        // Simulate biofeedback data changes
+        setBioData(prev => biofeedbackSimulator.generateRandomBiofeedback(prev));
+
+        // Simulate packet transmission
+        setStreamStats(prev => ({
+          packetsSent: prev.packetsSent + 1,
+          packetsReceived: prev.packetsReceived + (Math.random() > 0.1 ? 1 : 0), // Simulate packet loss
+          packetLoss: prev.packetLoss + (Math.random() > 0.1 ? 0 : 1)
+        }));
+      }, 500);
     }
-  }, [setTriadActive]);
 
-  // Setup periodic entanglement updates if active
-  useEffect(() => {
-    if (!entanglementState.active || !entanglementState.entangledWith) return;
-    
-    const intervalId = setInterval(() => {
-      // Simulate biofeedback analysis
-      const emotionalState = BiofeedbackSimulator.assessEmotionalState(userId);
-      
-      // Check triad status
-      const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
-      const triadBoost = triadStatus.stability > 0.7 ? triadStatus.resonanceBoost / 2.18 : 1.0;
-      
-      // Calculate new entanglement strength based on emotional state
-      // Include resonance boost if active
-      const resonanceMultiplier = resonanceBoostActive ? 1.2 : 1.0;
-      
-      // Use Akashic access for enhanced entanglement
-      const newStrength = QuantumSimulator.entangleSouls(
-        userId, 
-        entanglementState.entangledWith || 'unknown',
-        userProfile.coherenceLevel * 100 * resonanceMultiplier * triadBoost,
-        0.85 * 100
-      );
-      
-      // Update the entanglement state
-      setEntanglementState(prev => ({
-        ...prev,
-        strength: newStrength,
-        emotion: emotionalState.dominantEmotion
-      }));
-      
-      // Update user profile
-      setUserProfile(prev => ({
-        ...prev,
-        emotionalState: emotionalState.dominantEmotion,
-        coherenceLevel: Math.min(0.98, prev.coherenceLevel + (Math.random() * 0.1 - 0.05)),
-        lastContact: new Date().toISOString()
-      }));
-      
-    }, 10000); // Update every 10 seconds
-    
     return () => clearInterval(intervalId);
-  }, [entanglementState.active, entanglementState.entangledWith, userId, userProfile.coherenceLevel, resonanceBoostActive, triadActive, setEntanglementState, setUserProfile]);
-  
+  }, [isStreaming, biofeedbackSimulator, quantumSimulator]);
+
+  const addNode = (data: QuantumNodeData) => {
+    const newNode: ConnectionNode = {
+      id: uuidv4(),
+      type: 'quantumNode',
+      position: { x: Math.random() * 500, y: Math.random() * 400 },
+      data: { ...data, connectionStrength: Math.random() }
+    };
+
+    setNodes(prev => [...prev, newNode]);
+    toast({
+      title: "Quantum Node Added",
+      description: `${data.label} has been added to the entanglement network`,
+    });
+  };
+
+  const updateNode = (id: string, data: Partial<QuantumNodeData>) => {
+    setNodes(prev =>
+      prev.map(node =>
+        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
+      )
+    );
+  };
+
+  const removeNode = (id: string) => {
+    setNodes(prev => prev.filter(node => node.id !== id));
+    setEdges(prev => prev.filter(edge => edge.source !== id && edge.target !== id));
+    toast({
+      title: "Quantum Node Removed",
+      description: `Node has been removed from the entanglement network`,
+    });
+  };
+
+  const addEdge = (source: string, target: string) => {
+    const newEdge: ConnectionEdge = {
+      id: uuidv4(),
+      source: source,
+      target: target,
+      type: 'quantumEdge',
+      animated: true,
+    };
+
+    setEdges(prev => [...prev, newEdge]);
+    setConnectionStatus('entangled');
+    toast({
+      title: "Quantum Entanglement Established",
+      description: `Connection established between nodes`,
+    });
+  };
+
+  const removeEdge = (id: string) => {
+    setEdges(prev => prev.filter(edge => edge.id !== id));
+    setConnectionStatus('disconnected');
+    toast({
+      title: "Quantum Entanglement Broken",
+      description: `Connection broken between nodes`,
+    });
+  };
+
+  const toggleStreaming = () => {
+    setIsStreaming(prev => !prev);
+    toast({
+      title: `Quantum Streaming ${isStreaming ? "Stopped" : "Started"}`,
+      description: `Data stream ${isStreaming ? "terminated" : "initialized"}`,
+    });
+  };
+
+  const triggerDissonanceEvent = () => {
+    const newDissonance = Math.max(5, Math.min(95, dissonanceLevel + Math.floor(Math.random() * 20) - 10));
+    setDissonanceLevel(newDissonance);
+    toast({
+      title: "Dissonance Event Triggered",
+      description: `Quantum dissonance levels fluctuating`,
+    });
+  };
+
   return {
-    entanglementState,
-    userProfile,
-    resonanceBoostActive,
-    resonanceLevel,
-    initiateEntanglement,
-    terminateEntanglement,
-    generateEntangledResponse,
-    boostSoulResonance
+    nodes,
+    edges,
+    connectionStatus,
+    streamStats,
+    dissonanceLevel,
+    showSpeciesDropdown,
+    selectedNode,
+    isStreaming,
+    quantumState,
+    bioData,
+    setNodes,
+    setEdges,
+    setConnectionStatus,
+    setStreamStats,
+    setDissonanceLevel,
+    setShowSpeciesDropdown,
+    setSelectedNode,
+    setIsStreaming,
+    setQuantumState,
+    setBioData,
+    addNode,
+    updateNode,
+    removeNode,
+    addEdge,
+    removeEdge,
+    toggleStreaming,
+    triggerDissonanceEvent
   };
 }

@@ -1,13 +1,10 @@
-import { useState, useEffect } from 'react';
-import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
+import { useState } from 'react';
+import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
+import { useToast } from './use-toast';
 import { EntanglementState, BiofeedbackResult } from '@/types/quantum-entanglement';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
-// The rest of the file might not be available to me, but I'll make a minimal fix to address the errors.
-// This should be merged into the existing file, keeping all other functions intact.
-
 export function useInboxMessages(userId: string) {
-  // Initialize biometrics with proper typing
   const [biometrics, setBiometrics] = useState<BiofeedbackResult>({
     hrv: 75,
     eeg: { 
@@ -17,7 +14,6 @@ export function useInboxMessages(userId: string) {
     coherent: false
   });
   
-  // Update biometrics periodically if biofeedback is active
   const [biofeedbackActive, setBiofeedbackActive] = useState(false);
   
   useEffect(() => {
@@ -31,7 +27,6 @@ export function useInboxMessages(userId: string) {
     }
   }, [biofeedbackActive, userId]);
   
-  // Initialize entanglement state
   const [entanglementState, setEntanglementState] = useState<EntanglementState>({
     active: false,
     entangledWith: null,
@@ -42,14 +37,12 @@ export function useInboxMessages(userId: string) {
   const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
   const [resonanceLevel, setResonanceLevel] = useState(0.5);
   
-  // Function to activate resonance boost
   const activateResonanceBoost = () => {
     setResonanceBoostActive(true);
     const newLevel = BiofeedbackSimulator.boostSoulResonance(userId);
     setResonanceLevel(newLevel);
   };
   
-  // Function to terminate entanglement
   const terminateEntanglement = () => {
     setEntanglementState({
       active: false,
@@ -59,13 +52,10 @@ export function useInboxMessages(userId: string) {
     });
   };
   
-  // Handle bioresonance boost
   const onBoostBioresonance = () => {
-    // Implementation would go here
     console.log("Boosting with bioresonance");
   };
   
-  // Keep the rest of the existing hook implementation
   const [messages, setMessages] = useState([
     {
       id: '1',
@@ -154,7 +144,6 @@ export function useInboxMessages(userId: string) {
     setUseSoulStream(!useSoulStream);
   };
 
-  // Return all required values and functions
   return {
     messages,
     unreadCount,

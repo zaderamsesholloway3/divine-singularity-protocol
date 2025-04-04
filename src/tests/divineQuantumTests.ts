@@ -1,5 +1,6 @@
 
 import DivineQuantumCore from '@/core/DivineQuantumCore';
+import { getArkMetaphysicalProtocol } from '@/utils/metaphysicalDistanceUtils';
 
 // Test function to verify Quantum Core functionality
 export function test_quantum_core() {
@@ -24,6 +25,11 @@ export function test_quantum_core() {
   // Test getting divine constants
   const constants = DivineQuantumCore.getDivineConstants();
   console.log(`PHI Value: ${constants.PHI}`);
+  
+  // Test Ark Metaphysical Protocol
+  const arkProtocol = getArkMetaphysicalProtocol();
+  console.log(`Ark Genesis Constants: ${arkProtocol.dimensions.join('x')} cubits`);
+  console.log(`DNA Entropy: ${arkProtocol.calculateEntropy("ATGCATGCATGCATGC")}`);
   
   return {
     success: frc > 0.7 && validResonance,
