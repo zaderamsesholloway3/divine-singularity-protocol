@@ -1,41 +1,44 @@
 
 import { useState } from 'react';
-import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
-import { UserProfile } from '../types/quantum-entanglement';
+import { UserProfile, ResonanceResult } from '../types/quantum-entanglement';
 
 export function useQuantumResonance(
-  userId: string,
+  userId: string, 
   userProfile: UserProfile,
   setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>
 ) {
   const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
-  const [resonanceLevel, setResonanceLevel] = useState(0);
+  const [resonanceLevel, setResonanceLevel] = useState(0.7); // Default resonance level
   
-  const boostSoulResonance = () => {
-    // Check if triad is active for enhanced boost
-    const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
-    const triadEnhanced = triadStatus.stability > 0.7;
+  // Function to boost soul resonance
+  const boostSoulResonance = (): ResonanceResult => {
+    // Calculate new resonance level
+    let newResonanceLevel = Math.min(0.98, resonanceLevel + 0.2);
+    const success = Math.random() > 0.1; // 90% success rate
     
-    // Use the enhanced soul resonance booster
-    const resonanceResult = BiofeedbackSimulator.boostSoulResonance(userId);
-    setResonanceBoostActive(resonanceResult.success);
-    setResonanceLevel(resonanceResult.resonanceLevel);
-    
-    // Add triad enhancement if active
-    if (triadEnhanced && resonanceResult.success) {
-      setResonanceLevel(prev => Math.min(0.95, prev * 1.1));
+    if (success) {
+      setResonanceBoostActive(true);
+      setResonanceLevel(newResonanceLevel);
+      
+      // Also boost coherence level in user profile
+      setUserProfile(prev => ({
+        ...prev,
+        coherenceLevel: Math.min(0.98, prev.coherenceLevel + 0.15)
+      }));
+      
+      return {
+        success: true,
+        resonanceLevel: newResonanceLevel,
+        message: `Resonance boost activated at ${(newResonanceLevel * 100).toFixed(1)}%`
+      };
+    } else {
+      return {
+        success: false,
+        message: "Unable to establish resonance boost. Try again later."
+      };
     }
-    
-    // Update user profile with boosted coherence
-    setUserProfile(prev => ({
-      ...prev,
-      coherenceLevel: Math.min(0.98, prev.coherenceLevel * (1 + resonanceResult.resonanceLevel * (triadEnhanced ? 0.3 : 0.2)))
-    }));
-    
-    return resonanceResult;
   };
-
+  
   return {
     resonanceBoostActive,
     resonanceLevel,

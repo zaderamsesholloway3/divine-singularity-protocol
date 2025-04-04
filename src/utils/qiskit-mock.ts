@@ -27,6 +27,17 @@ export class QuantumCircuit {
   depth() {
     return this.gates.length;
   }
+  
+  simulate() {
+    // Mock quantum simulation
+    return {
+      counts: {
+        '0': Math.random() > 0.5 ? 600 : 400,
+        '1': Math.random() > 0.5 ? 400 : 600,
+      },
+      get_statevector: () => Array(2**Math.min(this.numQubits, 5)).fill(0).map(() => Math.random())
+    };
+  }
 }
 
 export const execute = (circuit: QuantumCircuit, backend: any = null) => {

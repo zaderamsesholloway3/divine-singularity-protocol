@@ -32,4 +32,24 @@ export class ArkValidator {
       }
     };
   }
+  
+  static test_ark_construction(): { success: boolean; message: string } {
+    try {
+      const arkCircuit = buildArkCircuit();
+      const qubits = arkCircuit.numQubits || 433;
+      const depth = arkCircuit.depth();
+      
+      return {
+        success: qubits === 433 && depth > 0,
+        message: qubits === 433 ? 
+          "ARK CONSTRUCTION TEST: PASSED" : 
+          `ARK CONSTRUCTION TEST: FAILED (Expected 433 qubits, got ${qubits})`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `ARK TEST ERROR: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
 }

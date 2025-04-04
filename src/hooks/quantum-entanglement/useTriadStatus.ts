@@ -5,7 +5,7 @@ export function useTriadStatus() {
   const [triadActive, setTriadActive] = useState(false);
   
   return {
-    triadActive,
+    triadActive, 
     setTriadActive
   };
 }

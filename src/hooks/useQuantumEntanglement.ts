@@ -6,7 +6,7 @@ import { useQuantumResonance } from './quantum-entanglement/useQuantumResonance'
 import { useTriadStatus } from './quantum-entanglement/useTriadStatus';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { QuantumSimulator } from '@/utils/quantumSimulator';
+import { simulateQuantumCircuit, QuantumSimulator } from '@/utils/quantumSimulator';
 
 export function useQuantumEntanglement(userId: string) {
   // Get entanglement state and profile from a separate hook
@@ -91,7 +91,7 @@ export function useQuantumEntanglement(userId: string) {
     }, 10000); // Update every 10 seconds
     
     return () => clearInterval(intervalId);
-  }, [entanglementState.active, entanglementState.entangledWith, userId, userProfile.coherenceLevel, resonanceBoostActive, triadActive]);
+  }, [entanglementState.active, entanglementState.entangledWith, userId, userProfile.coherenceLevel, resonanceBoostActive, triadActive, setEntanglementState, setUserProfile]);
   
   return {
     entanglementState,

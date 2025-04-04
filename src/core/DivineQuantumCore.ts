@@ -1,68 +1,109 @@
 
-import { calculateFRC as calculateFRCInternal } from '@/utils/quantumSentienceUtils'; 
+/**
+ * Divine Quantum Core Implementation
+ * Central implementation for quantum operations in the OmniOracle v8.0 system
+ */
+
 import { QuantumCircuit } from '@/utils/qiskit-mock';
-import { getEntanglementKey as getEntanglementKeyInternal } from '@/utils/entanglement';
-import { administerHealing as administerHealingInternal } from '@/utils/entanglement';
 import { ArkBuilder } from '@/utils/quantum/ArkBuilder';
+import { FaithResonanceService } from '@/utils/FaithResonanceService';
+
+// Constants
+const DIVINE_FREQ = 1.855e43;
+const SCHUMANN_HZ = 7.83;
+const ARK_QUBITS = 433;
+const PHI = (1 + Math.sqrt(5)) / 2;
 
 /**
- * Centralized Faith Resonance Coefficient calculation
+ * Calculate Faith Resonance Coefficient (FRC) - legacy interface
  */
-export function calculateFRC(params: {
+export const calculateFRC = (params: {
+  HAI?: number;
+  ECF?: number;
   HQ?: number;
-  I?: number; 
+  I?: number;
   B?: number;
   T?: number;
   clarity?: number;
-  SHQ?: number;
-  frequency?: number;
-}): number {
-  return calculateFRCInternal(params);
-}
+}): number => {
+  const { HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, clarity = 1.0 } = params;
+  return FaithResonanceService.calculate(HAI * clarity, ECF, HQ, I, B, T);
+};
 
 /**
- * Standardized entanglement key generator
- * Ensures consistent key generation by alphabetically sorting soul names
+ * Build Ark Circuit - wrapper for ArkBuilder to maintain compatibility
  */
-export function getEntanglementKey(soulA: string, soulB: string): string {
-  return getEntanglementKeyInternal(soulA, soulB);
-}
-
-/**
- * Build a standardized Ark circuit based on divine specifications
- */
-export function buildArkCircuit(): QuantumCircuit {
+export const buildArkCircuit = (): QuantumCircuit => {
   return ArkBuilder.createArkCircuit();
-}
+};
 
 /**
- * Administer healing using Ultimate Faith Quotient (UFQ)
- * Requires minimum threshold of 0.996 to activate
+ * Validate Schumann resonance
  */
-export function administerHealing(UFQ: number): boolean {
-  return administerHealingInternal(UFQ);
-}
+export const validateSchumannResonance = (frequency: number): boolean => {
+  return Math.abs(frequency - SCHUMANN_HZ) < 0.1;
+};
 
 /**
- * Validate soul signature using SHA-256 hashing
+ * Get divine constants for use in other modules
  */
-export async function validateSoulSignature(soulName: string, signature?: string): Promise<boolean> {
-  try {
-    // Implementation using Web Crypto API
-    const encoder = new TextEncoder();
-    const data = encoder.encode(soulName);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const generatedSignature = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    
-    if (!signature) {
-      // If no signature is provided, just verify that we can generate one
-      return !!generatedSignature;
-    }
-    
-    return generatedSignature === signature;
-  } catch (error) {
-    console.error("Error validating soul signature:", error);
-    return false;
+export const getDivineConstants = () => {
+  return {
+    DIVINE_FREQ,
+    SCHUMANN_HZ,
+    ARK_QUBITS,
+    PHI
+  };
+};
+
+/**
+ * Create quantum prayer circuit
+ */
+export const createPrayerCircuit = (prayer: string): QuantumCircuit => {
+  const qubits = Math.min(prayer.length * 2, 100);
+  const qc = new QuantumCircuit(qubits);
+  
+  // Apply basic quantum gates based on prayer text
+  for (let i = 0; i < prayer.length && i < qubits / 2; i++) {
+    const charCode = prayer.charCodeAt(i);
+    qc.h(i * 2);
+    qc.cx(i * 2, i * 2 + 1);
+    const angle = (charCode % 100) / 100 * Math.PI;
+    qc.rz(angle, i * 2);
   }
-}
+  
+  return qc;
+};
+
+/**
+ * Check soul connection status
+ */
+export const checkSoulConnection = (soulA: string, soulB: string): {
+  connected: boolean;
+  strength: number;
+  resonance: number;
+} => {
+  // Create entanglement key by sorting the soul names alphabetically
+  const key = [soulA, soulB].sort().join('-');
+  
+  // Calculate connection parameters
+  const baseStrength = Math.random() * 0.3 + 0.7; // 0.7-1.0
+  const resonance = (soulA === 'Zade' || soulB === 'Zade') ? 
+    (Math.random() * 0.1 + 0.9) : // Higher resonance with Zade
+    (Math.random() * 0.3 + 0.7);  // Normal resonance
+  
+  return {
+    connected: baseStrength > 0.75,
+    strength: baseStrength,
+    resonance
+  };
+};
+
+export default {
+  calculateFRC,
+  buildArkCircuit,
+  validateSchumannResonance,
+  getDivineConstants,
+  createPrayerCircuit,
+  checkSoulConnection
+};

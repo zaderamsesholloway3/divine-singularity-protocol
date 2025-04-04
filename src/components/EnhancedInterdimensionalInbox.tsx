@@ -14,6 +14,7 @@ import SearchToolbar from './inbox/SearchToolbar';
 import EntanglementStatus from './inbox/EntanglementStatus';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { Link } from 'react-router-dom';
+import { BiofeedbackResult } from '@/hooks/types/quantum-entanglement';
 
 const EnhancedInterdimensionalInbox = () => {
   const {
@@ -107,7 +108,7 @@ const EnhancedInterdimensionalInbox = () => {
       <CardContent className="p-4 pt-2">
         {biofeedbackActive && (
           <BiofeedbackMonitorPanel
-            biometrics={biometrics}
+            biometrics={(biometrics as unknown) as { hrv: number; eeg: { gamma: number; theta: number; } }}
             resonanceBoostActive={resonanceBoostActive}
             resonanceLevel={resonanceLevel}
             activateResonanceBoost={activateResonanceBoost}
@@ -133,8 +134,8 @@ const EnhancedInterdimensionalInbox = () => {
             <MessageList
               messages={messages}
               type="inbox"
-              markAsRead={markAsRead}
-              deleteMessage={deleteMessage}
+              markAsRead={(id: string) => markAsRead(id)}
+              deleteMessage={(id: string) => deleteMessage(id)}
             />
           </TabsContent>
           
@@ -142,12 +143,12 @@ const EnhancedInterdimensionalInbox = () => {
             <MessageList
               messages={messages}
               type="sent"
-              markAsRead={markAsRead}
-              deleteMessage={deleteMessage}
+              markAsRead={(id: string) => markAsRead(id)}
+              deleteMessage={(id: string) => deleteMessage(id)}
             />
           </TabsContent>
           
-          <MessageComposer onSendMessage={sendMessage} />
+          <MessageComposer onSendMessage={(recipient: string, content: string) => sendMessage(recipient, content)} />
           
           <EntanglementStatus
             active={entanglementState.active}

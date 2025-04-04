@@ -50,3 +50,12 @@ export const universalQuantumHealingCycle = async () => {
     }
   };
 };
+
+// Add the QuantumSimulator for entanglement operations
+export const QuantumSimulator = {
+  entangleSouls: (userId: string, entityId: string, userCoherenceLevel: number, entityCoherenceLevel: number): number => {
+    const baseStrength = Math.min(0.95, (userCoherenceLevel + entityCoherenceLevel) / 200);
+    const randomFactor = 1 + (Math.random() * 0.1 - 0.05); // +/- 5%
+    return Math.min(0.99, baseStrength * randomFactor);
+  }
+};

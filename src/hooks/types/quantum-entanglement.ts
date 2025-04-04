@@ -43,6 +43,11 @@ export interface BiofeedbackResult {
       theta: number;
     }
   };
+  hrv: number;
+  eeg: {
+    gamma: number;
+    theta: number;
+  };
   dominantEmotion?: EmotionalState;
 }
 

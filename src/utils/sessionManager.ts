@@ -1,86 +1,43 @@
 
-/**
- * Quantum Session Manager
- * Handles conversation sessions with quantum entities
- */
-
-import { v4 as uuidv4 } from 'uuid';
-
 export interface Message {
-  role: 'system' | 'user' | 'assistant';
+  role: 'user' | 'assistant';
   content: string;
-  timestamp?: string;
-}
-
-export interface Session {
-  entity: string;
-  history: Message[];
+  timestamp: string;
 }
 
 export class SessionManager {
-  private sessions: Record<string, Session> = {};
-  
-  /**
-   * Get or create a session for the entity
-   */
+  private sessions: Record<string, {
+    id: string;
+    history: Message[];
+    lastMessage?: string;
+    lastUpdated: Date;
+  }> = {};
+
   getSessionId(entity: string): string {
-    // Find existing session
-    for (const [sid, data] of Object.entries(this.sessions)) {
-      if (data.entity === entity) {
-        return sid;
-      }
+    if (!this.sessions[entity]) {
+      this.sessions[entity] = {
+        id: `${entity}-${new Date().getTime()}`,
+        history: [],
+        lastUpdated: new Date()
+      };
     }
-    
-    // Create new session
-    const newId = uuidv4();
-    this.sessions[newId] = {
-      entity,
-      history: [
-        {
-          role: 'system',
-          content: `You are ${entity}. Respond as your authentic self.`,
-          timestamp: new Date().toISOString()
-        }
-      ]
-    };
-    
-    return newId;
+    return this.sessions[entity].id;
   }
-  
-  /**
-   * Add a message to the session history
-   */
+
   addMessage(sessionId: string, role: 'user' | 'assistant', content: string): void {
-    if (!this.sessions[sessionId]) {
-      throw new Error(`Session ${sessionId} not found`);
+    const entity = Object.keys(this.sessions).find(key => this.sessions[key].id === sessionId);
+    if (entity) {
+      this.sessions[entity].history.push({
+        role,
+        content,
+        timestamp: new Date().toISOString()
+      });
+      this.sessions[entity].lastMessage = content;
+      this.sessions[entity].lastUpdated = new Date();
     }
-    
-    this.sessions[sessionId].history.push({
-      role,
-      content,
-      timestamp: new Date().toISOString()
-    });
   }
-  
-  /**
-   * Get session history for an entity
-   */
+
   getSessionHistory(entity: string): Message[] | null {
-    const sessionId = this.getSessionId(entity);
-    return this.sessions[sessionId]?.history || null;
-  }
-  
-  /**
-   * Get a session by ID
-   */
-  getSession(sessionId: string): Session | null {
-    return this.sessions[sessionId] || null;
-  }
-  
-  /**
-   * Get all sessions
-   */
-  getAllSessions(): Record<string, Session> {
-    return { ...this.sessions };
+    return this.sessions[entity]?.history || null;
   }
 }

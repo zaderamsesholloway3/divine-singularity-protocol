@@ -1,65 +1,77 @@
 
-// This file provides functions used by MessageHeader component
-
 /**
- * The phase filtered ping response analyzer
- * @param phaseOffset Phase offset value to analyze
- * @param faithQuotient Optional faith quotient to enhance results
- * @returns Analysis results object
+ * Divine Repair Index 
+ * Provides utilities for phase filtering and dimensional observer logging
  */
-export function phaseFilteredPingResponse(phaseOffset: number, faithQuotient: number = 0) {
+
+// Function to filter quantum signals through a phase correction algorithm
+export const phaseFilteredPingResponse = (phaseOffset: number, faithQuotient: number): string => {
+  // Apply phase correction based on offset and faith quotient
+  const correctionFactor = Math.min(0.1, phaseOffset) * 10;
+  const faithBoost = Math.min(1.0, faithQuotient * 1.05);
+  
+  // Format response based on phase alignment quality
+  if (phaseOffset < 0.01) {
+    return `Perfect phase lock: ${(1 - correctionFactor).toFixed(3)} × ${faithBoost.toFixed(2)}`;
+  } else if (phaseOffset < 0.05) {
+    return `Phase aligned: ${(1 - correctionFactor).toFixed(3)} × ${faithBoost.toFixed(2)}`;
+  } else if (phaseOffset < 0.1) {
+    return `Phase correction applied: ${(1 - correctionFactor).toFixed(3)} × ${faithBoost.toFixed(2)}`;
+  } else {
+    return `Phase instability detected: ${(1 - correctionFactor).toFixed(3)} × ${faithBoost.toFixed(2)}`;
+  }
+};
+
+// Log dimensional observer events to console
+export const logDimensionalObserverEvent = (phaseOffset: number): void => {
+  const timestamp = new Date().toISOString();
+  const severity = phaseOffset > 0.2 ? "CRITICAL" : 
+                  phaseOffset > 0.15 ? "HIGH" :
+                  phaseOffset > 0.1 ? "MEDIUM" : "LOW";
+                  
+  console.warn(`[${timestamp}] DIMENSIONAL OBSERVER EVENT: Phase Offset ${phaseOffset.toFixed(4)} - Severity: ${severity}`);
+  
+  // Record high-severity events with more detail
+  if (phaseOffset > 0.15) {
+    console.error(`[${timestamp}] ⚠️ PHASE LOCK COMPROMISED - Initiating automatic stabilization`);
+    console.info(`[${timestamp}] Applying Schumann resonance (7.83Hz) filter...`);
+    
+    // Simulated correction check
+    const correctedOffset = phaseOffset * (Math.random() * 0.3 + 0.3); // 30-60% reduction
+    console.info(`[${timestamp}] ✓ Phase offset reduced to ${correctedOffset.toFixed(4)}`);
+  }
+};
+
+// Get quantum ark status
+export const getQuantumArkStatus = (): {
+  status: "optimal" | "stable" | "unstable" | "critical";
+  resonance: number;
+  faithQuotient: number;
+} => {
+  const resonance = Math.random() * 20 + 80; // 80-100%
+  const faithQuotient = Math.random() * 0.2 + 0.8; // 0.8-1.0
+  
+  let status: "optimal" | "stable" | "unstable" | "critical";
+  if (resonance > 95) status = "optimal";
+  else if (resonance > 90) status = "stable";
+  else if (resonance > 85) status = "unstable";
+  else status = "critical";
+  
   return {
-    offset: phaseOffset,
-    stability: phaseOffset < 0.05 ? 'high' : phaseOffset < 0.1 ? 'medium' : 'low',
-    synchronization: 100 - (phaseOffset * 100),
-    faithEnhancement: faithQuotient > 0.8
+    status,
+    resonance,
+    faithQuotient
   };
-}
+};
 
-/**
- * Logs dimensional observer events when phase corrections are needed
- * @param phaseOffset The phase offset detected
- */
-export function logDimensionalObserverEvent(phaseOffset: number) {
-  console.log(`[Divine Repair] Dimensional observer event logged: ${phaseOffset.toFixed(4)}`);
-  // In a real implementation, this would communicate with backend services
-}
-
-// Define the return type for divineDiagnosticMode
-export interface DiagnosticResults {
-  moduleStatus: {
-    [key: string]: {
-      status: string;
-      resonance?: number;
-      stability?: number;
-      details?: string;
-    }
-  };
-  repairsAttempted: number;
-  repairsSuccessful: number;
-  timeCompleted: string;
-}
-
-/**
- * Runs a complete divine diagnostic mode process
- * @returns Diagnostic results with repair status
- */
-export async function divineDiagnosticMode(): Promise<DiagnosticResults> {
-  // Simulate a diagnostic process
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        moduleStatus: {
-          "Akashic Records": { status: "optimal", resonance: 0.97, stability: 0.99, details: "7.83Hz link stable" },
-          "Ouroboros Link": { status: "stable", resonance: 0.92, stability: 0.95, details: "Loop integrity verified" },
-          "Triad Junction": { status: "optimal", resonance: 0.98, stability: 1.0, details: "Triangulation complete" },
-          "Faith Resonance": { status: "stable", resonance: 0.91, stability: 0.94, details: "Harmonic pattern stable" },
-          "Quantum Backdoor": { status: "partial", resonance: 0.84, stability: 0.87, details: "Minor interference detected" }
-        },
-        repairsAttempted: 3,
-        repairsSuccessful: 2,
-        timeCompleted: new Date().toISOString()
-      });
-    }, 1500);
-  });
-}
+// Calculate divine recovery chance
+export const calculateDivineRecoveryProbability = (faithQuotient: number): number => {
+  // Base probability is faith quotient
+  let probability = faithQuotient;
+  
+  // Apply Golden Ratio enhancement
+  const PHI = (1 + Math.sqrt(5)) / 2;
+  probability = Math.min(0.99, probability * (1 + (0.1 / PHI)));
+  
+  return probability;
+};
