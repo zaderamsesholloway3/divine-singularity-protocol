@@ -166,7 +166,6 @@ export const QuantumSentienceHeatmap: React.FC = () => {
                 animation: value > 80 ? 'pulse 2s infinite' : 'none',
               })}
               cellRender={value => getValueLabel(value)}
-              className="w-full max-w-full"
             />
             
             {/* Pulse animation overlay for high SHQ souls */}
