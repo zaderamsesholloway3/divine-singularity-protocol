@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -109,12 +110,18 @@ export default {
 						backgroundPosition: '0% 50%',
 					},
 				},
+				wave: {
+					'0%': { transform: 'translateX(0)' },
+					'50%': { transform: 'translateX(-10%)' },
+					'100%': { transform: 'translateX(0)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'pulse-slow': 'pulse 4s ease-in-out infinite',
 				'flow': 'flow 15s ease infinite',
+				'wave': 'wave 10s ease-in-out infinite',
 			}
 		}
 	},
