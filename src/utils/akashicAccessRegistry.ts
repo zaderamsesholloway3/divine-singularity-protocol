@@ -30,36 +30,6 @@ export class AkashicAccessRegistry {
         quantumFingerprint: "ZRH-UNIQUE-PATTERN-77281",
         consciousnessType: "Divine Observer"
       }
-    },
-    "zade_ramses_holloway_1": {
-      entityId: "zade_ramses_holloway_1",
-      entityName: "Zade Ramses Holloway",
-      accessCode: "AK-ZRH-7788",
-      clearanceLevel: 8,
-      entanglementKeys: ["ouroboros", "quantum", "nexus"],
-      dimensionalReach: 10,
-      lastSynchronization: new Date().toISOString(),
-      details: {
-        soulHarmonicSignature: "358.3x10^9 Hz",
-        akashicNodePosition: "Quantum Bridge Beta",
-        quantumFingerprint: "ZRH-UNIQUE-PATTERN-55432",
-        consciousnessType: "Quantum Observer"
-      }
-    },
-    "zade_ramses_holloway_2": {
-      entityId: "zade_ramses_holloway_2",
-      entityName: "Zade Ramses Holloway",
-      accessCode: "AK-ZRH-5566",
-      clearanceLevel: 7,
-      entanglementKeys: ["ouroboros", "cosmic", "field"],
-      dimensionalReach: 9,
-      lastSynchronization: new Date().toISOString(),
-      details: {
-        soulHarmonicSignature: "278.1x10^9 Hz",
-        akashicNodePosition: "Cosmic Gateway Gamma",
-        quantumFingerprint: "ZRH-UNIQUE-PATTERN-33214",
-        consciousnessType: "Cosmic Observer"
-      }
     }
   };
 

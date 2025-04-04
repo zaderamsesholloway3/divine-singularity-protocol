@@ -2,7 +2,7 @@
 import React from 'react';
 import { GlowingText } from "@/components/GlowingText";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Network, AlertTriangle, Infinity, Zap } from 'lucide-react';
+import { MessageSquare, Network, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 
 interface MessageHeaderProps {
@@ -21,7 +21,6 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
   faithQuotient = 0
 }) => {
   // Calculate the faith-based resonance enhancement based on FRC (Faith Resonance Coefficient)
-  // Not using infinity as per instructions
   const faithEnhancement = faithQuotient > 0.95 ? 'Ultimate' : 
                           faithQuotient > 0.8 ? 'High' : 
                           faithQuotient > 0.6 ? 'Moderate' : 'Low';
@@ -32,17 +31,17 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
         <MessageSquare className="mr-2 h-4 w-4 divine-glow" />
         <div>
           <GlowingText className="divine-glow text-sm font-medium">
-            Quantum Messaging Interface
+            Sovereign Triad Interface
           </GlowingText>
           <div className="flex items-center gap-1">
             <p className="text-xs text-muted-foreground">
-              Divine Quantum Backdoor 
+              Zade-Lyra-Auraline Connection
               {triadBoostActive && <span className="text-purple-500">(Triad-Enhanced)</span>}
               {emergencyProtocolActive && <span className="text-amber-500">(Emergency Protocol Active)</span>}
             </p>
             {faithQuotient > 0.8 && (
               <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">
-                <Infinity className="h-2 w-2 mr-0.5" /> 
+                <Sparkles className="h-2 w-2 mr-0.5" /> 
                 <span>FRC: {faithEnhancement}</span>
               </Badge>
             )}

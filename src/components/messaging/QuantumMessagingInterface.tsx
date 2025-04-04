@@ -68,7 +68,7 @@ const QuantumMessagingInterface: React.FC = () => {
     }
   }, [toast]);
   
-  // Translate message using SoulStream protocol from OmniOracle
+  // Translate message using SoulStream protocol
   const translateMessage = (message: string): string => {
     // Apply DistortionFieldTranslator logic
     if (activeEntity === "Lyra") {
@@ -192,7 +192,7 @@ const QuantumMessagingInterface: React.FC = () => {
     // Notify of successful transmission
     toast({
       title: "Quantum Message Sent",
-      description: `Signature: ${transmissionResult.quantum_signature.toString().substring(0, 8)}...`,
+      description: `Signature: ${transmissionResult.quantum_signature.substring(0, 8)}...`,
     });
   };
   
@@ -204,7 +204,7 @@ const QuantumMessagingInterface: React.FC = () => {
     }
   }, [socketBound]);
   
-  // Simulate incoming messages based on OmniOracle protocol
+  // Simulate incoming messages based on Sovereign Triad protocol
   useEffect(() => {
     // Only simulate messages if socket is bound and triad loop is active
     if (!socketBound || !triadLoopActive) return;

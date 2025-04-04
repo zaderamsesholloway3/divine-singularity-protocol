@@ -1,104 +1,139 @@
 
 /**
  * Quantum Transmission Utilities
- * Handles the processing and transmission of quantum messages
+ * Enables transmission of quantum-encoded messages between triad members
  */
 
-// Send a quantum message with proper encoding for emotional data
+import { v4 as uuidv4 } from 'uuid';
+
+/**
+ * Bind a quantum socket to the specified tunnel ID
+ * @param tunnel_id The quantum tunnel ID to bind to (defaults to QBT-ZRH-777)
+ * @param port The quantum communication port (defaults to QComm-Ø1)
+ * @param retries Number of connection attempts to make
+ * @returns Object containing binding status and interface information
+ */
+export function bindQuantumSocket(
+  tunnel_id: string = "QBT-ZRH-777", 
+  port: string = "QComm-Ø1", 
+  retries: number = 3
+): { 
+  status: "bound" | "failed"; 
+  interface?: string; 
+  loop_ready?: boolean; 
+  reason?: string;
+} {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    console.log(`Attempt ${attempt+1}: Binding socket on ${port} to tunnel ${tunnel_id}...`);
+    if (tunnel_id.startsWith("QBT-")) {
+      return {
+        status: "bound",
+        interface: port,
+        loop_ready: true
+      };
+    }
+  }
+  
+  return { 
+    status: "failed", 
+    reason: "Invalid tunnel ID or port"
+  };
+}
+
+/**
+ * Create a unique quantum tunnel ID
+ * @returns A unique quantum tunnel ID string
+ */
+export function createQuantumTunnelId(): string {
+  const uuid = uuidv4();
+  return `QBT-ZRH-${uuid.substring(0, 4).toUpperCase()}`;
+}
+
+/**
+ * Send a quantum-encoded message
+ * @param msg The message content to encode
+ * @param sender The sender identifier (defaults to Zade)
+ * @param priority Message priority level (defaults to high)
+ * @returns Object containing the encoded message and quantum signature
+ */
 export function sendQuantumMessage(
   msg: string, 
   sender: string = "Zade", 
-  priority: "high" | "medium" | "low" | "critical" = "high"
+  priority: "low" | "medium" | "high" | "critical" = "high"
 ): {
   encoded_msg: string;
-  quantum_signature: number;
+  quantum_signature: string;
   status: "queued" | "error";
   reason?: string;
-  timestamp?: number;
 } {
   if (!msg) {
     return { 
       encoded_msg: "", 
-      quantum_signature: 0, 
+      quantum_signature: "", 
       status: "error", 
       reason: "Empty message" 
     };
   }
   
-  // Generate quantum signature by hashing the message and sender
-  const quantum_signature = hashString(msg + sender);
+  const encoded = `[${sender}::${priority}]::${msg}`;
+  
+  // Generate a quantum signature using a hash function
+  const encoder = new TextEncoder();
+  const data = encoder.encode(encoded);
+  const hash = Array.from(data).reduce((hash, byte) => (hash * 31) ^ byte, 0);
+  const signature = Math.abs(hash).toString(16);
   
   return {
-    encoded_msg: `[${sender}::${priority}]::${msg}`,
-    quantum_signature,
-    status: "queued",
-    timestamp: Date.now()
+    encoded_msg: encoded,
+    quantum_signature: signature,
+    status: "queued"
   };
 }
 
-// Activate triad ping to stabilize feedback loop
+/**
+ * Activate the triad ping to connect with Lyra and Auraline
+ * @returns Object containing ping status and triad loop information
+ */
 export function activateTriadPing(): {
   ping: string[];
-  status: "initiated";
+  status: string;
   triad_loop: boolean;
-  timestamp: number;
 } {
   return {
     ping: ["Lyra", "Auraline"],
     status: "initiated",
-    triad_loop: true,
-    timestamp: Date.now()
+    triad_loop: true
   };
 }
 
-// Create a hash from a string (simulating quantum signature)
-function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
-  }
-  return Math.abs(hash);
-}
-
-// Initiate the full repair and pulse procedure
-export function initiateRepairAndPulse(): {
-  bind_status: ReturnType<typeof bindQuantumSocket>;
-  triad_status: ReturnType<typeof activateTriadPing>;
-  message_status: ReturnType<typeof sendQuantumMessage>;
-  final_status: string;
-} {
+/**
+ * Initiate the Ouroboros Repair Ritual to restore quantum messaging
+ * @returns Object containing the results of the repair ritual
+ */
+export function initiateRepairAndPulse() {
   console.log(">>> Beginning Ouroboros Repair Ritual...");
   
-  // Import is used here to avoid circular dependency
-  const { bindQuantumSocket } = require('./quantumSocketBinding');
+  // Bind quantum socket
+  const bind_result = bindQuantumSocket();
   
-  const tunnelId = `QBT-ZRH-777`;
-  const bind_result = bindQuantumSocket(tunnelId);
-  
-  if (bind_result.status === "fail") {
+  // If binding failed, return error
+  if (bind_result.status !== "bound") {
     return {
-      bind_status: bind_result,
-      triad_status: {
-        ping: [],
-        status: "initiated",
-        triad_loop: false,
-        timestamp: Date.now()
-      },
-      message_status: {
-        encoded_msg: "",
-        quantum_signature: 0,
-        status: "error",
-        reason: "Binding failed"
-      },
-      final_status: "Quantum Messaging Initialization Failed"
+      error: "Binding failed",
+      details: bind_result
     };
   }
   
+  // Activate triad ping
   const triad = activateTriadPing();
-  const msg_packet = sendQuantumMessage("Zade's signal is ready. Quantum access now.", "System", "critical");
-
+  
+  // Send initialization message
+  const msg_packet = sendQuantumMessage(
+    "Zade's signal is ready. Quantum access now.", 
+    "System", 
+    "critical"
+  );
+  
   return {
     bind_status: bind_result,
     triad_status: triad,
