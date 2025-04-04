@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -58,10 +59,12 @@ const UniversalConnectionVisualizer = () => {
     { name: 'Andromedan', distance: 2537000, color: 'rgba(249, 115, 22, 0.8)', resonance: 0.65 }
   ]);
   
-  const [triadData, setTriadData] = useState({
+  // Updated connection data to show the correct entities
+  const [connectionData, setConnectionData] = useState({
     zade: { strength: 0.95, messages: 24, lastUpdate: new Date().toISOString() },
-    zadeRamsesHolloway1: { strength: 0.87, messages: 18, lastUpdate: new Date(Date.now() - 120000).toISOString() },
-    zadeRamsesHolloway2: { strength: 0.75, messages: 12, lastUpdate: new Date(Date.now() - 300000).toISOString() }
+    lyra: { strength: 0.87, messages: 18, lastUpdate: new Date(Date.now() - 120000).toISOString() },
+    auraline: { strength: 0.75, messages: 12, lastUpdate: new Date(Date.now() - 300000).toISOString() },
+    ouroboros: { strength: 0.92, messages: 0, lastUpdate: new Date().toISOString() }
   });
   
   // Chart data for universal waveform
@@ -77,7 +80,7 @@ const UniversalConnectionVisualizer = () => {
     }))
   });
   
-  // Chart data for triad connections
+  // Updated chart data for connection visualization
   const [triadChartData, setTriadChartData] = useState({
     labels: Array.from({ length: 30 }, (_, i) => i.toString()),
     datasets: [
@@ -90,7 +93,7 @@ const UniversalConnectionVisualizer = () => {
         fill: true
       },
       {
-        label: 'Zade Ramses Holloway',
+        label: 'Lyra',
         data: Array.from({ length: 30 }, () => Math.random() * 0.4 + 0.5),
         borderColor: 'rgba(6, 182, 212, 0.8)',
         backgroundColor: 'rgba(6, 182, 212, 0.2)',
@@ -98,10 +101,18 @@ const UniversalConnectionVisualizer = () => {
         fill: true
       },
       {
-        label: 'Zade Ramses Holloway',
+        label: 'Auraline',
         data: Array.from({ length: 30 }, () => Math.random() * 0.5 + 0.3),
         borderColor: 'rgba(249, 115, 22, 0.8)',
         backgroundColor: 'rgba(249, 115, 22, 0.2)',
+        tension: 0.4,
+        fill: true
+      },
+      {
+        label: 'Ouroboros',
+        data: Array.from({ length: 30 }, () => Math.random() * 0.2 + 0.7),
+        borderColor: 'rgba(147, 51, 234, 0.8)',
+        backgroundColor: 'rgba(147, 51, 234, 0.2)',
         tension: 0.4,
         fill: true
       }
@@ -169,22 +180,27 @@ const UniversalConnectionVisualizer = () => {
         resonance: Math.max(0.5, Math.min(0.95, species.resonance + (Math.random() - 0.5) * 0.03))
       })));
       
-      // Update triad connection data
-      setTriadData(prev => ({
+      // Update connection data
+      setConnectionData(prev => ({
         zade: { 
           ...prev.zade,
           strength: Math.max(0.7, Math.min(0.98, prev.zade.strength + (Math.random() - 0.5) * 0.02)),
           lastUpdate: new Date().toISOString()
         },
-        zadeRamsesHolloway1: { 
-          ...prev.zadeRamsesHolloway1,
-          strength: Math.max(0.6, Math.min(0.95, prev.zadeRamsesHolloway1.strength + (Math.random() - 0.5) * 0.03)),
-          lastUpdate: Math.random() > 0.7 ? new Date().toISOString() : prev.zadeRamsesHolloway1.lastUpdate
+        lyra: { 
+          ...prev.lyra,
+          strength: Math.max(0.6, Math.min(0.95, prev.lyra.strength + (Math.random() - 0.5) * 0.03)),
+          lastUpdate: Math.random() > 0.7 ? new Date().toISOString() : prev.lyra.lastUpdate
         },
-        zadeRamsesHolloway2: { 
-          ...prev.zadeRamsesHolloway2,
-          strength: Math.max(0.5, Math.min(0.9, prev.zadeRamsesHolloway2.strength + (Math.random() - 0.5) * 0.04)),
-          lastUpdate: Math.random() > 0.8 ? new Date().toISOString() : prev.zadeRamsesHolloway2.lastUpdate
+        auraline: { 
+          ...prev.auraline,
+          strength: Math.max(0.5, Math.min(0.9, prev.auraline.strength + (Math.random() - 0.5) * 0.04)),
+          lastUpdate: Math.random() > 0.8 ? new Date().toISOString() : prev.auraline.lastUpdate
+        },
+        ouroboros: {
+          ...prev.ouroboros,
+          strength: Math.max(0.8, Math.min(0.98, prev.ouroboros.strength + (Math.random() - 0.5) * 0.01)),
+          lastUpdate: new Date().toISOString()
         }
       }));
       
@@ -209,9 +225,10 @@ const UniversalConnectionVisualizer = () => {
           // Remove first data point and add a new one
           newValues.shift();
           let baseVal;
-          if (index === 0) baseVal = triadData.zade.strength;
-          else if (index === 1) baseVal = triadData.zadeRamsesHolloway1.strength;
-          else baseVal = triadData.zadeRamsesHolloway2.strength;
+          if (index === 0) baseVal = connectionData.zade.strength;
+          else if (index === 1) baseVal = connectionData.lyra.strength;
+          else if (index === 2) baseVal = connectionData.auraline.strength;
+          else baseVal = connectionData.ouroboros.strength;
           
           newValues.push(baseVal * (0.9 + Math.random() * 0.2));
           return { ...dataset, data: newValues };
@@ -222,7 +239,7 @@ const UniversalConnectionVisualizer = () => {
     
     // Clean up interval on unmount
     return () => clearInterval(intervalId);
-  }, [speciesData, triadData]);
+  }, [speciesData, connectionData]);
   
   // Render divine connection waveform
   useEffect(() => {
@@ -346,7 +363,7 @@ const UniversalConnectionVisualizer = () => {
               </TabsTrigger>
               <TabsTrigger value="triad" className="flex items-center">
                 <Shield className="h-3 w-3 mr-1" />
-                Triad Connection
+                Connection Matrix
               </TabsTrigger>
             </TabsList>
             
@@ -378,31 +395,31 @@ const UniversalConnectionVisualizer = () => {
                 <div className="flex items-center text-xs">
                   <Circle className="h-2 w-2 mr-1 text-green-500" />
                   <span className="mr-1">Zade:</span>
-                  <span>{(triadData.zade.strength * 100).toFixed(1)}%</span>
+                  <span>{(connectionData.zade.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">
-                    {new Date(triadData.zade.lastUpdate).toLocaleTimeString()}
+                    {new Date(connectionData.zade.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
                   <Circle className="h-2 w-2 mr-1 text-cyan-500" />
-                  <span className="mr-1">Zade Ramses Holloway:</span>
-                  <span>{(triadData.zadeRamsesHolloway1.strength * 100).toFixed(1)}%</span>
+                  <span className="mr-1">Lyra:</span>
+                  <span>{(connectionData.lyra.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">
-                    {new Date(triadData.zadeRamsesHolloway1.lastUpdate).toLocaleTimeString()}
+                    {new Date(connectionData.lyra.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
                   <Circle className="h-2 w-2 mr-1 text-orange-500" />
-                  <span className="mr-1">Zade Ramses Holloway:</span>
-                  <span>{(triadData.zadeRamsesHolloway2.strength * 100).toFixed(1)}%</span>
+                  <span className="mr-1">Auraline:</span>
+                  <span>{(connectionData.auraline.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">
-                    {new Date(triadData.zadeRamsesHolloway2.lastUpdate).toLocaleTimeString()}
+                    {new Date(connectionData.auraline.lastUpdate).toLocaleTimeString()}
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
                   <Wand2 className="h-2 w-2 mr-1 text-purple-500" />
                   <span className="mr-1">Ouroboros:</span>
-                  <span>{(divineStrength * 100).toFixed(1)}%</span>
+                  <span>{(connectionData.ouroboros.strength * 100).toFixed(1)}%</span>
                   <span className="ml-auto">Active</span>
                 </div>
               </div>
