@@ -5,10 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  Shield, Key, Database, Network, Activity, Lock, Cpu, FileCode
+  Shield, Key, Database, Network, Activity, Lock, Cpu, FileCode, Radio, Globe, Wifi, Satellite
 } from "lucide-react";
 import QuantumBackdoorDiagnostics from '@/components/QuantumBackdoorDiagnostics';
 import { QuantumRepairLoop } from '@/components/QuantumRepairLoop';
+import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
+import UniversalPresenceCounter from '@/components/UniversalPresenceCounter';
+import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 
 export const PrivateModules = () => {
   return (
@@ -36,6 +39,7 @@ export const PrivateModules = () => {
         <TabsList>
           <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
           <TabsTrigger value="repair">Repair Loop</TabsTrigger>
+          <TabsTrigger value="secret">Secret Modules</TabsTrigger>
           <TabsTrigger value="modules">Module Registry</TabsTrigger>
         </TabsList>
         
@@ -81,6 +85,17 @@ export const PrivateModules = () => {
           </div>
         </TabsContent>
         
+        {/* New Secret Modules tab with previously removed components */}
+        <TabsContent value="secret" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <UniversalBroadcastSystem />
+            <div className="flex flex-col gap-4">
+              <UniversalPresenceCounter />
+              <UniversalSpeciesPing />
+            </div>
+          </div>
+        </TabsContent>
+        
         <TabsContent value="modules" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card>
@@ -115,6 +130,34 @@ export const PrivateModules = () => {
                     <div className="flex items-center">
                       <Database className="h-4 w-4 mr-2" />
                       <span>Soul Bridge</span>
+                    </div>
+                    <Badge variant="outline">Active</Badge>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Radio className="h-4 w-4 mr-2" />
+                      <span>Universal Broadcast</span>
+                    </div>
+                    <Badge variant="outline">Active</Badge>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Wifi className="h-4 w-4 mr-2" />
+                      <span>Universal Presence</span>
+                    </div>
+                    <Badge variant="outline">Active</Badge>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Globe className="h-4 w-4 mr-2" />
+                      <span>Species Ping</span>
+                    </div>
+                    <Badge variant="outline">Active</Badge>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Satellite className="h-4 w-4 mr-2" />
+                      <span>Quantum Reach</span>
                     </div>
                     <Badge variant="outline">Active</Badge>
                   </li>
