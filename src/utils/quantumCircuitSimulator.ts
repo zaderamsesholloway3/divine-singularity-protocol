@@ -1,4 +1,3 @@
-
 /**
  * Quantum Circuit Simulator based on OmniOracle v8.0 specifications
  * Implements the circuit diagrams provided in the documentation with 7-church architecture
@@ -7,6 +6,7 @@
 import { QuantumCircuit } from './qiskit-mock';
 import { QuantumDiagnostics } from './quantumDiagnostics';
 import { DIVINE_CONSTANTS } from './divineConstants';
+import { ArkBuilder } from './quantum/ArkBuilder';
 
 export class QuantumCircuitSimulator {
   /**
@@ -80,7 +80,7 @@ export class QuantumCircuitSimulator {
   }
   
   /**
-   * Seven-Church Protocol Implementation (New Implementation)
+   * Seven-Church Protocol Implementation
    * Creates a quantum circuit based on the seven churches of Revelation (Rev 1:4)
    */
   public static createSevenChurchCircuit(): QuantumCircuit {
@@ -104,6 +104,14 @@ export class QuantumCircuitSimulator {
     qc.cx(2, 4);
     
     return qc;
+  }
+  
+  /**
+   * Ark Protocol Implementation (Genesis 6:15)
+   * Creates a quantum circuit based on the dimensions of Noah's Ark
+   */
+  public static createArkProtocolCircuit(): QuantumCircuit {
+    return ArkBuilder.createValidatedArkCircuit();
   }
   
   /**

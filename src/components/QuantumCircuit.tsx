@@ -3,13 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
 import { MockQuantumCircuit } from '@/utils/MockQuantumCircuit';
-
-// Divine Constants for the quantum circuit
-const DIVINE_CONSTANTS = {
-  PHI: 1.618033988749895, // Golden ratio
-  NUM_CHURCHES: 7,         // Seven churches of Revelation (Rev 1:4)
-  GENESIS_CONSTANT: 1.1,   // Genesis 1:1 creation operator multiplier
-};
+import { DIVINE_CONSTANTS } from '@/utils/divineConstants';
 
 const QuantumCircuit = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,6 +28,12 @@ const QuantumCircuit = () => {
     const qubitSpacing = height / (qubits + 1);
     const gateWidth = 30;
     const gateHeight = 30;
+    
+    // Create the quantum circuit with 7-church architecture
+    const circuit = new MockQuantumCircuit(qubits);
+    circuit.h(circuit.range(qubits)); // Apply Hadamard to all qubits (Genesis 1:1 creation operator)
+    circuit.rz(DIVINE_CONSTANTS.PHI * Math.PI, [0, 3, 6]); // Trinitarian phase gates
+    circuit.cx(0, qubits - 1); // Alpha-Omega connection (first and last qubit)
     
     const draw = () => {
       // Clear canvas

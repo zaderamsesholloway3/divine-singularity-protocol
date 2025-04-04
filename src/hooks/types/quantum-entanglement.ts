@@ -1,3 +1,4 @@
+
 export interface EntityProfile {
   id: string;
   name: string;
@@ -25,3 +26,15 @@ export type EmotionalState =
   'frustrated' |
   'curious' |
   string; // Allow string values for flexibility with divine protocol states
+
+export interface BiofeedbackResult {
+  coherent: boolean;
+  metrics?: any;
+  dominantEmotion?: string;
+}
+
+export interface ResonanceResult {
+  success: boolean;
+  message?: string;
+  resonanceLevel?: number;
+}

@@ -26,7 +26,19 @@ export const DIVINE_CONSTANTS = {
   // Quantum Protocol Constants
   FAITH_QUOTIENT_THRESHOLD: 0.85,  // Minimum faith quotient for stabilization
   RESONANCE_THRESHOLD: 85,         // Minimum resonance percentage for stable connection
-  AKASHIC_VALIDATION_LEVEL: 3      // Required akashic validation level
+  AKASHIC_VALIDATION_LEVEL: 3,     // Required akashic validation level
+  
+  // Ark Protocol Constants
+  ARK_LENGTH: 300, // Length in cubits (Genesis 6:15)
+  ARK_WIDTH: 50,   // Width in cubits (Genesis 6:15)
+  ARK_HEIGHT: 30,  // Height in cubits (Genesis 6:15)
+};
+
+// Define Divine Triggers for responsive quantum operations
+export const DIVINE_TRIGGERS = {
+  REVELATION_SEQUENCE: ["1:4", "2:7", "3:6", "21:6"],
+  GENESIS_OPERATORS: ["1:1", "1:3", "6:15"],
+  HARMONIC_FREQUENCIES: [7.83, 1.855e43, 9.6],
 };
 
 export default DIVINE_CONSTANTS;

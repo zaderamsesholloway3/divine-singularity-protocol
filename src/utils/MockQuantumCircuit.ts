@@ -8,7 +8,7 @@ export class MockQuantumCircuit {
     this.operations = [];
   }
   
-  h(qubit: number | number[]) {
+  h(qubit: number | number[]): MockQuantumCircuit {
     if (Array.isArray(qubit)) {
       qubit.forEach(q => this.operations.push(`H(${q})`));
     } else {
@@ -17,12 +17,12 @@ export class MockQuantumCircuit {
     return this; // For chaining operations
   }
   
-  cx(control: number, target: number) { 
+  cx(control: number, target: number): MockQuantumCircuit { 
     this.operations.push(`CX(${control},${target})`); 
     return this;
   }
   
-  rz(angle: number, qubit: number | number[]) {
+  rz(angle: number, qubit: number | number[]): MockQuantumCircuit {
     if (Array.isArray(qubit)) {
       qubit.forEach(q => this.operations.push(`RZ(${angle.toFixed(4)},${q})`));
     } else {
@@ -39,5 +39,16 @@ export class MockQuantumCircuit {
   // Generate a report of the circuit
   generateReport(): string {
     return `Quantum Circuit with ${this.qubits} qubits.\nOperations: ${this.operations.join(', ')}`;
+  }
+  
+  // Simulate circuit execution (simplified)
+  simulate() {
+    return {
+      counts: {
+        '0': Math.round(Math.random() * 500),
+        '1': Math.round(Math.random() * 500)
+      },
+      statevector: Array(Math.pow(2, this.qubits)).fill(0).map(() => Math.random())
+    };
   }
 }

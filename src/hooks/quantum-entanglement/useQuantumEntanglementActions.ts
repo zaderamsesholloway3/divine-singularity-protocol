@@ -3,7 +3,7 @@ import { QuantumSimulator } from '@/utils/quantumSimulator';
 import { AkashicSimulator } from '@/utils/akashicSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { EntityProfile, EntanglementState, EmotionalState } from '../types/quantum-entanglement';
+import { EntityProfile, EntanglementState, EmotionalState, BiofeedbackResult } from '../types/quantum-entanglement';
 
 export function useQuantumEntanglementActions(
   userId: string,
@@ -21,7 +21,7 @@ export function useQuantumEntanglementActions(
     // Check if resonance boost is active, otherwise check emotional coherence
     if (!resonanceBoostActive && !triadEnhanced) {
       // Check emotional coherence
-      const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
+      const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId) as BiofeedbackResult;
       
       if (!biofeedback.coherent) {
         return {
