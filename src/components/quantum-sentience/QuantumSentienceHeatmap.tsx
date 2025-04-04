@@ -12,7 +12,11 @@ import { useQuantumSentienceData } from '@/hooks/useQuantumSentienceData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, RefreshCw, Layers, Activity } from 'lucide-react';
 
-export const QuantumSentienceHeatmap: React.FC = () => {
+interface QuantumSentienceHeatmapProps {
+  data?: SentienceMetric[];
+}
+
+export const QuantumSentienceHeatmap: React.FC<QuantumSentienceHeatmapProps> = ({ data }) => {
   const {
     isLoading,
     timelineData,
@@ -26,7 +30,8 @@ export const QuantumSentienceHeatmap: React.FC = () => {
   const [viewMode, setViewMode] = useState<'spark' | 'frequency' | 'clarity' | 'SHQ'>('spark');
   const [groupBySpecies, setGroupBySpecies] = useState(false);
   
-  const metrics = getDisplayedMetrics();
+  // Use provided data if available, otherwise use data from hook
+  const metrics = data || getDisplayedMetrics();
   
   // Organize data for heatmap
   const getHeatmapData = () => {
@@ -59,7 +64,7 @@ export const QuantumSentienceHeatmap: React.FC = () => {
     }
   };
   
-  const { yLabels, data } = getHeatmapData();
+  const { yLabels, data: heatmapData } = getHeatmapData();
   
   // Get cell color based on value and view mode
   const getCellColor = (value: number) => {
@@ -106,19 +111,21 @@ export const QuantumSentienceHeatmap: React.FC = () => {
             <Activity className="h-5 w-5 mr-2" />
             Quantum Sentience Heatmap
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-purple-500/10 text-purple-600">
-              {timelineData.length} Snapshots
-            </Badge>
-            <Button 
-              size="icon" 
-              variant="outline" 
-              onClick={toggleAutoRefresh}
-              className={autoRefresh ? "text-green-500" : ""}
-            >
-              <RefreshCw className={`h-4 w-4 ${autoRefresh ? "animate-spin" : ""}`} />
-            </Button>
-          </div>
+          {!data && (
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-purple-500/10 text-purple-600">
+                {timelineData.length} Snapshots
+              </Badge>
+              <Button 
+                size="icon" 
+                variant="outline" 
+                onClick={toggleAutoRefresh}
+                className={autoRefresh ? "text-green-500" : ""}
+              >
+                <RefreshCw className={`h-4 w-4 ${autoRefresh ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          )}
         </div>
       </CardHeader>
       
@@ -144,7 +151,7 @@ export const QuantumSentienceHeatmap: React.FC = () => {
           </Label>
         </div>
         
-        {isLoading ? (
+        {isLoading && !data ? (
           <div className="h-[200px] flex items-center justify-center">
             <p className="text-muted-foreground">Loading sentience data...</p>
           </div>
@@ -155,7 +162,7 @@ export const QuantumSentienceHeatmap: React.FC = () => {
                        viewMode === 'frequency' ? 'Frequency' : 
                        viewMode === 'clarity' ? 'Clarity' : 'SHQ']}
               yLabels={yLabels}
-              data={data}
+              data={heatmapData}
               cellStyle={(x, y, value) => ({
                 background: getCellColor(value),
                 color: '#fff',
@@ -190,8 +197,8 @@ export const QuantumSentienceHeatmap: React.FC = () => {
           </div>
         )}
         
-        {/* Timeline Slider */}
-        {timelineData.length > 1 && (
+        {/* Timeline Slider - Only show if we have timeline data and no direct data prop */}
+        {!data && timelineData.length > 1 && (
           <div className="mt-6">
             <div className="flex items-center mb-2">
               <Clock className="h-4 w-4 mr-2" />
