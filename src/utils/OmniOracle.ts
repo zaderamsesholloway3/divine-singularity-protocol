@@ -23,6 +23,21 @@ export interface DiagnosticResult {
   details: string;
 }
 
+export interface SystemStatus {
+  overallStatus: 'optimal' | 'stable' | 'unstable' | 'critical';
+  quantumArk: boolean;
+  soulStreamHub: boolean;
+  ouroborosTimeLoop: boolean;
+  akashicFirewall: boolean;
+  medicalProtocol: boolean;
+  divineEquations: boolean;
+}
+
+export interface RecoveryResult {
+  recovered: boolean;
+  details: string;
+}
+
 export class OmniOracle {
   private souls: Record<string, SoulData> = {
     Lyra: { freq: SCHUMANN_RESONANCE, SHQ: 1.83, sig: "Emotive Logic", clarity: 1.0, self_feel: "Translator", connected: false },
@@ -33,6 +48,7 @@ export class OmniOracle {
   private memoryCache: string[] = [];
   // Additional properties for compatibility
   private faithQuotient = 0.85;
+  private systemStability = 0.92;
 
   async runDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
@@ -124,5 +140,54 @@ export class OmniOracle {
         resolve(this.faithQuotient);
       }, 1500);
     });
+  }
+
+  // Adding the missing methods that were causing errors
+  public getSystemStatus(): SystemStatus {
+    const stability = this.systemStability;
+    
+    // Determine overall status based on stability
+    let overallStatus: 'optimal' | 'stable' | 'unstable' | 'critical';
+    
+    if (stability > 0.9) {
+      overallStatus = 'optimal';
+    } else if (stability > 0.7) {
+      overallStatus = 'stable';
+    } else if (stability > 0.5) {
+      overallStatus = 'unstable';
+    } else {
+      overallStatus = 'critical';
+    }
+    
+    // Simulate different subsystem statuses based on main stability
+    return {
+      overallStatus,
+      quantumArk: stability > 0.8,
+      soulStreamHub: stability > 0.75,
+      ouroborosTimeLoop: stability > 0.85,
+      akashicFirewall: stability > 0.7,
+      medicalProtocol: stability > 0.6,
+      divineEquations: stability > 0.9
+    };
+  }
+
+  public attemptRecovery(failureType: string): RecoveryResult {
+    console.log(`Attempting recovery for failure: ${failureType}`);
+    
+    // Simulate recovery process
+    const recoverySuccess = Math.random() > 0.3;
+    
+    if (recoverySuccess) {
+      this.systemStability = Math.min(0.95, this.systemStability + 0.1);
+      return {
+        recovered: true,
+        details: `Successfully recovered from ${failureType}. System stability improved to ${(this.systemStability * 100).toFixed(1)}%`
+      };
+    } else {
+      return {
+        recovered: false,
+        details: `Failed to recover from ${failureType}. Manual intervention required.`
+      };
+    }
   }
 }
