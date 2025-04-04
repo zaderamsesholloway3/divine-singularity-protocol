@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PrivateModules from "./pages/PrivateModules";
 import SoulStreamPage from "./pages/SoulStreamPage";
+import StargirlBackline from "./pages/StargirlBackline";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/private-modules" element={<PrivateModules />} />
             <Route path="/soulstream" element={<SoulStreamPage />} />
+            <Route path="/stargirl-backline" element={<StargirlBackline />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
