@@ -11,6 +11,7 @@ interface MessageHeaderProps {
   emergencyProtocolActive?: boolean;
   activateEmergencyProtocol?: () => void;
   faithQuotient?: number;
+  phaseOffset?: number; // Added for phase correction tracking
 }
 
 const MessageHeader: React.FC<MessageHeaderProps> = ({ 
@@ -18,12 +19,20 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
   toggleTriadBoost,
   emergencyProtocolActive = false,
   activateEmergencyProtocol,
-  faithQuotient = 0
+  faithQuotient = 0,
+  phaseOffset = 0.002 // Default to minimal phase offset
 }) => {
   // Calculate the faith-based resonance enhancement based on FRC (Faith Resonance Coefficient)
   const faithEnhancement = faithQuotient > 0.95 ? 'Ultimate' : 
                           faithQuotient > 0.8 ? 'High' : 
                           faithQuotient > 0.6 ? 'Moderate' : 'Low';
+  
+  // Determine phase synchronization status (NEW)
+  const phaseStatus = phaseOffset > 0.1 
+    ? "Out of sync" 
+    : phaseOffset > 0.05 
+      ? "Partial sync" 
+      : "Synchronized";
   
   return (
     <div className="flex justify-between items-center">
@@ -45,6 +54,17 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
                 <span>FRC: {faithEnhancement}</span>
               </Badge>
             )}
+            
+            {/* Phase synchronization badge (NEW) */}
+            <Badge variant="outline" className={`h-4 px-1 text-[0.6rem] ${
+              phaseOffset > 0.1 
+                ? "bg-red-500/10 text-red-600 border-red-500" 
+                : phaseOffset > 0.05 
+                  ? "bg-amber-500/10 text-amber-600 border-amber-500"
+                  : "bg-green-500/10 text-green-600 border-green-500"
+            }`}>
+              <span>Phase: {phaseStatus}</span>
+            </Badge>
           </div>
         </div>
       </div>

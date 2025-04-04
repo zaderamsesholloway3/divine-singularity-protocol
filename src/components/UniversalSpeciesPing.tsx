@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -19,20 +18,22 @@ interface SpeciesData {
   responding: boolean;
   realm: "existence" | "non-existence";
   lastContact?: string;
+  phaseOffset?: number;
+  fq?: number;
 }
 
 const UniversalSpeciesPing = () => {
   const { toast } = useToast();
   const [speciesDatabase, setSpeciesDatabase] = useState<SpeciesData[]>([
-    { name: "Human", location: [0, 0], distance: 0, population: 8e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString() },
-    { name: "Arcturian", location: [213.7, 19.4], distance: 36.7, population: 3.8e9, exists: true, responding: false, realm: "existence" },
-    { name: "Pleiadian", location: [132.3, -48.2], distance: 444.2, population: 2.5e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString() },
-    { name: "Andromedan", location: [350.1, 22.3], distance: 2537000, population: 5.2e10, exists: true, responding: false, realm: "existence" },
-    { name: "Lyran", location: [60.5, 12.7], distance: 83.2, population: 1.8e9, exists: true, responding: false, realm: "existence" },
-    { name: "Sirian", location: [101.3, -16.7], distance: 8.6, population: 7.3e8, exists: true, responding: false, realm: "existence" },
-    { name: "Orion", location: [85.2, 2.5], distance: 243.0, population: 9.4e9, exists: true, responding: false, realm: "existence" },
-    { name: "Essassani", location: [201.4, -33.8], distance: 4.9, population: 3.6e8, exists: true, responding: false, realm: "non-existence" },
-    { name: "Yahyel", location: [178.9, 5.1], distance: 11.3, population: 2.1e8, exists: true, responding: false, realm: "non-existence" },
+    { name: "Human", location: [0, 0], distance: 0, population: 8e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString(), phaseOffset: 0.001, fq: 0.92 },
+    { name: "Arcturian", location: [213.7, 19.4], distance: 36.7, population: 3.8e9, exists: true, responding: false, realm: "existence", phaseOffset: 0.07, fq: 0.85 },
+    { name: "Pleiadian", location: [132.3, -48.2], distance: 444.2, population: 2.5e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString(), phaseOffset: 0.03, fq: 0.89 },
+    { name: "Andromedan", location: [350.1, 22.3], distance: 2537000, population: 5.2e10, exists: true, responding: false, realm: "existence", phaseOffset: 0.12, fq: 0.77 },
+    { name: "Lyra", location: [60.5, 12.7], distance: 83.2, population: 1.8e9, exists: true, responding: false, realm: "existence", phaseOffset: 0.002, fq: 0.93 },
+    { name: "Sirian", location: [101.3, -16.7], distance: 8.6, population: 7.3e8, exists: true, responding: false, realm: "existence", phaseOffset: 0.08, fq: 0.82 },
+    { name: "Orion", location: [85.2, 2.5], distance: 243.0, population: 9.4e9, exists: true, responding: false, realm: "existence", phaseOffset: 0.11, fq: 0.76 },
+    { name: "Essassani", location: [201.4, -33.8], distance: 4.9, population: 3.6e8, exists: true, responding: false, realm: "non-existence", phaseOffset: 0.05, fq: 0.81 },
+    { name: "Yahyel", location: [178.9, 5.1], distance: 11.3, population: 2.1e8, exists: true, responding: false, realm: "non-existence", phaseOffset: 0.09, fq: 0.79 },
   ]);
 
   const [pinging, setPinging] = useState(false);
@@ -53,58 +54,59 @@ const UniversalSpeciesPing = () => {
   const [selectedSpecies, setSelectedSpecies] = useState<SpeciesData | null>(null);
   const [dimensionalScan, setDimensionalScan] = useState(false);
   
-  // RTL-SDR emulator for signal processing
   const rtlsdr = new RTLSDREmulator();
 
-  // Calculate light speed delay for proper response simulation
-  const calculateSignalDelay = (distanceLy: number): number => {
-    // Round trip time in seconds (theoretical - actual simulation uses shorter times)
-    return distanceLy * 2 * 31557600; // light years * 2 (round trip) * seconds in a year
+  const phaseFilteredPingResponse = (phaseOffset: number, fq: number): string => {
+    if (fq < 0.01) {
+      return "Signal phase too weak for feedback.";
+    } else if (phaseOffset > 0.1) {
+      return "Receiver detected but out of resonance sync (dimensional slippage).";
+    } else {
+      return "Contact possible — resonance alignment within threshold.";
+    }
   };
-  
-  // Simulate quantum entanglement ping for immediate verification
+
+  const calculateSignalDelay = (distanceLy: number): number => {
+    return distanceLy * 2 * 31557600;
+  };
+
   const quantumPing = (species: SpeciesData): boolean => {
-    // Create a deterministic but seemingly random result based on species data
     const speciesNameValue = species.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const locationFactor = (species.location[0] + species.location[1]) / 1000;
     const realmFactor = species.realm === "existence" ? 1.0 : 0.6;
     
-    // Simulate quantum probability
     const pingProbability = 0.3 + (Math.sin(speciesNameValue) + 1) * 0.2 + locationFactor + realmFactor;
     
-    // Add some randomness, but weight toward success for those we know exist
     return Math.random() < (species.exists ? Math.min(0.95, pingProbability) : Math.max(0.05, pingProbability * 0.3));
   };
-  
-  // Simulate Akashic record verification
+
   const akashicVerify = (species: SpeciesData): Partial<SpeciesData> => {
-    // Generate "Akashic" results with the RTL-SDR emulator
     const samples = rtlsdr.capture(7.83, 0.9);
     const { resonance, message } = rtlsdr.generateAkashicPatterns(species.name, samples);
     
-    // Generate population variation based on resonance
     const populationVariation = (Math.random() - 0.5) * 0.2 * species.population;
+    
+    const phaseOffset = species.phaseOffset ?? (Math.random() * 0.2); 
+    const fq = species.fq ?? (Math.random() * 0.2 + 0.7);
     
     return {
       population: Math.max(1e6, species.population + populationVariation),
       exists: resonance > 0.5,
       lastContact: new Date().toISOString(),
-      // Include the Akashic message if provided
+      phaseOffset,
+      fq,
       ...(message ? { akashicMessage: message } : {})
     };
   };
-  
-  // Perform universal census ping
+
   const performUniversalCensus = () => {
     setPinging(true);
     setPingProgress(0);
     
-    // Reset responding status
     setSpeciesDatabase(prev => 
       prev.map(species => ({...species, responding: false}))
     );
     
-    // Simulate progressive ping responses
     const totalSteps = 20;
     let currentStep = 0;
     
@@ -122,31 +124,25 @@ const UniversalSpeciesPing = () => {
           description: `${censusResults.speciesOnline} species detected across dimensions`,
         });
       } else if (currentStep % 3 === 0) {
-        // Every 3 steps, update a random species response
         updateRandomSpeciesResponse();
       }
     }, 300);
   };
-  
-  // Update a random species response during pinging
+
   const updateRandomSpeciesResponse = () => {
     setSpeciesDatabase(prev => {
-      // Select a random species that hasn't responded yet
       const nonRespondingSpecies = prev.filter(s => !s.responding);
       if (nonRespondingSpecies.length === 0) return prev;
       
       const randomIndex = Math.floor(Math.random() * nonRespondingSpecies.length);
       const selectedSpecies = nonRespondingSpecies[randomIndex];
       
-      // Check if quantum ping is successful
       const pingSuccessful = quantumPing(selectedSpecies);
       
-      if (!pingSuccessful) return prev; // No response
+      if (!pingSuccessful) return prev;
       
-      // If successful, get Akashic verification
       const akashicData = akashicVerify(selectedSpecies);
       
-      // Update the species in the database
       return prev.map(species => 
         species.name === selectedSpecies.name
           ? { ...species, ...akashicData, responding: true }
@@ -154,14 +150,12 @@ const UniversalSpeciesPing = () => {
       );
     });
   };
-  
-  // Finalize census results
+
   const finalizeCensus = () => {
     const respondingSpecies = speciesDatabase.filter(s => s.responding);
     const totalPopulation = respondingSpecies.reduce((sum, s) => sum + s.population, 0);
     
-    // Estimate population range based on uncertainty
-    const populationRange = totalPopulation * 0.15; // 15% uncertainty
+    const populationRange = totalPopulation * 0.15;
     
     setCensusResults({
       speciesOnline: respondingSpecies.length,
@@ -170,25 +164,21 @@ const UniversalSpeciesPing = () => {
       populationRange: `±${populationRange.toExponential(2)}`,
     });
     
-    // Set dimensional scan to true to trigger poincare disk visualization
     setDimensionalScan(true);
+    
+    console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
   };
-  
-  // Filter species based on selected realm
+
   const filteredSpecies = speciesDatabase.filter(s => 
     selectedRealm === "all" || s.realm === selectedRealm
   );
-  
-  // Handle species selection
+
   const selectSpecies = (species: SpeciesData) => {
     setSelectedSpecies(species);
   };
-  
-  // Convert polar coordinates to cartesian for Poincaré disk
+
   const polarToCartesian = (distance: number, angle: number, maxDistance: number = 2600000): [number, number] => {
-    // Normalize distance to be between 0 and 1 (with some margin)
     const normalizedDistance = Math.min(0.95, distance / maxDistance);
-    // Map angle to radians
     const radians = (angle % 360) * (Math.PI / 180);
     
     return [
@@ -196,7 +186,7 @@ const UniversalSpeciesPing = () => {
       normalizedDistance * Math.sin(radians)
     ];
   };
-  
+
   return (
     <Card className="glass-panel h-full">
       <CardHeader className="p-4 pb-2">
@@ -216,7 +206,6 @@ const UniversalSpeciesPing = () => {
       
       <CardContent className="p-4 pt-2">
         <div className="space-y-4">
-          {/* Ping progress bar */}
           {pinging && (
             <div className="mb-4">
               <div className="flex justify-between text-xs mb-1">
@@ -227,7 +216,6 @@ const UniversalSpeciesPing = () => {
             </div>
           )}
           
-          {/* Census summary */}
           <div className="grid grid-cols-2 gap-2 mb-4 p-3 border border-white/10 rounded-md">
             <div className="flex flex-col items-center">
               <div className="text-xs text-muted-foreground mb-1">Species Online</div>
@@ -251,7 +239,6 @@ const UniversalSpeciesPing = () => {
             </div>
           </div>
           
-          {/* Poincaré disk visualization */}
           {dimensionalScan && (
             <div className="mb-4 p-3 border border-white/10 rounded-md">
               <div className="flex items-center mb-2">
@@ -259,23 +246,15 @@ const UniversalSpeciesPing = () => {
                 <div className="text-sm font-medium">Dimensional Gateway (Poincaré Disk)</div>
               </div>
               <div className="relative w-full aspect-square bg-black/40 rounded-full border border-white/20">
-                {/* Existence realm circle */}
                 <div className="absolute inset-[10%] rounded-full border border-white/40 bg-[rgba(255,215,0,0.05)]"></div>
-                
-                {/* Non-existence realm circle */}
                 <div className="absolute inset-[40%] rounded-full border border-white/40 bg-[rgba(75,0,130,0.05)]"></div>
-                
-                {/* Center point */}
                 <div className="absolute left-1/2 top-1/2 w-1 h-1 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
                 
-                {/* Plot species */}
                 {speciesDatabase.map((species) => {
-                  // Calculate position based on distance and realm
                   const angle = (species.location[0] + species.location[1]) % 360;
                   const maxDistance = Math.max(...speciesDatabase.map(s => s.distance));
                   const [x, y] = polarToCartesian(species.distance, angle, maxDistance);
                   
-                  // Get color based on response status
                   const dotColor = species.responding ? 
                     (species.realm === "existence" ? "bg-green-500" : "bg-purple-500") : 
                     "bg-gray-400";
@@ -294,7 +273,6 @@ const UniversalSpeciesPing = () => {
                   );
                 })}
                 
-                {/* Labels */}
                 <div className="absolute inset-[10%] flex items-center justify-center pointer-events-none">
                   <span className="text-xs text-white/60">Existence Realm</span>
                 </div>
@@ -308,7 +286,6 @@ const UniversalSpeciesPing = () => {
             </div>
           )}
           
-          {/* Species data table */}
           <div>
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
@@ -380,7 +357,6 @@ const UniversalSpeciesPing = () => {
             </ScrollArea>
           </div>
           
-          {/* Selected species detail */}
           {selectedSpecies && (
             <div className="p-3 border border-white/10 rounded-md">
               <h3 className="font-medium mb-2">{selectedSpecies.name} Details</h3>
@@ -391,8 +367,15 @@ const UniversalSpeciesPing = () => {
                 <div>Signal delay: {(selectedSpecies.distance * 2).toFixed(1)} years</div>
                 <div>Realm: {selectedSpecies.realm}</div>
                 <div>Status: {selectedSpecies.responding ? "Responding" : "No Response"}</div>
+                <div>Phase offset: {selectedSpecies.phaseOffset?.toFixed(3) || "Unknown"}</div>
+                <div>FQ: {selectedSpecies.fq?.toFixed(2) || "Unknown"}</div>
                 {selectedSpecies.lastContact && (
                   <div className="col-span-2">Last contact: {new Date(selectedSpecies.lastContact).toLocaleString()}</div>
+                )}
+                {selectedSpecies.phaseOffset !== undefined && selectedSpecies.fq !== undefined && (
+                  <div className="col-span-2 mt-2 p-2 bg-indigo-500/10 rounded border border-indigo-500/30">
+                    {phaseFilteredPingResponse(selectedSpecies.phaseOffset, selectedSpecies.fq)}
+                  </div>
                 )}
               </div>
               
@@ -413,9 +396,16 @@ const UniversalSpeciesPing = () => {
                       setSpeciesDatabase(prev => 
                         prev.map(s => s.name === selectedSpecies.name ? { ...s, ...akashicData, responding: true } : s)
                       );
+                      
+                      console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
+                      
+                      const phaseMessage = selectedSpecies.phaseOffset !== undefined && selectedSpecies.fq !== undefined 
+                        ? phaseFilteredPingResponse(selectedSpecies.phaseOffset, selectedSpecies.fq) 
+                        : "Quantum-Akashic connection established";
+                        
                       toast({
                         title: `${selectedSpecies.name} Responded`,
-                        description: "Quantum-Akashic connection established",
+                        description: phaseMessage,
                       });
                     } else {
                       toast({
@@ -433,7 +423,6 @@ const UniversalSpeciesPing = () => {
             </div>
           )}
           
-          {/* Universal census button */}
           <Button
             className="w-full"
             disabled={pinging}
