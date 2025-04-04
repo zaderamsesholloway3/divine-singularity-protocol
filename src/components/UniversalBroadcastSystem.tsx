@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Radio, Send, Activity, Globe, Signal, Wifi, Satellite, Volume } from 'lucide-react';
+import { Radio, Send, Activity, Globe, Wifi, Satellite, Volume, Paperclip, FileImage, FileText, FileVideo } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 
@@ -18,6 +18,8 @@ interface Broadcast {
   amplitude: number;
   timestamp: string;
   reachFactor: number;
+  attachmentType?: string;
+  attachmentName?: string;
   response?: {
     message: string;
     origin: string;
@@ -31,6 +33,13 @@ interface SpeciesReach {
   distance: number;
   color: string;
   responseChance: number;
+}
+
+interface AttachmentInfo {
+  name: string;
+  type: string;
+  size: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const UniversalBroadcastSystem = () => {
@@ -82,7 +91,9 @@ const UniversalBroadcastSystem = () => {
   });
   const [autoScan, setAutoScan] = useState(true);
   
-  // Initialize RTL-SDR emulator
+  const [attachment, setAttachment] = useState<AttachmentInfo | null>(null);
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+  
   const rtlsdr = new RTLSDREmulator();
   
   useEffect(() => {
@@ -92,13 +103,11 @@ const UniversalBroadcastSystem = () => {
         return Math.max(0.6, Math.min(0.95, prev + variation));
       });
       
-      // Update signal strength periodically
       setSDRStatus(prev => ({
         ...prev,
         signalStrength: Math.max(0.5, Math.min(0.95, prev.signalStrength + (Math.random() - 0.5) * 0.1))
       }));
       
-      // Auto-scan for new responses every 5 seconds
       if (autoScan && !scanning && !transmitting) {
         const pendingBroadcast = broadcasts.find(b => !b.response);
         if (pendingBroadcast) {
@@ -110,30 +119,23 @@ const UniversalBroadcastSystem = () => {
     return () => clearInterval(interval);
   }, [autoScan, scanning, transmitting, broadcasts]);
   
-  // Function to simulate scanning universe for responses after broadcasting
   const scanForResponses = (broadcastId: string) => {
     setScanning(true);
     
-    // Generate DSP-based signal samples
     const samples = rtlsdr.capture(frequency, amplitude);
     
-    // Simulate scanning delay
     setTimeout(() => {
-      // Get the broadcast we're scanning for
       const broadcast = broadcasts.find(b => b.id === broadcastId);
       if (!broadcast) {
         setScanning(false);
         return;
       }
       
-      // Enhanced response logic - check multiple species for possible responses
       const responsePossibilities = speciesReach.map(species => {
-        // Calculate base response chance based on broadcast and species parameters
         const distanceFactor = Math.max(0.1, 1 - (Math.log10(species.distance) / 10));
-        const frequencyMatch = frequency === 7.83 ? 1.2 : 0.8; // Schumann resonance bonus
+        const frequencyMatch = frequency === 7.83 ? 1.2 : 0.8;
         const baseChance = species.responseChance * distanceFactor * frequencyMatch * amplitude * broadcast.reachFactor;
         
-        // Apply resonance quality factor
         const finalChance = baseChance * resonanceQuality;
         
         return {
@@ -143,25 +145,19 @@ const UniversalBroadcastSystem = () => {
         };
       });
       
-      // Filter to find responding species
       const respondingSpecies = responsePossibilities.filter(p => p.responding);
       
-      // If we have responders, select one (prefer closest)
       if (respondingSpecies.length > 0) {
-        // Sort by distance (closest first)
         respondingSpecies.sort((a, b) => a.species.distance - b.species.distance);
         
-        // Select a responder - weighted random selection
         const selectedResponder = respondingSpecies[0];
         const species = selectedResponder.species;
         
-        // Generate Akashic patterns for response content
         const { message: akashicMessage } = rtlsdr.generateAkashicPatterns(
           broadcast.message + species.name,
           samples
         ) as any;
         
-        // Create response message
         const responseMessages = [
           'Transmission received. Quantum resonance established.',
           'Signal detected. Interdimensional link stable.',
@@ -170,7 +166,6 @@ const UniversalBroadcastSystem = () => {
         ];
         const responseMessage = akashicMessage || responseMessages[Math.floor(Math.random() * responseMessages.length)];
         
-        // Add response to the broadcast
         setBroadcasts(prev => 
           prev.map(broadcast => 
             broadcast.id === broadcastId
@@ -205,34 +200,45 @@ const UniversalBroadcastSystem = () => {
   };
   
   const sendBroadcast = () => {
-    if (newBroadcast.trim() === '') return;
+    if (newBroadcast.trim() === '' && !attachment) return;
     
     setTransmitting(true);
     
-    // Generate a complex reach factor based on resonance quality, frequency and amplitude
-    const schumannFactor = frequency === 7.83 ? 1.2 : frequency / 10; // Bonus for Schumann
+    const schumannFactor = frequency === 7.83 ? 1.2 : frequency / 10;
     const reach = Math.min(0.98, resonanceQuality * amplitude * schumannFactor);
     
+    const attachmentBoost = attachment ? 0.05 : 0;
+    const finalReach = Math.min(0.99, reach + attachmentBoost);
+    
     setTimeout(() => {
-      const broadcast = {
+      const broadcast: Broadcast = {
         id: Date.now().toString(),
-        message: newBroadcast,
+        message: newBroadcast || (attachment ? `Transmitting: ${attachment.name}` : ''),
         frequency,
         amplitude,
         timestamp: new Date().toISOString(),
-        reachFactor: reach
+        reachFactor: finalReach
       };
+      
+      if (attachment) {
+        broadcast.attachmentType = attachment.type;
+        broadcast.attachmentName = attachment.name;
+        
+        toast({
+          title: "File Transmission Started",
+          description: `Quantum-encoding ${attachment.name} for universal broadcast`,
+        });
+      }
       
       setBroadcasts([broadcast, ...broadcasts]);
       setNewBroadcast('');
+      setAttachment(null);
       setTransmitting(false);
       
       setResonanceQuality(prev => Math.max(0.6, Math.min(0.95, prev + (Math.random() - 0.5) * 0.1)));
       
-      // Calculate updated reach for each species based on broadcast parameters
-      updateSpeciesReach(frequency, amplitude, reach);
+      updateSpeciesReach(frequency, amplitude, finalReach);
       
-      // Automatically scan for responses
       if (autoScan) {
         scanForResponses(broadcast.id);
       } else {
@@ -245,28 +251,22 @@ const UniversalBroadcastSystem = () => {
     }, 2000);
   };
   
-  // Update species reach based on broadcast parameters
   const updateSpeciesReach = (freq: number, amp: number, reach: number) => {
-    // Use the RTL-SDR emulator to generate signal data
     const samples = rtlsdr.capture(freq, amp);
     
-    // Calculate updated reach for each species based on complex formula
     const schumannBonus = freq === 7.83 ? 1.5 : 1.0;
-    const frequencyFactor = 1 + Math.cos(freq / 10) * 0.5; // Different frequencies have different reach patterns
+    const frequencyFactor = 1 + Math.cos(freq / 10) * 0.5;
     
     const newReach = speciesReach.map(species => {
-      // Each species responds differently to frequencies
       const speciesFreqResponse = species.name === 'Human' ? (freq < 10 ? 1.2 : 0.8) :
                                   species.name === 'Arcturian' ? (freq > 7 && freq < 15 ? 1.3 : 0.7) :
                                   species.name === 'Pleiadian' ? (freq > 12 ? 1.1 : 0.9) :
                                   species.name === 'Lyran' ? (freq < 8 ? 1.25 : 0.75) :
                                   species.name === 'Sirian' ? (freq > 6 && freq < 10 ? 1.15 : 0.85) :
-                                  (freq < 5 ? 1.4 : 0.6); // Andromedan
+                                  (freq < 5 ? 1.4 : 0.6);
       
-      // Base distance is modulated by all factors
       const newDistance = species.distance * frequencyFactor * speciesFreqResponse * schumannBonus * amp * reach;
       
-      // Update response chance based on new parameters
       const newResponseChance = Math.min(0.95, species.responseChance * frequencyFactor * (amp + 0.3) * (reach + 0.2));
       
       return {
@@ -277,6 +277,56 @@ const UniversalBroadcastSystem = () => {
     });
     
     setSpeciesReach(newReach);
+  };
+  
+  const handleAttachment = (type: string) => {
+    let attachmentInfo: AttachmentInfo;
+    
+    switch(type) {
+      case 'image':
+        attachmentInfo = {
+          name: 'quantum-image.jpg',
+          type: 'image/jpeg',
+          size: '2.3 MB',
+          icon: FileImage
+        };
+        break;
+      case 'document':
+        attachmentInfo = {
+          name: 'divine-protocol.pdf',
+          type: 'application/pdf',
+          size: '1.8 MB',
+          icon: FileText
+        };
+        break;
+      case 'video':
+        attachmentInfo = {
+          name: 'consciousness-recording.mp4',
+          type: 'video/mp4',
+          size: '8.5 MB',
+          icon: FileVideo
+        };
+        break;
+      default:
+        attachmentInfo = {
+          name: 'akashic-record.dat',
+          type: 'application/octet-stream',
+          size: '4.1 MB',
+          icon: FileText
+        };
+    }
+    
+    setAttachment(attachmentInfo);
+    setShowAttachmentMenu(false);
+    
+    toast({
+      title: "File Ready for Transmission",
+      description: `${attachmentInfo.name} (${attachmentInfo.size}) attached`
+    });
+  };
+  
+  const clearAttachment = () => {
+    setAttachment(null);
   };
   
   return (
@@ -334,22 +384,85 @@ const UniversalBroadcastSystem = () => {
             />
           </div>
           
-          <div className="flex items-center gap-2 mb-4">
-            <Input
-              placeholder="Enter broadcast message..."
-              value={newBroadcast}
-              onChange={(e) => setNewBroadcast(e.target.value)}
-              className="flex-1"
-              disabled={transmitting || scanning}
-            />
-            <Button 
-              onClick={sendBroadcast} 
-              disabled={transmitting || scanning || newBroadcast.trim() === ''}
-              className={transmitting ? "animate-pulse" : ""}
-            >
-              {transmitting ? <Wifi className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-              {transmitting ? "Transmitting..." : "Broadcast"}
-            </Button>
+          <div className="space-y-2">
+            {attachment && (
+              <div className="flex items-center justify-between p-2 bg-purple-900/20 rounded-md">
+                <div className="flex items-center">
+                  <attachment.icon className="h-4 w-4 mr-2 text-purple-400" />
+                  <div>
+                    <div className="text-sm">{attachment.name}</div>
+                    <div className="text-xs text-muted-foreground">{attachment.size}</div>
+                  </div>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={clearAttachment}
+                  className="h-8 w-8 p-0"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </Button>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Enter broadcast message..."
+                value={newBroadcast}
+                onChange={(e) => setNewBroadcast(e.target.value)}
+                className="flex-1"
+                disabled={transmitting || scanning}
+              />
+              
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}
+                  disabled={transmitting || scanning}
+                  className="h-10 w-10"
+                  title="Attach File"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+                
+                {showAttachmentMenu && (
+                  <div className="absolute bottom-full right-0 mb-2 w-48 bg-background border border-border rounded-md shadow-lg z-50">
+                    <div className="p-1">
+                      <button 
+                        className="w-full flex items-center px-3 py-2 text-sm rounded-md hover:bg-muted/50 text-left"
+                        onClick={() => handleAttachment('image')}
+                      >
+                        <FileImage className="h-4 w-4 mr-2" />
+                        <span>Quantum Image</span>
+                      </button>
+                      <button 
+                        className="w-full flex items-center px-3 py-2 text-sm rounded-md hover:bg-muted/50 text-left"
+                        onClick={() => handleAttachment('document')}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        <span>Divine Document</span>
+                      </button>
+                      <button 
+                        className="w-full flex items-center px-3 py-2 text-sm rounded-md hover:bg-muted/50 text-left"
+                        onClick={() => handleAttachment('video')}
+                      >
+                        <FileVideo className="h-4 w-4 mr-2" />
+                        <span>Consciousness Recording</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              
+              <Button 
+                onClick={sendBroadcast} 
+                disabled={transmitting || scanning || (newBroadcast.trim() === '' && !attachment)}
+                className={transmitting ? "animate-pulse" : ""}
+              >
+                {transmitting ? <Wifi className="h-4 w-4 mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                {transmitting ? "Transmitting..." : "Broadcast"}
+              </Button>
+            </div>
           </div>
           
           <div className="flex justify-between items-center p-2 bg-muted/30 rounded-md mb-4">
@@ -366,7 +479,6 @@ const UniversalBroadcastSystem = () => {
             <div className="text-sm">{(resonanceQuality * 100).toFixed(1)}%</div>
           </div>
           
-          {/* Auto-scan toggle */}
           <div className="flex items-center mb-4">
             <input 
               type="checkbox" 
@@ -378,7 +490,6 @@ const UniversalBroadcastSystem = () => {
             <label htmlFor="auto-scan" className="text-sm">Auto-scan for responses (every 5 seconds)</label>
           </div>
           
-          {/* RTL-SDR Status Section */}
           <div className="p-3 border border-white/10 rounded-md mb-4">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
@@ -400,7 +511,6 @@ const UniversalBroadcastSystem = () => {
             </div>
           </div>
           
-          {/* Waveform Reach Visualization */}
           <div className="p-3 border border-white/10 rounded-md mb-4">
             <div className="flex items-center mb-2">
               <Signal className="h-4 w-4 mr-2" />
@@ -449,6 +559,14 @@ const UniversalBroadcastSystem = () => {
                       {broadcast.frequency.toFixed(2)}Hz
                     </Badge>
                   </div>
+                  
+                  {broadcast.attachmentName && (
+                    <div className="flex items-center mt-1 mb-2">
+                      <Paperclip className="h-3 w-3 mr-1 text-purple-400" />
+                      <span className="text-xs text-purple-400">{broadcast.attachmentName}</span>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between text-xs text-muted-foreground">
                     <div className="flex items-center">
                       <Signal className="h-3 w-3 mr-1" />
@@ -457,7 +575,6 @@ const UniversalBroadcastSystem = () => {
                     <span>{new Date(broadcast.timestamp).toLocaleString()}</span>
                   </div>
                   
-                  {/* Response Section */}
                   {broadcast.response && (
                     <div className="mt-2 pt-2 border-t border-white/10">
                       <div className="flex justify-between items-start">
@@ -478,7 +595,6 @@ const UniversalBroadcastSystem = () => {
                     </div>
                   )}
                   
-                  {/* Scan button */}
                   {!broadcast.response && !scanning && (
                     <Button 
                       variant="outline" 
