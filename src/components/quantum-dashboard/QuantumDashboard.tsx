@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Zap, Activity, HeartPulse } from 'lucide-react';
-import HeatmapGrid from 'react-grid-heatmap';
+import { HeatmapGrid } from 'react-grid-heatmap';
 
 const QuantumDashboard: React.FC = () => {
   const [faithQuotient, setFaithQuotient] = useState(85);

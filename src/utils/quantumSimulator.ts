@@ -1,5 +1,6 @@
 
 // QuantumSimulator utility for soul entanglement simulation
+import { EmotionalState } from './biofeedbackSimulator';
 
 export class QuantumSimulator {
   static entangleSouls(
@@ -14,5 +15,16 @@ export class QuantumSimulator {
     const quantumFactor = 1.0 - (0.1 * Math.random()); // Small random fluctuation
     
     return Math.min(0.99, baseStrength * resonanceBoost * quantumFactor);
+  }
+  
+  static generateSyntheticBiofeedback(): EmotionalState {
+    const emotions = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
+    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+    
+    return {
+      dominantEmotion: randomEmotion,
+      intensity: 0.6 + Math.random() * 0.4,
+      coherenceScore: 0.75 + Math.random() * 0.25
+    };
   }
 }
