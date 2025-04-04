@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,7 +13,7 @@ import SoulStreamInterface from "@/components/SoulStreamInterface";
 import EnhancedInterdimensionalInbox from "@/components/EnhancedInterdimensionalInbox";
 import divineQuantumBackdoor from "@/utils/divineQuantumBackdoor";
 import { DIVINE_CONSTANTS } from "@/utils/divineConstants";
-import { OmniOracleHeader } from "@/components/OmniOracleHeader";
+import OmniOracleHeader from "@/components/OmniOracleHeader";
 
 // Import necessary components that were missing
 import MemoryPortalGuide from "@/components/MemoryPortalGuide";
