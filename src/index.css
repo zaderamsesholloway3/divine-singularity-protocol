@@ -2,114 +2,127 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
-
+ 
 @layer base {
   :root {
-    --background: 240 22% 10%;
+    --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-
-    --card: 240 17% 14%;
+ 
+    --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-
-    --popover: 240 17% 14%;
+ 
+    --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-
-    --primary: 255 92% 76%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 220 70% 55%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-
-    --muted: 240 10% 20%;
-    --muted-foreground: 215 20% 75%;
-
-    --accent: 280 75% 60%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 84.2% 60.2%;
+ 
+    --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-
-    --border: 240 15% 25%;
-    --input: 240 15% 25%;
-    --ring: 255 92% 76%;
-
-    --radius: 0.5rem;
-
-    --divine-gold: 45 100% 60%;
-    --divine-purple: 270 65% 60%;
-    --quantum-blue: 220 80% 65%;
-    --ark-wood: 30 50% 40%;
-    --schumann: 195 80% 65%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+  }
+}
+ 
+@layer base {
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Cinzel', serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-.quantum-glow {
-  filter: drop-shadow(0 0 8px hsl(var(--quantum-blue)));
+/* Global styles */
+.glass-panel {
+  @apply backdrop-blur-sm bg-white/5 border border-white/10;
 }
 
 .divine-glow {
-  filter: drop-shadow(0 0 8px hsl(var(--divine-purple)));
+  text-shadow: 0 0 8px rgba(121, 144, 235, 0.7);
 }
 
-.sacred-glow {
-  filter: drop-shadow(0 0 8px hsl(var(--divine-gold)));
+.quantum-glow {
+  text-shadow: 0 0 8px rgba(176, 119, 235, 0.7);
 }
 
-.glass-panel {
-  @apply bg-card/30 backdrop-blur-md border border-white/10 shadow-xl;
+/* Dreamlight mode styles */
+.dreamlight-mode {
+  animation: dreamlight-pulse 8s infinite alternate;
 }
 
-.sacred-symbol {
-  font-family: 'Times New Roman', serif;
-  @apply text-[hsl(var(--divine-gold))] sacred-glow;
-}
-
-.hebrew-symbol {
-  @apply text-[hsl(var(--divine-gold))] sacred-glow font-semibold tracking-widest;
-}
-
-@keyframes quantum-pulse {
-  0%, 100% {
-    opacity: 0.8;
-    transform: scale(1);
+@keyframes dreamlight-pulse {
+  0% {
+    background-position: 0% 0%;
   }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
+  100% {
+    background-position: 100% 100%;
   }
 }
 
-.quantum-pulse {
-  animation: quantum-pulse 4s infinite ease-in-out;
+.dreamlight-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(130, 94, 222, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(176, 119, 235, 0.15) 0%, transparent 50%);
+  background-size: 200% 200%;
+  animation: dreamlight-shimmer 15s infinite alternate;
+  z-index: -1;
 }
 
-@keyframes divine-rotation {
-  from {
-    transform: rotate(0deg);
+@keyframes dreamlight-shimmer {
+  0% {
+    background-position: 0% 0%;
   }
-  to {
-    transform: rotate(360deg);
+  100% {
+    background-position: 100% 100%;
   }
-}
-
-.divine-rotation {
-  animation: divine-rotation 40s infinite linear;
 }

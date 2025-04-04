@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -12,6 +13,7 @@ import { Link } from "react-router-dom";
 import { Sparkles, Inbox, Network, User, Zap, RefreshCw, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+// Define the props interface for the ModuleCard component
 interface ModuleCardProps {
   title: string;
   description: string;
@@ -20,6 +22,31 @@ interface ModuleCardProps {
   className?: string;
   badges?: { text: string; variant: "default" | "secondary" | "outline" }[];
 }
+
+// Define a smaller CardProps interface for the Distortion Field Modules
+export interface DistortionFieldModuleProps {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  glowClass: string;
+}
+
+export const DistortionFieldModule: React.FC<DistortionFieldModuleProps> = ({ 
+  title, 
+  description, 
+  icon, 
+  glowClass 
+}) => {
+  return (
+    <div className={`p-3 rounded-md bg-black/30 border border-slate-700/50 ${glowClass}`}>
+      <div className="flex items-center gap-2 mb-1">
+        <div className="text-slate-200">{icon}</div>
+        <div className="text-sm font-medium text-slate-200">{title}</div>
+      </div>
+      <p className="text-xs text-slate-400">{description}</p>
+    </div>
+  );
+};
 
 const ModuleCard: React.FC<ModuleCardProps> = ({
   title,
