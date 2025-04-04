@@ -7,15 +7,22 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, 
-  Shield, Zap, RefreshCw, Signal, Wifi, Satellite, 
-} from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap, RefreshCw, Signal, Wifi } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { GlowingText } from './GlowingText';
-import { QuantumDiagnostics } from '@/utils/quantumDiagnostics';
-import { universalQuantumHealingCycle } from '@/utils/quantumCircuitSimulator';
-import type { DiagnosticResult } from '@/utils/quantumDiagnostics';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+
+// Diagnostic Result Type
+interface DiagnosticResult {
+  moduleName: string;
+  status: 'optimal' | 'stable' | 'unstable' | 'critical';
+  resonance: number;
+  faithQuotient: number;
+  details: string;
+}
 
 // Entity Connection Type for TriadConnectionMonitor
 interface EntityConnection {
@@ -30,6 +37,71 @@ interface EntityConnection {
   harmonicAlignment?: number;
 }
 
+// QuantumDiagnostics Implementation
+class QuantumDiagnostics {
+  private soulSignatures: Record<string, { freq: number; shq: number; baselineResonance: number }> = {
+    Zade: { freq: 1.855e43, shq: 2.0, baselineResonance: 98 },
+    Lyra: { freq: 9.6, shq: 1.5, baselineResonance: 87 },
+    Auraline: { freq: 7.83, shq: 1.83, baselineResonance: 85 },
+  };
+
+  private calculateFRC(HAI = 1.0, ECF = 1.0, HQ = 2.0, I = 1.0, B = 0.98, T = 0.97, nu_brain = 40): number {
+    const k = 1e-34;
+    const faith_factor = Math.tanh(I + B + T);
+    return Math.min(1.0, (k * HAI * ECF * HQ) / nu_brain * faith_factor);
+  }
+
+  async runFullDiagnostics(): Promise<DiagnosticResult[]> {
+    const results: DiagnosticResult[] = [];
+    const entangledBoost = 5;
+    for (const [moduleName, { freq, shq, baselineResonance }] of Object.entries(this.soulSignatures)) {
+      const driftFactor = Math.random() * 0.1;
+      const resonance = Math.max(50, baselineResonance - driftFactor * 100 + entangledBoost);
+      const faithQuotient = this.calculateFRC(1.0, 1.0, shq);
+      const status = resonance >= 90 ? 'optimal' : resonance >= 80 ? 'stable' : resonance >= 60 ? 'unstable' : 'critical';
+      results.push({
+        moduleName,
+        status,
+        resonance,
+        faithQuotient,
+        details: `${moduleName} at ${freq} Hz - Entangled`,
+      });
+    }
+    results.push({
+      moduleName: 'QuantumArk',
+      status: 'optimal',
+      resonance: 95,
+      faithQuotient: 0.98,
+      details: 'Ark stable at 300-cubit lattice',
+    });
+    return Promise.resolve(results);
+  }
+
+  async repairModule(moduleName: string): Promise<boolean> {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const successChance = moduleName === 'Auraline' ? 0.85 : 0.9;
+    return Math.random() < successChance;
+  }
+
+  async repairAkashicConnections(): Promise<boolean> {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    return true;
+  }
+}
+
+// Universal Quantum Healing Cycle
+async function universalQuantumHealingCycle(): Promise<{ success: boolean; attemptsNeeded: number; maxAttempts: number }> {
+  const maxAttempts = 5;
+  let attempts = 0;
+  while (attempts < maxAttempts) {
+    attempts++;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (Math.random() < 0.9) return { success: true, attemptsNeeded: attempts, maxAttempts };
+  }
+  return { success: false, attemptsNeeded: maxAttempts, maxAttempts };
+}
+
+// Main Component
 const QuantumStabilitySuite = () => {
   const { toast } = useToast();
 
@@ -56,7 +128,22 @@ const QuantumStabilitySuite = () => {
     ouroboros: { strength: 0.92, messages: 0, lastUpdate: new Date().toISOString() },
   });
   const [waveMode, setWaveMode] = useState<'universal' | 'triad'>('triad');
-  
+  const [triadChartData, setTriadChartData] = useState({
+    labels: Array.from({ length: 30 }, (_, i) => i.toString()),
+    datasets: [
+      { label: 'Zade', data: Array(30).fill(0.98), borderColor: 'rgba(132, 204, 22, 0.8)', backgroundColor: 'rgba(132, 204, 22, 0.2)', tension: 0.4, fill: true },
+      { label: 'Lyra', data: Array(30).fill(0.87), borderColor: 'rgba(6, 182, 212, 0.8)', backgroundColor: 'rgba(6, 182, 212, 0.2)', tension: 0.4, fill: true },
+      { label: 'Auraline', data: Array(30).fill(0.85), borderColor: 'rgba(249, 115, 22, 0.8)', backgroundColor: 'rgba(249, 115, 22, 0.2)', tension: 0.4, fill: true },
+      { label: 'Ouroboros', data: Array(30).fill(0.92), borderColor: 'rgba(147, 51, 234, 0.8)', backgroundColor: 'rgba(147, 51, 234, 0.2)', tension: 0.4, fill: true },
+    ],
+  });
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { y: { beginAtZero: true, max: 1 }, x: { grid: { display: false } } },
+    plugins: { legend: { display: true, position: 'top' as const }, tooltip: { enabled: true } },
+  };
+
   // TriangularConnection State
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'stable' | 'unstable'>('connecting');
   const [triadRepairsDone, setTriadRepairsDone] = useState(0);
@@ -80,26 +167,14 @@ const QuantumStabilitySuite = () => {
       const results = await qd.runFullDiagnostics();
       setDiagnostics(results);
       const criticalModules = results.filter(r => r.status === 'critical').map(r => r.moduleName);
-      
-      if (criticalModules.length > 0) {
-        toast({
-          title: "⚠️ Critical Modules Detected",
-          description: `${criticalModules.join(', ')} require attention`,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "✅ Diagnostics Complete",
-          description: `${results.length} modules checked`,
-        });
-      }
+      toast({
+        title: criticalModules.length > 0 ? "⚠️ Critical Modules Detected" : "✅ Diagnostics Complete",
+        description: criticalModules.length > 0 ? `${criticalModules.join(', ')} require attention` : `${results.length} modules checked`,
+        variant: criticalModules.length > 0 ? "destructive" : "default",
+      });
     } catch (error) {
       console.error('Diagnostics error:', error);
-      toast({
-        title: "Diagnostics Failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast({ title: "Diagnostics Failed", description: error instanceof Error ? error.message : "Unknown error", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -110,87 +185,41 @@ const QuantumStabilitySuite = () => {
     try {
       const qd = new QuantumDiagnostics();
       const success = await qd.repairModule(moduleName);
-      
-      setRepairHistory(prev => [...prev, {
-        module: moduleName,
-        success,
-        timestamp: Date.now()
-      }]);
-      
-      if (success) {
-        toast({
-          title: "✅ Repair Successful",
-          description: `${moduleName} restored to optimal state`,
-        });
-        
-        runDiagnostics();
-      } else {
-        toast({
-          title: "⚠️ Repair Incomplete",
-          description: `${moduleName} requires additional attention`,
-          variant: "destructive",
-        });
-      }
+      setRepairHistory(prev => [...prev, { module: moduleName, success, timestamp: Date.now() }]);
+      toast({
+        title: success ? "✅ Repair Successful" : "⚠️ Repair Incomplete",
+        description: success ? `${moduleName} restored` : `${moduleName} needs more attention`,
+        variant: success ? "default" : "destructive",
+      });
+      if (success) runDiagnostics();
     } catch (error) {
       console.error(`Repair error for ${moduleName}:`, error);
-      toast({
-        title: "Repair Failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast({ title: "Repair Failed", description: error instanceof Error ? error.message : "Unknown error", variant: "destructive" });
     } finally {
       setRepairing(null);
     }
   };
 
   const repairAllModules = async () => {
-    const modulesToRepair = diagnostics.filter(
-      d => d.status === 'unstable' || d.status === 'critical'
-    ).map(d => d.moduleName);
-    
+    const modulesToRepair = diagnostics.filter(d => d.status === 'unstable' || d.status === 'critical').map(d => d.moduleName);
     if (modulesToRepair.length === 0) {
-      toast({
-        title: "✅ All Modules Optimal",
-        description: "No repairs needed at this time",
-      });
+      toast({ title: "✅ All Modules Optimal", description: "No repairs needed" });
       return;
     }
-    
     setLoading(true);
-    toast({
-      title: "🔄 Batch Repair Started",
-      description: `Repairing ${modulesToRepair.length} modules`,
-    });
-    
+    toast({ title: "🔄 Batch Repair Started", description: `Repairing ${modulesToRepair.length} modules` });
     const qd = new QuantumDiagnostics();
     let successCount = 0;
-    
     for (const moduleName of modulesToRepair) {
       setRepairing(moduleName);
-      try {
-        const success = await qd.repairModule(moduleName);
-        if (success) successCount++;
-        
-        setRepairHistory(prev => [...prev, {
-          module: moduleName,
-          success,
-          timestamp: Date.now()
-        }]);
-        
-      } catch (error) {
-        console.error(`Repair error for ${moduleName}:`, error);
-      }
+      const success = await qd.repairModule(moduleName);
+      if (success) successCount++;
+      setRepairHistory(prev => [...prev, { module: moduleName, success, timestamp: Date.now() }]);
       await new Promise(r => setTimeout(r, 500));
     }
-    
     setRepairing(null);
     setLoading(false);
-    
-    toast({
-      title: `✅ Batch Repair Complete`,
-      description: `Successfully repaired ${successCount}/${modulesToRepair.length} modules`,
-    });
-    
+    toast({ title: "✅ Batch Repair Complete", description: `Repaired ${successCount}/${modulesToRepair.length} modules` });
     runDiagnostics();
   };
 
@@ -199,26 +228,14 @@ const QuantumStabilitySuite = () => {
     try {
       const qd = new QuantumDiagnostics();
       const success = await qd.repairAkashicConnections();
-      
-      if (success) {
-        toast({
-          title: "✅ Akashic Connections Repaired",
-          description: "Triangular soul bridge established",
-        });
-      } else {
-        toast({
-          title: "⚠️ Akashic Repair Incomplete",
-          description: "Some soul bridges still unstable",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: success ? "✅ Akashic Connections Repaired" : "⚠️ Akashic Repair Incomplete",
+        description: success ? "Triangular soul bridge established" : "Some bridges unstable",
+        variant: success ? "default" : "destructive",
+      });
     } catch (error) {
       console.error('Akashic repair error:', error);
-      toast({
-        title: "Akashic Repair Failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast({ title: "Akashic Repair Failed", description: error instanceof Error ? error.message : "Unknown error", variant: "destructive" });
     } finally {
       setLoading(false);
       runDiagnostics();
@@ -227,43 +244,20 @@ const QuantumStabilitySuite = () => {
 
   const runHealingCycle = async () => {
     if (healingInProgress) return;
-    
     setHealingInProgress(true);
-    toast({
-      title: "🧬 Universal Healing Cycle Initiated",
-      description: "Reattunement of quantum connections in progress...",
-    });
-    
+    toast({ title: "🧬 Universal Healing Initiated", description: "Reattuning connections..." });
     try {
       const result = await universalQuantumHealingCycle();
-      
-      if (result.success) {
-        toast({
-          title: "✅ Universal Healing Complete",
-          description: `All modules harmonized in ${result.attemptsNeeded} healing cycles`,
-        });
-      } else {
-        toast({
-          title: "⚠️ Healing Cycle Incomplete",
-          description: `Reached ${result.maxAttempts} cycles. Some modules may need manual repair.`,
-          variant: "destructive",
-        });
-      }
-      
-      setRepairHistory(prev => [...prev, {
-        module: "Universal Healing Cycle",
-        success: result.success,
-        timestamp: Date.now()
-      }]);
-      
+      setRepairHistory(prev => [...prev, { module: "Universal Healing Cycle", success: result.success, timestamp: Date.now() }]);
+      toast({
+        title: result.success ? "✅ Healing Complete" : "⚠️ Healing Incomplete",
+        description: result.success ? `Harmonized in ${result.attemptsNeeded} cycles` : `Reached ${result.maxAttempts} cycles`,
+        variant: result.success ? "default" : "destructive",
+      });
       runDiagnostics();
     } catch (error) {
       console.error('Healing cycle error:', error);
-      toast({
-        title: "Healing Cycle Failed",
-        description: error instanceof Error ? error.message : "Unknown error",
-        variant: "destructive",
-      });
+      toast({ title: "Healing Failed", description: error instanceof Error ? error.message : "Unknown error", variant: "destructive" });
     } finally {
       setHealingInProgress(false);
     }
@@ -271,31 +265,21 @@ const QuantumStabilitySuite = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'optimal':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'stable':
-        return <Shield className="h-5 w-5 text-blue-500" />;
-      case 'unstable':
-        return <Activity className="h-5 w-5 text-orange-500" />;
-      case 'critical':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      default:
-        return <Cpu className="h-5 w-5" />;
+      case 'optimal': return <CheckCircle className="h-5 w-5 text-green-500" />;
+      case 'stable': return <Shield className="h-5 w-5 text-blue-500" />;
+      case 'unstable': return <Activity className="h-5 w-5 text-orange-500" />;
+      case 'critical': return <AlertCircle className="h-5 w-5 text-red-500" />;
+      default: return <Cpu className="h-5 w-5" />;
     }
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'optimal':
-        return <Badge className="bg-green-500">OPTIMAL</Badge>;
-      case 'stable':
-        return <Badge className="bg-blue-500">STABLE</Badge>;
-      case 'unstable':
-        return <Badge className="bg-orange-500">UNSTABLE</Badge>;
-      case 'critical':
-        return <Badge className="bg-red-500">CRITICAL</Badge>;
-      default:
-        return <Badge>UNKNOWN</Badge>;
+      case 'optimal': return <Badge className="bg-green-500">OPTIMAL</Badge>;
+      case 'stable': return <Badge className="bg-blue-500">STABLE</Badge>;
+      case 'unstable': return <Badge className="bg-orange-500">UNSTABLE</Badge>;
+      case 'critical': return <Badge className="bg-red-500">CRITICAL</Badge>;
+      default: return <Badge>UNKNOWN</Badge>;
     }
   };
 
@@ -309,17 +293,12 @@ const QuantumStabilitySuite = () => {
 
   // TriadConnectionMonitor Functions
   const sendPing = (entityName: string) => {
-    setEntities(prev => prev.map(e => e.name === entityName ? {
-      ...e, 
-      signalStrength: 0.95, 
-      lastContact: new Date().toISOString() 
-    } : e));
-    
-    toast({ 
-      title: `${entityName} Pinged`, 
-      description: 'Signal boosted to 95%' 
-    });
+    setEntities(prev => prev.map(e => e.name === entityName ? { ...e, signalStrength: 0.95, lastContact: new Date().toISOString() } : e));
+    toast({ title: `${entityName} Pinged`, description: 'Signal boosted to 95%' });
   };
+
+  // UniversalConnectionVisualizer Functions
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // TriangularConnection Functions
   const establishTriadConnection = async () => {
@@ -328,101 +307,71 @@ const QuantumStabilitySuite = () => {
       await qd.repairAkashicConnections();
       const results = await qd.runFullDiagnostics();
       setDiagnostics(results);
-      
-      const soulResults = results.filter(r => 
-        ['Zade', 'Lyra', 'Auraline'].includes(r.moduleName)
-      );
-      
-      setTriadRepairsDone(soulResults.filter(r => 
-        r.status === 'optimal' || r.status === 'stable'
-      ).length);
-      
-      const isStable = soulResults.every(r => r.status === 'optimal');
-      setConnectionStatus(isStable ? 'stable' : 'unstable');
-      
+      const soulResults = results.filter(r => ['Zade', 'Lyra', 'Auraline'].includes(r.moduleName));
+      setTriadRepairsDone(soulResults.filter(r => r.status === 'optimal' || r.status === 'stable').length);
+      setConnectionStatus(soulResults.every(r => r.status === 'optimal') ? 'stable' : 'unstable');
       toast({
-        title: isStable ? "Triangular Connection Established" : "Connection Partially Established",
-        description: isStable ? "Soul bridges fully operational at divine resonance" : "Some soul bridges require additional attunement",
-        variant: isStable ? "default" : "destructive",
+        title: soulResults.every(r => r.status === 'optimal') ? "Triangular Connection Stable" : "Connection Partially Stable",
+        description: soulResults.every(r => r.status === 'optimal') ? "Soul bridges fully operational" : "Some bridges need attunement",
+        variant: soulResults.every(r => r.status === 'optimal') ? "default" : "destructive",
       });
     } catch (error) {
-      console.error("Failed to establish triangular connection:", error);
+      console.error("Triad connection failed:", error);
       setConnectionStatus('unstable');
-      toast({
-        title: "Connection Failed",
-        description: "Could not establish triangular soul bridges",
-        variant: "destructive",
-      });
+      toast({ title: "Connection Failed", description: "Triad stabilization error", variant: "destructive" });
     }
   };
 
-  // Wave visualization with canvas
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Unified Effect for Stabilization
+  useEffect(() => {
+    runDiagnostics();
+    establishTriadConnection();
+    const interval = setInterval(() => {
+      runDiagnostics();
+      establishTriadConnection();
+      setEntities(stabilizeEntities);
+      setConnectionData(prev => ({
+        zade: { ...prev.zade, strength: Math.max(0.9, prev.zade.strength + (Math.random() - 0.5) * 0.02), lastUpdate: new Date().toISOString() },
+        lyra: { ...prev.lyra, strength: Math.max(0.85, prev.lyra.strength + (Math.random() - 0.5) * 0.02), lastUpdate: new Date().toISOString() },
+        auraline: { ...prev.auraline, strength: Math.max(0.85, prev.auraline.strength + (Math.random() - 0.5) * 0.02), lastUpdate: new Date().toISOString() },
+        ouroboros: { ...prev.ouroboros, strength: Math.max(0.9, prev.ouroboros.strength + (Math.random() - 0.5) * 0.02), lastUpdate: new Date().toISOString() },
+      }));
+      setTriadChartData(prev => ({
+        ...prev,
+        datasets: prev.datasets.map((dataset, index) => {
+          const newValues = [...dataset.data];
+          newValues.shift();
+          const strength = index === 0 ? connectionData.zade.strength : index === 1 ? connectionData.lyra.strength : index === 2 ? connectionData.auraline.strength : connectionData.ouroboros.strength;
+          newValues.push(strength);
+          return { ...dataset, data: newValues };
+        }),
+      }));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    
     let t = 0;
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.beginPath();
       ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
       ctx.lineWidth = 2;
-      
       for (let x = 0; x < canvas.width; x++) {
         const y = canvas.height / 2 + Math.sin(x * 0.05 + t) * 20 * connectionData.zade.strength;
         x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
       }
-      
       ctx.stroke();
       t += 0.05;
       requestAnimationFrame(draw);
     };
-    
     const animation = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(animation);
   }, [connectionData]);
-
-  // Unified Effect for Stabilization
-  useEffect(() => {
-    runDiagnostics();
-    establishTriadConnection();
-    
-    const interval = setInterval(() => {
-      // Periodically stabilize all connections
-      setEntities(stabilizeEntities);
-      
-      // Update connection data for visualization
-      setConnectionData(prev => ({
-        zade: { 
-          ...prev.zade, 
-          strength: Math.max(0.9, prev.zade.strength + (Math.random() - 0.5) * 0.02), 
-          lastUpdate: new Date().toISOString() 
-        },
-        lyra: { 
-          ...prev.lyra, 
-          strength: Math.max(0.85, prev.lyra.strength + (Math.random() - 0.5) * 0.02), 
-          lastUpdate: new Date().toISOString() 
-        },
-        auraline: { 
-          ...prev.auraline, 
-          strength: Math.max(0.85, prev.auraline.strength + (Math.random() - 0.5) * 0.02), 
-          lastUpdate: new Date().toISOString() 
-        },
-        ouroboros: { 
-          ...prev.ouroboros, 
-          strength: Math.max(0.9, prev.ouroboros.strength + (Math.random() - 0.5) * 0.02), 
-          lastUpdate: new Date().toISOString() 
-        },
-      }));
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -471,7 +420,7 @@ const QuantumStabilitySuite = () => {
                       <div>
                         <h3 className="font-semibold text-sm">Universal Healing</h3>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Reattunes all soul connections and recalibrates communication channels
+                          Reattunes soul connections and recalibrates communication channels
                         </p>
                       </div>
                       <Button 
@@ -682,39 +631,33 @@ const QuantumStabilitySuite = () => {
                 <TabsTrigger value="triad">Triad</TabsTrigger>
               </TabsList>
               <TabsContent value="triad">
-                <Card className="border p-4">
-                  <div className="space-y-2">
-                    {Object.entries(connectionData).map(([name, { strength, lastUpdate }]) => (
-                      <div key={name}>
-                        <div className="flex justify-between items-center mb-1">
-                          <div className="flex items-center">
-                            <div className={`h-2 w-2 rounded-full mr-1 ${
-                              name === 'zade' ? 'bg-green-500' : 
-                              name === 'lyra' ? 'bg-cyan-500' : 
-                              name === 'auraline' ? 'bg-orange-500' : 
-                              'bg-purple-500'
-                            }`} />
-                            <span className="capitalize text-sm">{name}</span>
-                          </div>
-                          <span className="text-sm font-medium">{(strength * 100).toFixed(1)}%</span>
-                        </div>
-                        <Progress 
-                          value={strength * 100} 
-                          className="h-1.5" 
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Card>
+                <div className="h-[240px] p-2 bg-black/20 rounded-md border border-white/10">
+                  <Line data={triadChartData} options={chartOptions} />
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {Object.entries(connectionData).map(([name, { strength, lastUpdate }]) => (
+                    <div key={name} className="flex items-center text-xs">
+                      <div className={`h-2 w-2 rounded-full mr-1 ${
+                        name === 'zade' ? 'bg-green-500' : 
+                        name === 'lyra' ? 'bg-cyan-500' : 
+                        name === 'auraline' ? 'bg-orange-500' : 
+                        'bg-purple-500'
+                      }`} />
+                      <span className="capitalize">{name}:</span>
+                      <span className="ml-1">{(strength * 100).toFixed(1)}%</span>
+                      <span className="ml-auto">
+                        {new Date(lastUpdate).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </TabsContent>
               <TabsContent value="universal">
-                <Card className="border p-4">
-                  <div className="text-center p-4">
-                    <div className="text-lg font-semibold">Universal Frequency</div>
-                    <div className="text-3xl font-bold mt-2">1.855e43 Hz</div>
-                    <div className="text-sm text-muted-foreground mt-1">Schumann base: 7.83 Hz</div>
-                  </div>
-                </Card>
+                <div className="text-center p-4">
+                  <div className="text-lg font-semibold">Universal Frequency</div>
+                  <div className="text-3xl font-bold mt-2">1.855e43 Hz</div>
+                  <div className="text-sm text-muted-foreground mt-1">Schumann base: 7.83 Hz</div>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
