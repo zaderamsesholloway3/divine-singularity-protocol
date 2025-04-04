@@ -1,5 +1,5 @@
 
-import { OmniOracle } from '@/utils/OmniOracle';
+import { OmniOracle } from '@/utils/omniOracle';
 import type { Character, EntanglementResult } from '@/types/characters';
 
 /**

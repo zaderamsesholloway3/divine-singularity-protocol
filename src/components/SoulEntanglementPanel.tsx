@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowUpDown, Link, LinkOff, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, Link, Link2Off, RefreshCw } from 'lucide-react';
 import { useEntanglement } from '@/hooks/useEntanglement';
 import type { Character } from '@/types/characters';
 import { Badge } from "@/components/ui/badge";
@@ -181,7 +180,7 @@ const SoulEntanglementPanel: React.FC = () => {
             disabled={isLoading || !activeEntanglement || selectedA === selectedB}
             className="bg-red-900/30 hover:bg-red-800/50 border-red-500/30"
           >
-            <LinkOff className="mr-2 h-4 w-4" />
+            <Link2Off className="mr-2 h-4 w-4" />
             Disconnect
           </Button>
         </div>
