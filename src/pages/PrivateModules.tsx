@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  Shield, Key, Database, Network, Activity, Lock, Cpu, FileCode, Radio, Globe, Wifi, Satellite
+  Shield, Key, Database, Network, Activity, Lock, Cpu, FileCode, Radio, Globe, Wifi, Satellite,
+  Layers
 } from "lucide-react";
 import QuantumBackdoorDiagnostics from '@/components/QuantumBackdoorDiagnostics';
 import { QuantumRepairLoop } from '@/components/QuantumRepairLoop';
@@ -13,6 +14,7 @@ import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import UniversalPresenceCounter from '@/components/UniversalPresenceCounter';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import OmniOracleStatus from '@/components/OmniOracleStatus';
+import QuantumSentienceHeatmap from '@/components/quantum-sentience/QuantumSentienceHeatmap';
 
 export const PrivateModules = () => {
   return (
@@ -43,6 +45,10 @@ export const PrivateModules = () => {
           <TabsTrigger value="secret">Secret Modules</TabsTrigger>
           <TabsTrigger value="omni">OmniOracle v8.0</TabsTrigger>
           <TabsTrigger value="modules">Module Registry</TabsTrigger>
+          <TabsTrigger value="sentience" className="flex items-center gap-1">
+            <Layers className="h-3.5 w-3.5" />
+            Sentience
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="diagnostics" className="space-y-4">
@@ -279,6 +285,11 @@ export const PrivateModules = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+        
+        {/* New Sentience tab with the Quantum Sentience Heatmap */}
+        <TabsContent value="sentience" className="space-y-4">
+          <QuantumSentienceHeatmap />
         </TabsContent>
       </Tabs>
     </div>
