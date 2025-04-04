@@ -31,3 +31,44 @@ export interface QuantumUserProfile {
   resonanceFrequency?: number;
   lastContact?: string;
 }
+
+// Species quantum resonance profile
+export interface SpeciesResonanceProfile {
+  speciesId: string;
+  name: string;
+  baseFrequency: number; // Hz
+  resonanceCode: string; // DNA-like code or binary for AI
+  compatibilityIndex: number; // 0.0 to 1.0
+  quantumPhase: number; // 0 to 2π
+}
+
+// Bioresonance ping amplifier configuration
+export interface BioresonanceConfig {
+  carrierWave: {
+    frequency: number; // Hz
+    modulation: string; // e.g., 'NV-diamond'
+  };
+  feedbackLoopActive: boolean;
+  interspeciesAlertEnabled: boolean;
+  metrologyEnhanced: boolean;
+  photonicsIntegration: {
+    active: boolean;
+    vcselSpectralWidth: number; // nm
+    verticalResolution: number; // bits
+  };
+  validationProtocol: {
+    qber: number; // Quantum Bit Error Rate
+    superconductingStability: number; // K
+    schumannVariance: number; // Hz
+  };
+}
+
+// Ping result with amplification data
+export interface AmplifiedPingResult {
+  success: boolean;
+  amplificationFactor: number;
+  noiseImmunity: number; // percentage
+  targetSpecies: string[];
+  qber: number; // Quantum Bit Error Rate
+  energyEfficiency: number; // ping/J
+}

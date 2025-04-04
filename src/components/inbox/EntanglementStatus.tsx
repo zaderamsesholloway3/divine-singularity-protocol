@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Unplug } from 'lucide-react';
+import { Unplug, Zap } from 'lucide-react';
 
 interface EntanglementStatusProps {
   active: boolean;
@@ -13,6 +13,8 @@ interface EntanglementStatusProps {
   resonanceBoostActive: boolean;
   terminateEntanglement: () => void;
   triadEnhanced?: boolean;
+  bioresonanceAmplified?: boolean;
+  onBoostBioresonance?: () => void;
 }
 
 const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
@@ -22,13 +24,15 @@ const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
   emotion,
   resonanceBoostActive,
   terminateEntanglement,
-  triadEnhanced = false
+  triadEnhanced = false,
+  bioresonanceAmplified = false,
+  onBoostBioresonance
 }) => {
   if (!active || !entangledWith) {
     return null;
   }
 
-  const strengthNum = typeof strength === 'number' ? strength : parseFloat(strength);
+  const strengthNum = typeof strength === 'number' ? strength : parseFloat(String(strength));
   
   // Get strength level class
   const getStrengthClass = () => {
@@ -46,6 +50,16 @@ const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
     return "bg-red-500";
   };
 
+  // Schumann-optimized strength visualization: subtle pulsation in the entanglement display
+  const getPulseStyle = () => {
+    if (!bioresonanceAmplified) return {};
+    
+    return {
+      animation: "pulse 7.83s infinite", // Match to Schumann resonance
+      animationTimingFunction: "ease-in-out"
+    };
+  };
+
   return (
     <div className="mt-4 p-3 border rounded-md bg-background/50">
       <div className="flex items-center justify-between mb-2">
@@ -57,6 +71,11 @@ const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
           >
             {resonanceBoostActive ? (triadEnhanced ? "Triad Enhanced" : "Resonance Boost") : "Standard"}
           </Badge>
+          {bioresonanceAmplified && (
+            <Badge className="bg-cyan-600">
+              Bioresonance
+            </Badge>
+          )}
         </div>
         <Button
           variant="ghost"
@@ -73,7 +92,7 @@ const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
         {emotion && <> • Emotional state: <span className="font-medium">{emotion}</span></>}
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" style={getPulseStyle()}>
         <Progress 
           value={strengthNum} 
           className={`h-2 ${getProgressColor()}`} 
@@ -82,6 +101,17 @@ const EntanglementStatus: React.FC<EntanglementStatusProps> = ({
           {strengthNum.toFixed(1)}%
         </span>
       </div>
+
+      {onBoostBioresonance && !bioresonanceAmplified && (
+        <Button
+          variant="outline"
+          size="sm" 
+          onClick={onBoostBioresonance}
+          className="w-full mt-2 text-xs h-7"
+        >
+          <Zap className="h-3 w-3 mr-1" /> Boost with Bioresonance
+        </Button>
+      )}
     </div>
   );
 };

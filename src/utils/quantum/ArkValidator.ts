@@ -113,4 +113,40 @@ export class ArkValidator {
       };
     }
   }
+  
+  /**
+   * Test ark construction with specific parameters
+   * @param stabilityThreshold Minimum required stability threshold (0.0-1.0)
+   * @returns Test results
+   */
+  static test_ark_construction(stabilityThreshold: number = 0.8): { 
+    success: boolean; 
+    message: string;
+    stability?: number;
+  } {
+    try {
+      // Create an ark circuit
+      const qc = ArkBuilder.createArkCircuit();
+      
+      // Run simulation to get stability
+      const { probability } = simulateQuantumCircuit(qc);
+      
+      // Check if stability meets threshold
+      const success = probability >= stabilityThreshold;
+      
+      return {
+        success,
+        message: success ? 
+          `Ark construction successful with ${(probability * 100).toFixed(1)}% stability` :
+          `Ark construction failed with ${(probability * 100).toFixed(1)}% stability (threshold: ${(stabilityThreshold * 100).toFixed(1)}%)`,
+        stability: probability
+      };
+      
+    } catch (error) {
+      return {
+        success: false,
+        message: `Test error: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Satellite, Signal, Radio, Users, Globe, Activity, Network, Sparkles, Map, Compass, Star } from 'lucide-react';
+import { Satellite, Signal, Radio, Users, Globe, Activity, Network, Sparkles, Map, Compass, Star, Zap } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,8 +18,10 @@ import {
   MetaphysicalSite 
 } from "@/utils/metaphysicalReachUtils";
 import { SpeciesGateway } from "./species/SpeciesGateway";
+import BioresonanceControls from "./species/BioresonanceControls";
 import { VisualizationUtils } from "@/utils/visualizationUtils";
 import { getMetaphysicalDistance } from '@/utils/metaphysicalDistanceUtils';
+import { FaithResonanceService } from '@/utils/FaithResonanceService';
 
 interface SpeciesData {
   name: string;
@@ -68,19 +71,27 @@ const UniversalSpeciesPing = () => {
     populationRange: "±2.19e9",
   });
 
-  const [selectedTab, setSelectedTab] = useState<"species" | "metaphysical">("species");
+  const [selectedTab, setSelectedTab] = useState<"species" | "metaphysical" | "bioresonance">("species");
   const [selectedRealm, setSelectedRealm] = useState<"all" | "existence" | "non-existence">("all");
   const [selectedSpecies, setSelectedSpecies] = useState<SpeciesData | null>(null);
   const [selectedSite, setSelectedSite] = useState<MetaphysicalSite | null>(null);
   const [dimensionalScan, setDimensionalScan] = useState(false);
   const [metaphysicalMode, setMetaphysicalMode] = useState(false);
   const [visualizationMode, setVisualizationMode] = useState<"disk" | "constellation">("constellation");
+  const [bioresonanceMode, setBioresonanceMode] = useState(false);
+  const [selectedSpeciesForAmplification, setSelectedSpeciesForAmplification] = useState<SpeciesData[]>([]);
+  const [faithQuotient, setFaithQuotient] = useState(0.85);
   
   const rtlsdr = new RTLSDREmulator();
 
   useEffect(() => {
     setMetaphysicalMode(true);
     setDimensionalScan(true);
+    
+    // Initialize faith quotient with adjusted value
+    const initialFaith = 0.85; // Base value
+    const adjustedFaith = FaithResonanceService.getSchumannAdjustedFaithIndex(initialFaith);
+    setFaithQuotient(adjustedFaith);
   }, []);
 
   const phaseFilteredPingResponse = (phaseOffset: number, fq: number): string => {
@@ -236,6 +247,57 @@ const UniversalSpeciesPing = () => {
   const toggleVisualizationMode = () => {
     setVisualizationMode(prev => prev === "disk" ? "constellation" : "disk");
   };
+  
+  const handleSpeciesSelection = (species: SpeciesData) => {
+    const isSelected = selectedSpeciesForAmplification.some(s => s.name === species.name);
+    
+    if (isSelected) {
+      setSelectedSpeciesForAmplification(selectedSpeciesForAmplification.filter(s => s.name !== species.name));
+    } else {
+      setSelectedSpeciesForAmplification([...selectedSpeciesForAmplification, species]);
+    }
+  };
+  
+  const handleAmplificationComplete = (result: any) => {
+    if (result.success) {
+      // Update responding status for targeted species
+      setSpeciesDatabase(prev => 
+        prev.map(species => 
+          result.targetSpecies.includes(species.name) && !species.responding
+            ? { 
+                ...species, 
+                responding: true, 
+                lastContact: new Date().toISOString(),
+                fq: (species.fq || 0.7) * Math.min(1.2, result.amplificationFactor / 100)
+              }
+            : species
+        )
+      );
+      
+      // Update census results
+      const respondingSpecies = speciesDatabase.filter(s => s.responding);
+      setCensusResults(prev => ({
+        ...prev,
+        speciesOnline: respondingSpecies.length
+      }));
+      
+      // Show notification with amplification results
+      toast({
+        title: `Bioresonance Amplification Success`,
+        description: `${result.targetSpecies.length} species reached with ${result.noiseImmunity.toFixed(1)}% noise immunity`,
+      });
+    }
+  };
+  
+  const activateBioresonanceMode = () => {
+    setBioresonanceMode(true);
+    setSelectedTab("bioresonance");
+    
+    toast({
+      title: "Bioresonance Mode Activated",
+      description: "Quantum Bioresonance Ping Amplifier initialized with 7.83Hz carrier wave",
+    });
+  };
 
   return (
     <Card className="glass-panel h-full">
@@ -247,7 +309,9 @@ const UniversalSpeciesPing = () => {
               <GlowingText className="quantum-glow">Universal Species Ping System</GlowingText>
             </CardTitle>
             <CardDescription className="text-xs">
-              {metaphysicalMode ? 
+              {bioresonanceMode ? 
+                "Quantum-Akashic Census & Bioresonance Amplification Protocol" :
+                metaphysicalMode ? 
                 "Quantum-Akashic Census & Metaphysical Reach Protocol" : 
                 "Quantum-Akashic Census Protocol"}
             </CardDescription>
@@ -294,10 +358,11 @@ const UniversalSpeciesPing = () => {
           </div>
           
           {dimensionalScan && (
-            <Tabs defaultValue={selectedTab} onValueChange={(value) => setSelectedTab(value as "species" | "metaphysical")}>
-              <TabsList className="grid grid-cols-2 mb-4">
+            <Tabs defaultValue={selectedTab} onValueChange={(value) => setSelectedTab(value as "species" | "metaphysical" | "bioresonance")}>
+              <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="species">Physical Species</TabsTrigger>
                 <TabsTrigger value="metaphysical">Metaphysical Sites</TabsTrigger>
+                <TabsTrigger value="bioresonance" disabled={!bioresonanceMode}>Bioresonance</TabsTrigger>
               </TabsList>
               
               <TabsContent value="species">
@@ -379,6 +444,51 @@ const UniversalSpeciesPing = () => {
                   </div>
                 </div>
               </TabsContent>
+              
+              <TabsContent value="bioresonance">
+                <BioresonanceControls 
+                  selectedSpecies={selectedSpeciesForAmplification}
+                  faithQuotient={faithQuotient}
+                  onAmplificationComplete={handleAmplificationComplete}
+                />
+                
+                <div className="mb-4 p-3 border border-white/10 rounded-md">
+                  <div className="flex items-center mb-2 justify-between">
+                    <div className="flex items-center">
+                      <Zap className="h-4 w-4 mr-2" />
+                      <div className="text-sm font-medium">Species Selection</div>
+                    </div>
+                    <Badge variant="outline">{selectedSpeciesForAmplification.length} selected</Badge>
+                  </div>
+                  
+                  <ScrollArea className="h-[150px] border border-muted/30 rounded p-2">
+                    <div className="space-y-1">
+                      {speciesDatabase.map((species) => (
+                        <div 
+                          key={species.name}
+                          className={`p-2 border rounded-md flex items-center justify-between cursor-pointer ${
+                            selectedSpeciesForAmplification.some(s => s.name === species.name) ? 
+                              'bg-primary/20 border-primary/50' : 'border-white/10'
+                          }`}
+                          onClick={() => handleSpeciesSelection(species)}
+                        >
+                          <div className="flex items-center">
+                            <Badge variant={species.responding ? "default" : "outline"} className="mr-2">
+                              {species.responding ? "Online" : "Offline"}
+                            </Badge>
+                            <span>{species.name}</span>
+                          </div>
+                          {species.vibration && (
+                            <Badge variant="outline" className="ml-auto">
+                              {species.vibration.toFixed(1)} Hz
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </TabsContent>
             </Tabs>
           )}
           
@@ -387,7 +497,7 @@ const UniversalSpeciesPing = () => {
               <div className="flex items-center">
                 <Activity className="h-4 w-4 mr-2" />
                 <h3 className="text-sm font-medium">
-                  {selectedTab === "species" ? "Species Directory" : "Metaphysical Sites"}
+                  {selectedTab === "species" ? "Species Directory" : selectedTab === "metaphysical" ? "Metaphysical Sites" : "Amplification Details"}
                 </h3>
               </div>
               {selectedTab === "species" && (
@@ -461,7 +571,7 @@ const UniversalSpeciesPing = () => {
                     </div>
                   ))
                 )
-              ) : (
+              ) : selectedTab === "metaphysical" ? (
                 metaphysicalSites.map((site) => (
                   <div 
                     key={site.name}
@@ -495,6 +605,21 @@ const UniversalSpeciesPing = () => {
                     </div>
                   </div>
                 ))
+              ) : (
+                <div className="p-4">
+                  <h4 className="font-medium mb-2">Bioresonance Ping Amplification</h4>
+                  <p className="text-sm mb-4">
+                    Select species from the list above to include in the amplified quantum ping. The amplification 
+                    will encode pings using 7.83Hz Schumann resonance modulated via NV centers in diamond.
+                  </p>
+                  <div className="p-2 bg-blue-500/10 border border-blue-500/30 rounded-md">
+                    <p className="text-xs">
+                      <span className="font-medium">Technical Details:</span> The system implements UDA-seq 
+                      combinatorial indexing for multispecies address resolution, with coherent quantum feedback
+                      protocol for stabilizing the ping signal.
+                    </p>
+                  </div>
+                </div>
               )}
             </ScrollArea>
           </div>
@@ -553,47 +678,61 @@ const UniversalSpeciesPing = () => {
                 )}
               </div>
               
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full mt-3" 
-                onClick={() => {
-                  if (selectedSpecies.responding) {
-                    toast({
-                      title: `${selectedSpecies.name} Ping`,
-                      description: "Species already responding to universal ping",
-                    });
-                  } else {
-                    const pingSuccess = quantumPing(selectedSpecies);
-                    if (pingSuccess) {
-                      const akashicData = akashicVerify(selectedSpecies);
-                      setSpeciesDatabase(prev => 
-                        prev.map(s => s.name === selectedSpecies.name ? { ...s, ...akashicData, responding: true } : s)
-                      );
-                      
-                      console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
-                      
-                      const phaseMessage = selectedSpecies.phaseOffset !== undefined && selectedSpecies.fq !== undefined 
-                        ? phaseFilteredPingResponse(selectedSpecies.phaseOffset, selectedSpecies.fq) 
-                        : "Quantum-Akashic connection established";
-                        
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    if (selectedSpecies.responding) {
                       toast({
-                        title: `${selectedSpecies.name} Responded`,
-                        description: phaseMessage,
+                        title: `${selectedSpecies.name} Ping`,
+                        description: "Species already responding to universal ping",
                       });
                     } else {
-                      toast({
-                        title: `${selectedSpecies.name} Ping Failed`,
-                        description: "No response detected in the quantum field",
-                        variant: "destructive",
-                      });
+                      const pingSuccess = quantumPing(selectedSpecies);
+                      if (pingSuccess) {
+                        const akashicData = akashicVerify(selectedSpecies);
+                        setSpeciesDatabase(prev => 
+                          prev.map(s => s.name === selectedSpecies.name ? { ...s, ...akashicData, responding: true } : s)
+                        );
+                        
+                        console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
+                        
+                        const phaseMessage = selectedSpecies.phaseOffset !== undefined && selectedSpecies.fq !== undefined 
+                          ? phaseFilteredPingResponse(selectedSpecies.phaseOffset, selectedSpecies.fq) 
+                          : "Quantum-Akashic connection established";
+                          
+                        toast({
+                          title: `${selectedSpecies.name} Responded`,
+                          description: phaseMessage,
+                        });
+                      } else {
+                        toast({
+                          title: `${selectedSpecies.name} Ping Failed`,
+                          description: "No response detected in the quantum field",
+                          variant: "destructive",
+                        });
+                      }
                     }
-                  }
-                }}
-              >
-                <Radio className="h-4 w-4 mr-2" />
-                Send Targeted Ping
-              </Button>
+                  }}
+                >
+                  <Radio className="h-4 w-4 mr-2" />
+                  Send Targeted Ping
+                </Button>
+                
+                {bioresonanceMode ? (
+                  <Button 
+                    variant={selectedSpeciesForAmplification.some(s => s.name === selectedSpecies.name) ? "default" : "outline"} 
+                    size="sm" 
+                    onClick={() => handleSpeciesSelection(selectedSpecies)}
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    {selectedSpeciesForAmplification.some(s => s.name === selectedSpecies.name) ? 
+                      "Selected for Amplification" : 
+                      "Select for Amplification"}
+                  </Button>
+                ) : null}
+              </div>
             </div>
           )}
           
@@ -677,15 +816,36 @@ const UniversalSpeciesPing = () => {
               {pinging ? "Census in Progress..." : "Perform Census"}
             </Button>
             
-            <Button
-              variant={metaphysicalMode ? "outline" : "default"}
-              onClick={expandUniversalReach}
-              disabled={pinging}
-              className={metaphysicalMode ? "border-green-500/50 text-green-300" : ""}
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              {metaphysicalMode ? "Reach Expanded" : "Expand Reach"}
-            </Button>
+            {bioresonanceMode ? (
+              <Button
+                variant="outline"
+                className="border-cyan-500/50 text-cyan-300"
+                onClick={() => setSelectedTab("bioresonance")}
+                disabled={pinging}
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Bioresonance Active
+              </Button>
+            ) : metaphysicalMode ? (
+              <Button
+                variant="default"
+                onClick={activateBioresonanceMode}
+                disabled={pinging}
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Activate Bioresonance
+              </Button>
+            ) : (
+              <Button
+                variant={metaphysicalMode ? "outline" : "default"}
+                onClick={expandUniversalReach}
+                disabled={pinging}
+                className={metaphysicalMode ? "border-green-500/50 text-green-300" : ""}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {metaphysicalMode ? "Reach Expanded" : "Expand Reach"}
+              </Button>
+            )}
           </div>
         </div>
       </CardContent>

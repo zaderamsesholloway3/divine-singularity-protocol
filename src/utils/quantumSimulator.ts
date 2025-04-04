@@ -87,6 +87,79 @@ export class QuantumSimulator {
     
     return results;
   }
+  
+  /**
+   * Apply bioresonance amplification to entanglement
+   * 
+   * @param strength Current entanglement strength (0-100)
+   * @param carrierWaveFreq Carrier wave frequency in Hz (default: 7.83)
+   * @param nvCenterModulation Whether to use NV center modulation (default: true)
+   * @returns Amplified entanglement strength (0-100)
+   */
+  static applyBioresonanceAmplification(
+    strength: number,
+    carrierWaveFreq: number = 7.83,
+    nvCenterModulation: boolean = true
+  ): number {
+    // Normalize the frequency to Schumann resonance
+    const schumannFactor = carrierWaveFreq / 7.83;
+    const resonanceQuality = Math.exp(-Math.pow(schumannFactor - 1, 2) * 10);
+    
+    // Calculate amplification factor based on settings
+    const nvModulationBoost = nvCenterModulation ? 1.43 : 1.05;
+    const baseAmplification = 1.1 + 0.2 * resonanceQuality;
+    
+    // Apply amplification (max boost of 77% at perfect settings)
+    const amplifiedStrength = strength * baseAmplification * nvModulationBoost;
+    
+    // Apply Schumann resonance-based fluctuation
+    const schumannPhase = Date.now() / 1000 * 7.83;
+    const fluctuation = Math.sin(schumannPhase) * 2.0 * resonanceQuality;
+    
+    // Return capped strength value
+    return Math.min(100, Math.max(0, amplifiedStrength + fluctuation));
+  }
+}
+
+/**
+ * Simulate quantum circuit execution and return results with probability
+ * @param circuit Quantum circuit to simulate
+ * @returns Results with probability
+ */
+export function simulateQuantumCircuit(circuit: QuantumCircuit): { 
+  results: Record<string, number>;
+  probability: number;
+} {
+  // This is a simplified mock simulation
+  // In a real quantum system, we would actually simulate the circuit
+  
+  const operations = circuit.getOperations();
+  const hadamardCount = operations.filter(op => op.name === 'h').length;
+  const cnotCount = operations.filter(op => op.name === 'cx').length;
+  
+  // More complex circuits have lower probability of success in our mock
+  const complexity = (hadamardCount * 0.1) + (cnotCount * 0.15);
+  const probability = Math.max(0.1, 1 - complexity);
+  
+  // Generate mock measurement results
+  const shots = 1024;
+  const results: Record<string, number> = {};
+  
+  // Generate some plausible results based on circuit complexity
+  if (hadamardCount > 0) {
+    // With Hadamard gates, we expect more superposition
+    results['0'] = Math.floor(shots * 0.5);
+    results['1'] = shots - results['0'];
+  } else {
+    // Without Hadamard gates, more deterministic
+    results['0'] = Math.floor(shots * 0.9);
+    results['1'] = shots - results['0'];
+  }
+  
+  return {
+    results,
+    probability
+  };
 }
 
 /**
