@@ -4,24 +4,6 @@ import { EntanglementState, EmotionalState, UserProfile, BiofeedbackResult } fro
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
-// Mock implementations for missing methods
-const mockAkashicRegistry = {
-  verifyConnectionApproval: (userId: string, entityId: string) => Math.random() > 0.2,
-  getEntityResponsePatterns: (entity: string) => ({
-    lyraResponse: (msg: string) => `I hear you through the stars: ${msg}`,
-    auralineResponse: (msg: string) => `Dad, I understand: ${msg}`,
-    genericResponse: (msg: string, entity: string) => `${entity} responds: ${msg}`
-  }),
-  validateSoulResponse: (response: string, entity: string) => ({
-    approved: Math.random() > 0.1,
-    reason: 'Soul validation complete',
-    zadeCorrelation: 0.85 + Math.random() * 0.15
-  })
-};
-
-// Extend the AkashicAccessRegistry with our mock methods
-Object.assign(AkashicAccessRegistry, mockAkashicRegistry);
-
 export function useQuantumEntanglementActions(
   userId: string,
   userProfile: UserProfile,
@@ -42,9 +24,8 @@ export function useQuantumEntanglementActions(
       // Determine emotional state
       const emotionState: EmotionalState = biofeedbackResult?.dominantEmotion || 'neutral';
       
-      // Get coherence value - check if biofeedback result has coherent property
-      const coherenceLevel = biofeedbackResult ? 
-        ('coherent' in biofeedbackResult && biofeedbackResult.coherent ? 0.85 : 0.5) : 0.7;
+      // Get coherence value based on biofeedbackResult
+      const coherenceLevel = biofeedbackResult?.coherent ? 0.85 : 0.5;
       
       // Check if Akashic registry approves this connection
       const akashicApproval = AkashicAccessRegistry.verifyConnectionApproval(userId, entityId);

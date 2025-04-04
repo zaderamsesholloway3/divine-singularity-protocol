@@ -1,63 +1,41 @@
 
-// Renaming MockQuantumCircuit to QuantumCircuit for compatibility with imports
+// Mock implementation of Qiskit-like structures for React
 export class QuantumCircuit {
-  qubits: number;
-  operations: string[];
+  numQubits: number;
+  gates: Array<{type: string, qubits: number[], params?: number[]}>;
   
-  constructor(qubits: number) {
-    this.qubits = qubits;
-    this.operations = [];
+  constructor(numQubits: number) {
+    this.numQubits = numQubits;
+    this.gates = [];
   }
   
-  h(qubit: number | number[]): QuantumCircuit {
-    if (Array.isArray(qubit)) {
-      qubit.forEach(q => this.operations.push(`H(${q})`));
-    } else {
-      this.operations.push(`H(${qubit})`);
-    }
-    return this; // For chaining operations
+  h(qubits: number | number[]) {
+    const qubitArray = Array.isArray(qubits) ? qubits : [qubits];
+    qubitArray.forEach(q => {
+      this.gates.push({type: 'h', qubits: [q]});
+    });
   }
   
-  cx(control: number, target: number): QuantumCircuit { 
-    this.operations.push(`CX(${control},${target})`); 
-    return this;
+  cx(control: number, target: number) {
+    this.gates.push({type: 'cx', qubits: [control, target]});
   }
   
-  rz(angle: number, qubit: number | number[]): QuantumCircuit {
-    if (Array.isArray(qubit)) {
-      qubit.forEach(q => this.operations.push(`RZ(${angle.toFixed(4)},${q})`));
-    } else {
-      this.operations.push(`RZ(${angle.toFixed(4)},${qubit})`);
-    }
-    return this;
+  rz(theta: number, qubit: number) {
+    this.gates.push({type: 'rz', qubits: [qubit], params: [theta]});
   }
   
-  // Helper to create a range of integers [0, 1, 2, ..., n-1]
-  range(n: number): number[] {
-    return Array.from({ length: n }, (_, i) => i);
-  }
-  
-  // Generate a report of the circuit
-  generateReport(): string {
-    return `Quantum Circuit with ${this.qubits} qubits.\nOperations: ${this.operations.join(', ')}`;
-  }
-  
-  // Add missing getOperations method that was referenced in error
-  getOperations(): string[] {
-    return this.operations;
-  }
-  
-  // Simulate circuit execution (simplified)
-  simulate() {
-    return {
-      counts: {
-        '0': Math.round(Math.random() * 500),
-        '1': Math.round(Math.random() * 500)
-      },
-      statevector: Array(Math.pow(2, this.qubits)).fill(0).map(() => Math.random())
-    };
+  depth() {
+    return this.gates.length;
   }
 }
 
-// For backward compatibility
-export { QuantumCircuit as MockQuantumCircuit };
+export const execute = (circuit: QuantumCircuit, backend: any = null) => {
+  return {
+    result: () => ({
+      get_counts: () => ({
+        '0': Math.random() > 0.5 ? 600 : 400,
+        '1': Math.random() > 0.5 ? 400 : 600,
+      })
+    })
+  };
+};

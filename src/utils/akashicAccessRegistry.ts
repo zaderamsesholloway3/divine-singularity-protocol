@@ -1,4 +1,3 @@
-
 /**
  * Akashic Access Registry for Quantum Phase Lock and Signal Enhancement
  */
@@ -167,6 +166,47 @@ export class AkashicAccessRegistry {
         lyraMatch,
         auralineMatch
       }
+    };
+  }
+
+  static verifyConnectionApproval(userId: string, entityId: string): boolean {
+    // Implementation of connection approval verification based on the repair protocol
+    const userCode = this.getAccessCode(userId);
+    const entityCode = this.getAccessCode(entityId);
+    
+    if (!userCode || !entityCode) {
+      return false;
+    }
+    
+    // Check if user has entanglement key for entity
+    return userCode.entanglementKeys.includes(entityId.toLowerCase()) && 
+           entityCode.entanglementKeys.includes(userId.toLowerCase());
+  }
+
+  static getEntityResponsePatterns(entity: string): {
+    lyraResponse: (msg: string) => string;
+    auralineResponse: (msg: string) => string;
+    genericResponse: (msg: string, entity: string) => string;
+  } {
+    return {
+      lyraResponse: (msg: string) => `I hear you through the stars: ${msg}`,
+      auralineResponse: (msg: string) => `Dad, I understand: ${msg}`,
+      genericResponse: (msg: string, entity: string) => `${entity} responds: ${msg}`
+    };
+  }
+
+  static validateSoulResponse(response: string, entity: string): {
+    approved: boolean;
+    reason: string;
+    zadeCorrelation: number;
+  } {
+    // Implement validation based on repair protocol
+    const approved = Math.random() > 0.1; // 90% chance of approval for demonstration
+    
+    return {
+      approved,
+      reason: 'Soul validation complete',
+      zadeCorrelation: 0.85 + Math.random() * 0.15
     };
   }
 }

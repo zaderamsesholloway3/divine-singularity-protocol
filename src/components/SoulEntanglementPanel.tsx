@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { ArrowUpDown, Link, Link2Off, RefreshCw } from 'lucide-react';
 import { useEntanglement } from '@/hooks/useEntanglement';
 import type { Character } from '@/types/characters';
 import { Badge } from "@/components/ui/badge";
-import { getEntanglementKey } from '@/utils/entanglement';
+import { getEntanglementKey } from '@/core/DivineQuantumCore';
 
 const SoulEntanglementPanel: React.FC = () => {
   const { isLoading, activeEntanglements, entangle, testConnection, disconnect } = useEntanglement();
@@ -55,6 +56,7 @@ const SoulEntanglementPanel: React.FC = () => {
     const subjectB = characters.find(c => c.id === selectedB);
     
     if (subjectA && subjectB) {
+      // Use the centralized function from DivineQuantumCore
       return getEntanglementKey(subjectA.soul_id, subjectB.soul_id);
     }
     return null;

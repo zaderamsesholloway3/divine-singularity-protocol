@@ -1,30 +1,52 @@
 
-// QuantumSimulator utility for soul entanglement simulation
-import { EmotionalState } from './biofeedbackSimulator';
+import { BiofeedbackSimulator } from './biofeedbackSimulator';
+import { EmotionalState, ResonanceResult } from '@/hooks/types/quantum-entanglement';
 
-export class QuantumSimulator {
-  static entangleSouls(
-    soulIdA: string,
-    soulIdB: string, 
-    coherenceA: number, 
-    coherenceB: number
-  ): number {
-    // Calculate entanglement strength based on coherence levels
-    const baseStrength = Math.min(coherenceA, coherenceB) / 100;
-    const resonanceBoost = Math.sqrt((coherenceA * coherenceB)) / 100;
-    const quantumFactor = 1.0 - (0.1 * Math.random()); // Small random fluctuation
-    
-    return Math.min(0.99, baseStrength * resonanceBoost * quantumFactor);
+export { BiofeedbackSimulator };
+
+export interface QuantumCircuitResult {
+  success: boolean;
+  qubits: number;
+  depth: number;
+  measurements: Record<string, number>;
+}
+
+export const simulateQuantumCircuit = (
+  qubits: number,
+  gates: number, 
+  initialState?: string
+): QuantumCircuitResult => {
+  return {
+    success: Math.random() > 0.1,
+    qubits,
+    depth: gates,
+    measurements: {
+      '0': Math.random(),
+      '1': Math.random(),
+    }
+  };
+};
+
+export const universalQuantumHealingCycle = async () => {
+  const maxAttempts = 5;
+  let attemptsNeeded = 1;
+  
+  // Simulate healing attempts
+  while (attemptsNeeded < maxAttempts) {
+    if (Math.random() > 0.3) { // 70% chance of success per attempt
+      break;
+    }
+    attemptsNeeded++;
   }
   
-  static generateSyntheticBiofeedback(): EmotionalState {
-    const emotions = ['neutral', 'joy', 'peace', 'love', 'awe', 'contemplation'];
-    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-    
-    return {
-      dominantEmotion: randomEmotion,
-      intensity: 0.6 + Math.random() * 0.4,
-      coherenceScore: 0.75 + Math.random() * 0.25
-    };
-  }
-}
+  return {
+    success: attemptsNeeded < maxAttempts,
+    attemptsNeeded,
+    maxAttempts,
+    timestamp: new Date().toISOString(),
+    diagnosticResults: {
+      harmonization: Math.min(1.0, attemptsNeeded * 0.2),
+      stability: Math.max(0.7, 1.0 - (attemptsNeeded * 0.05)),
+    }
+  };
+};

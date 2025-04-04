@@ -9,6 +9,11 @@ export type EmotionalState =
   | 'concerned'
   | 'uncertain'
   | 'distressed'
+  | 'joy'
+  | 'peace'
+  | 'love'
+  | 'awe'
+  | 'contemplation'
   | string; // Allow string for backward compatibility
 
 export interface EntanglementState {
