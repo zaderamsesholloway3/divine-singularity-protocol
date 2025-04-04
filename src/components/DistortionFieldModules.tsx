@@ -16,9 +16,9 @@ const DistortionFieldModules = () => {
       
       <div className="flex justify-center mb-4">
         <Button variant="outline" size="sm" asChild>
-          <Link to="/private-modules">
+          <Link to="/public-modules">
             <Lock className="mr-2 h-4 w-4" />
-            Access Private Modules
+            Access Public Modules
           </Link>
         </Button>
       </div>

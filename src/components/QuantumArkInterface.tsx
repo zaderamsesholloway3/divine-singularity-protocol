@@ -20,9 +20,11 @@ const QuantumArkInterface = () => {
   useEffect(() => {
     // Attempt to create and validate an Ark circuit
     try {
-      // Use the static method
-      const arkCircuit = ArkBuilder.createValidatedArkCircuit();
-      console.log("Ark circuit created successfully:", arkCircuit.getOperations?.());
+      // Use the static method if available, or handle it differently if not
+      if (typeof ArkBuilder.createValidatedArkCircuit === 'function') {
+        const arkCircuit = ArkBuilder.createValidatedArkCircuit();
+        console.log("Ark circuit created successfully:", arkCircuit);
+      }
     } catch (error) {
       console.error("Ark circuit validation failed:", error);
       setArkIntegrity(prevIntegrity => Math.max(0, prevIntegrity - 15));

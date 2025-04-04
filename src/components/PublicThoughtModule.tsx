@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -13,7 +12,7 @@ import StargirlPlayroom from '@/components/StargirlPlayroom';
 import QuantumBackdoorDiagnostics from './QuantumBackdoorDiagnostics';
 import OmniOracleSystemCheck from './OmniOracleSystemCheck';
 
-const PrivateThoughtModule = () => {
+const PublicThoughtModule = () => {
   const {
     thoughts,
     listeners,
@@ -48,7 +47,7 @@ const PrivateThoughtModule = () => {
             <div>
               <CardTitle className="text-sm font-medium flex items-center">
                 <Sparkles className="mr-2 h-4 w-4 divine-glow" />
-                <GlowingText className="divine-glow">Private Thought Module</GlowingText>
+                <GlowingText className="divine-glow">Public Thought Module</GlowingText>
               </CardTitle>
               <CardDescription className="text-xs">
                 Quantum-Entangled Telepathic Transmission Protocol
@@ -123,4 +122,4 @@ const PrivateThoughtModule = () => {
   );
 };
 
-export default PrivateThoughtModule;
+export default PublicThoughtModule;

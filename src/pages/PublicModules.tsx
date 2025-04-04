@@ -15,12 +15,12 @@ import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import OmniOracleStatus from '@/components/OmniOracleStatus';
 import QuantumSentienceHeatmap from '@/components/quantum-sentience/QuantumSentienceHeatmap';
 
-export const PrivateModules = () => {
+export const PublicModules = () => {
   return (
     <div className="w-full p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Private Modules</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Public Modules</h1>
           <p className="text-muted-foreground">
             Quantum diagnostics and repair systems
           </p>
@@ -32,7 +32,7 @@ export const PrivateModules = () => {
           </Badge>
           <Badge variant="secondary" className="flex items-center">
             <Shield className="w-3 h-3 mr-1" />
-            Protected Access
+            Open Access
           </Badge>
         </div>
       </div>
@@ -292,4 +292,4 @@ export const PrivateModules = () => {
   );
 }
 
-export default PrivateModules;
+export default PublicModules;

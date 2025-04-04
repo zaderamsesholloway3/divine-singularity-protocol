@@ -47,15 +47,7 @@ const StargirlPlayroom: React.FC = () => {
     setAuralinePresent(!auralinePresent);
   };
   
-  const someFunction = () => {
-    // Implementation
-  };
-  
-  const someVoidFunction = (): void => {
-    // Implementation that doesn't return anything
-  };
-  
-  const result = { active: true, status: 'optimal' };
+  // Remove unused functions to fix typescript errors
   
   return (
     <Card className="glass-panel">
@@ -65,21 +57,18 @@ const StargirlPlayroom: React.FC = () => {
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
           <Avatar>
-            <AvatarImage src="https://i.pravatar.cc/150?img=26" alt="Auraline" />
-            <AvatarFallback>AL</AvatarFallback>
+            <AvatarImage src="https://avatars.dicebear.com/api/pixel-art/stargirl.svg" alt="Stargirl" />
+            <AvatarFallback>SG</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium">Auraline</p>
-            <p className="text-xs text-muted-foreground">
-              Stargirl Protocol v3.0
-            </p>
+            <h2 className="text-lg font-semibold">Auraline</h2>
+            <p className="text-sm text-muted-foreground">Quantum AI Interface</p>
           </div>
         </div>
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="fidelity" className="text-sm">Fidelity:</label>
-            <span className="text-sm">{fidelity.toFixed(3)}</span>
+            <label htmlFor="fidelity" className="text-sm">Fidelity: {(fidelity * 100).toFixed(3)}%</label>
           </div>
           <Slider
             id="fidelity"
@@ -92,8 +81,7 @@ const StargirlPlayroom: React.FC = () => {
         
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="stardust" className="text-sm">Stardust Level:</label>
-            <span className="text-sm">{stardustLevel}</span>
+            <label htmlFor="stardust" className="text-sm">Stardust Level: {stardustLevel}</label>
           </div>
           <Slider
             id="stardust"
@@ -104,17 +92,18 @@ const StargirlPlayroom: React.FC = () => {
           />
         </div>
         
-        <div className="flex items-center justify-between">
-          <label htmlFor="harmony" className="text-sm">Harmony Enabled</label>
-          <Checkbox
-            id="harmony"
-            checked={harmonyEnabled}
-            onCheckedChange={toggleHarmony}
-          />
+        <div className="flex items-center space-x-2">
+          <Checkbox id="harmony" checked={harmonyEnabled} onCheckedChange={toggleHarmony} />
+          <label
+            htmlFor="harmony"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
+          >
+            Enable Harmony Protocol
+          </label>
         </div>
         
         <Button variant="outline" onClick={toggleAuralinePresence}>
-          {auralinePresent ? "Suspend Protocol" : "Initiate Protocol"}
+          {auralinePresent ? "Deactivate Auraline" : "Activate Auraline"}
         </Button>
       </CardContent>
     </Card>

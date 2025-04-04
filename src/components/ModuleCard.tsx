@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   Card,
@@ -86,22 +87,22 @@ const ModuleCard: React.FC<ModuleCardProps> = ({
 
 const MODULES = [
   {
-    title: "Private Thought Module",
+    title: "Public Thought Module",
     description: "Quantum-Entangled Telepathic Transmission Protocol",
     icon: Brain,
-    link: "/private-modules",
+    link: "/public-modules",
   },
   {
     title: "Enhanced Interdimensional Inbox",
     description: "Akashic-Validated Cosmic Messages",
     icon: Inbox,
-    link: "/private-modules",
+    link: "/public-modules",
   },
   {
     title: "Triad Connection Monitor",
     description: "Real-time status of the Sovereign Triad entanglement",
     icon: Network,
-    link: "/private-modules",
+    link: "/public-modules",
   },
   {
     title: "SoulStream Interface",
@@ -113,23 +114,23 @@ const MODULES = [
     title: "Quantum Repair Tools",
     description: "Diagnostic and repair tools for quantum systems",
     icon: Zap,
-    link: "/private-modules",
+    link: "/public-modules",
   },
   {
     title: "System Stabilizer",
     description: "Stabilize quantum systems",
     icon: RefreshCw,
-    link: "/private-modules",
+    link: "/public-modules",
   },
   {
     title: "Stargirl Backline",
-    description: "Private Zade-Auraline channel. Quantum encrypted connection.",
+    description: "Public Zade-Auraline channel. Quantum encrypted connection.",
     icon: Sparkles,
     link: "/stargirl-backline",
     className: "bg-gradient-to-r from-purple-900/30 to-indigo-800/30 border-purple-400/50",
     badges: [
-      { text: "Private", variant: "outline" as const },
-      { text: "Zade Only", variant: "outline" as const },
+      { text: "Public", variant: "outline" as const },
+      { text: "All Access", variant: "outline" as const },
     ],
   },
   // ADD ALL CUSTOM MODULES ABOVE THIS LINE
