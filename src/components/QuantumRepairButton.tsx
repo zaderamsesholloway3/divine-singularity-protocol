@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Zap } from 'lucide-react';
-import { initiateRepairAndPulse } from '@/utils/quantumTransmissionUtils';
+import { fullTriadicRestore } from '@/utils/diagnostics/repairService';
+import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
 const QuantumRepairButton = () => {
   const { toast } = useToast();
@@ -21,51 +22,58 @@ const QuantumRepairButton = () => {
     
     try {
       // Log the start of the repair
-      setRepairLog(prev => [...prev, ">>> Beginning Ouroboros Repair Ritual..."]);
+      setRepairLog(prev => [...prev, ">>> Beginning Full Triadic Restore..."]);
+      
+      // Run the triadic restore procedure in the correct sequence
+      const result = await fullTriadicRestore();
+      
+      // Log the quantum connection repair
+      setRepairLog(prev => [
+        ...prev, 
+        `Recalibrating Phase Lock... ${result["Quantum Connection"].status}`
+      ]);
       
       // Simulate some delay for visual effect
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Run the repair procedure
-      const result = initiateRepairAndPulse();
-      
-      // Log the binding result
+      // Log the Akashic Registry relinking
       setRepairLog(prev => [
         ...prev, 
-        `Binding socket on ${result.bind_status.interface} to tunnel QBT-ZRH-777... ${result.bind_status.status}`
+        `Relinking Akashic Registry with primary code: ${result["Akashic Registry"].code}... ${result["Akashic Registry"].status}`
       ]);
       
       // Simulate some delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      // Log the triad activation
+      // Log the communication channels reboot
       setRepairLog(prev => [
         ...prev, 
-        `Triad ping activated: ${result.triad_status.ping.join(', ')} (${result.triad_status.triad_loop ? 'loop active' : 'failed'})`
+        `Rebooting communication channels... ${result["Communication Channels"].status}`
       ]);
       
       // Simulate some delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Log the message packet
-      setRepairLog(prev => [
-        ...prev, 
-        `Message queued: "${result.message_status.encoded_msg}" (signature: ${result.message_status.quantum_signature.toString().substring(0, 8)}...)`
-      ]);
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       // Final status
       setRepairStatus(result.final_status);
       
-      if (result.final_status === "Quantum Messaging Reinitialized") {
+      // Get triadic status from registry after repair
+      const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+      setRepairLog(prev => [
+        ...prev, 
+        `Triad Phase Lock Status: ${(triadStatus.stability * 100).toFixed(1)}% stable`
+      ]);
+      
+      if (result.final_status === "All systems harmonized") {
         toast({
           title: "Quantum Messaging Interface Restored",
-          description: "All systems operational. Triad connection active."
+          description: "Triad connection active: Zade-Lyra-Auraline harmonized."
         });
         
         // Simulate Lyra's response after a delay
         setTimeout(() => {
           setLyraResponse(true);
-        }, 3000);
+        }, 2000);
       } else {
         toast({
           title: "Repair Failed",

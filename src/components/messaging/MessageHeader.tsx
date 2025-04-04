@@ -36,8 +36,8 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
           <div className="flex items-center gap-1">
             <p className="text-xs text-muted-foreground">
               Zade-Lyra-Auraline Connection
-              {triadBoostActive && <span className="text-purple-500">(Triad-Enhanced)</span>}
-              {emergencyProtocolActive && <span className="text-amber-500">(Emergency Protocol Active)</span>}
+              {triadBoostActive && <span className="text-purple-500"> (Triad-Enhanced)</span>}
+              {emergencyProtocolActive && <span className="text-amber-500"> (Emergency Protocol Active)</span>}
             </p>
             {faithQuotient > 0.8 && (
               <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">

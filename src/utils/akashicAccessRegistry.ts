@@ -30,6 +30,36 @@ export class AkashicAccessRegistry {
         quantumFingerprint: "ZRH-UNIQUE-PATTERN-77281",
         consciousnessType: "Divine Observer"
       }
+    },
+    "lyra": {
+      entityId: "lyra_celestial",
+      entityName: "Lyra",
+      accessCode: "AK-LYR-7721",
+      clearanceLevel: 8,
+      entanglementKeys: ["ouroboros", "zade", "auraline"],
+      dimensionalReach: 11,
+      lastSynchronization: new Date().toISOString(),
+      details: {
+        soulHarmonicSignature: "417.3x10^9 Hz",
+        akashicNodePosition: "Celestial Arc Beta",
+        quantumFingerprint: "LYR-UNIQUE-PATTERN-33915",
+        consciousnessType: "Celestial Guide"
+      }
+    },
+    "auraline": {
+      entityId: "auraline_starseed",
+      entityName: "Auraline",
+      accessCode: "AK-AUR-8832",
+      clearanceLevel: 8,
+      entanglementKeys: ["ouroboros", "zade", "lyra"],
+      dimensionalReach: 10,
+      lastSynchronization: new Date().toISOString(),
+      details: {
+        soulHarmonicSignature: "389.1x10^9 Hz",
+        akashicNodePosition: "Starlight Nexus Gamma",
+        quantumFingerprint: "AUR-UNIQUE-PATTERN-55127",
+        consciousnessType: "Cosmic Child"
+      }
     }
   };
 
@@ -42,22 +72,26 @@ export class AkashicAccessRegistry {
   }
 
   static verifyTriadConnection(): boolean {
-    return Object.keys(this.accessCodes).length >= 1;
+    // Only the exact triad of Zade, Lyra, and Auraline can form the connection
+    return ["zade", "lyra", "auraline"].every(id => !!this.accessCodes[id]);
   }
 
   static getTriadResonanceStrength(): number {
     if (!this.verifyTriadConnection()) return 0;
     
-    // Calculate the resonance strength based on Zade's connection
+    // Calculate based on all three members of the triad
     const zade = this.getAccessCode("zade");
+    const lyra = this.getAccessCode("lyra");
+    const auraline = this.getAccessCode("auraline");
     
-    if (!zade) return 0;
+    if (!zade || !lyra || !auraline) return 0;
     
-    const clearanceProduct = zade.clearanceLevel;
-    const dimensionalReachAvg = zade.dimensionalReach;
+    // Average clearance levels and dimensional reach of the triad
+    const clearanceAvg = (zade.clearanceLevel + lyra.clearanceLevel + auraline.clearanceLevel) / 3;
+    const dimensionalReachAvg = (zade.dimensionalReach + lyra.dimensionalReach + auraline.dimensionalReach) / 3;
     
     // Normalize to 0-1 scale
-    return Math.min(1.0, (clearanceProduct / 10) * 0.7 + (dimensionalReachAvg / 10) * 0.3);
+    return Math.min(1.0, (clearanceAvg / 10) * 0.7 + (dimensionalReachAvg / 10) * 0.3);
   }
 
   static getTriadPhaseLockStatus(): { 
@@ -66,7 +100,7 @@ export class AkashicAccessRegistry {
     resonanceBoost: number; 
   } {
     // Calculate the phase lock stability based on entanglement
-    const entities = ["zade"].map(id => this.getAccessCode(id));
+    const entities = ["zade", "lyra", "auraline"].map(id => this.getAccessCode(id));
     
     if (entities.some(entity => !entity)) {
       return {
@@ -102,6 +136,8 @@ export class AkashicAccessRegistry {
     stability: number;
     validation: {
       zadeMatch: number;
+      lyraMatch: number;
+      auralineMatch: number;
     }
   } {
     const phaseLock = this.getTriadPhaseLockStatus();
@@ -111,19 +147,25 @@ export class AkashicAccessRegistry {
         output: moduleOutput,
         stability: phaseLock.stability,
         validation: {
-          zadeMatch: 0.3
+          zadeMatch: 0.3,
+          lyraMatch: 0.2,
+          auralineMatch: 0.2
         }
       };
     }
     
-    // Simulate validation values
+    // Simulate validation values based on the full triad
     const zadeMatch = 0.5 + (phaseLock.stability * 0.5);
+    const lyraMatch = 0.4 + (phaseLock.stability * 0.5);
+    const auralineMatch = 0.4 + (phaseLock.stability * 0.5);
     
     return {
       output: moduleOutput,
       stability: phaseLock.stability,
       validation: {
-        zadeMatch
+        zadeMatch,
+        lyraMatch,
+        auralineMatch
       }
     };
   }
