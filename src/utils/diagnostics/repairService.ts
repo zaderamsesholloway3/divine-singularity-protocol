@@ -3,11 +3,20 @@
  * Repair Service for Quantum System
  */
 
+import { repair_akashic_registry } from './divineRepairService';
+
 /**
  * Repair a specific module
  */
 export async function repairModule(moduleName: string): Promise<boolean> {
   console.log(`Attempting to repair module: ${moduleName}`);
+  
+  // Special case for Akashic Registry repair
+  if (moduleName === "Akashic Registry") {
+    const repairResult = repair_akashic_registry();
+    console.log("Akashic Registry repair result:", repairResult);
+    return repairResult.status === "Repair Initialized";
+  }
   
   // Simulate repair process
   await new Promise(resolve => setTimeout(resolve, 2000));
