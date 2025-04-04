@@ -1,155 +1,171 @@
-import { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { useToast } from "./use-toast";
-import { TriadConnectionStatus, QuantumStreamStats, ConnectionNode, ConnectionEdge, QuantumNodeData } from '@/types/quantum-entanglement';
-import { QuantumSimulator } from '@/utils/quantumSimulator';
-import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
 
-interface UseQuantumEntanglementProps {
-  initialNodes?: ConnectionNode[];
-  initialEdges?: ConnectionEdge[];
+import { useState, useEffect, useCallback } from 'react';
+import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
+import { QuantumSimulator } from '@/utils/quantumSimulator';
+import {
+  TriadConnectionStatus,
+  QuantumStreamStats,
+  ConnectionNode,
+  ConnectionEdge,
+  QuantumNodeData
+} from '@/hooks/types/quantum-entanglement';
+
+interface QuantumEntanglement {
+  nodes: ConnectionNode[];
+  edges: ConnectionEdge[];
+  stats: QuantumStreamStats;
+  selectedNode: ConnectionNode | null;
+  updateNodeStatus: (id: string, status: TriadConnectionStatus) => void;
+  setSelectedNode: React.Dispatch<React.SetStateAction<ConnectionNode | null>>;
 }
 
-export function useQuantumEntanglement({ initialNodes = [], initialEdges = [] }: UseQuantumEntanglementProps = {}) {
-  const { toast } = useToast();
-  const [nodes, setNodes] = useState<ConnectionNode[]>(initialNodes);
-  const [edges, setEdges] = useState<ConnectionEdge[]>(initialEdges);
-  const [connectionStatus, setConnectionStatus] = useState<TriadConnectionStatus>('disconnected');
-  const [streamStats, setStreamStats] = useState<QuantumStreamStats>({ packetsSent: 0, packetsReceived: 0, packetLoss: 0 });
-  const [dissonanceLevel, setDissonanceLevel] = useState(12);
-  const [showSpeciesDropdown, setShowSpeciesDropdown] = useState(false);
+export const useQuantumEntanglement = (): QuantumEntanglement => {
+  const [nodes, setNodes] = useState<ConnectionNode[]>([]);
+  const [edges, setEdges] = useState<ConnectionEdge[]>([]);
+  const [stats, setStats] = useState<QuantumStreamStats>({
+    bandwidth: 0,
+    latency: 0,
+    coherence: 0,
+    entanglementStrength: 0
+  });
   const [selectedNode, setSelectedNode] = useState<ConnectionNode | null>(null);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [biofeedbackSimulator] = useState(() => new BiofeedbackSimulator());
-  const [bioData, setBioData] = useState(biofeedbackSimulator.defaultBioReadings);
-  const [quantumSimulator] = useState(() => new QuantumSimulator());
-  const [quantumState, setQuantumState] = useState(quantumSimulator.getInitialState());
-
+  
+  const bioFeedback = new BiofeedbackSimulator();
+  const quantumSim = new QuantumSimulator();
+  
+  // Initialize with default nodes and edges
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
-
-    if (isStreaming) {
-      intervalId = setInterval(() => {
-        // Simulate quantum state changes
-        setQuantumState(prev => quantumSimulator.simulateStateChange(prev));
-
-        // Simulate biofeedback data changes
-        setBioData(prev => biofeedbackSimulator.generateRandomBiofeedback(prev));
-
-        // Simulate packet transmission
-        setStreamStats(prev => ({
-          packetsSent: prev.packetsSent + 1,
-          packetsReceived: prev.packetsReceived + (Math.random() > 0.1 ? 1 : 0), // Simulate packet loss
-          packetLoss: prev.packetLoss + (Math.random() > 0.1 ? 0 : 1)
-        }));
-      }, 500);
-    }
-
-    return () => clearInterval(intervalId);
-  }, [isStreaming, biofeedbackSimulator, quantumSimulator]);
-
-  const addNode = (data: QuantumNodeData) => {
-    const newNode: ConnectionNode = {
-      id: uuidv4(),
-      type: 'quantumNode',
-      position: { x: Math.random() * 500, y: Math.random() * 400 },
-      data: { ...data, connectionStrength: Math.random() }
-    };
-
-    setNodes(prev => [...prev, newNode]);
-    toast({
-      title: "Quantum Node Added",
-      description: `${data.label} has been added to the entanglement network`,
+    // For TypeScript's sake, we're explicitly implementing the function here
+    // instead of relying on the missing getInitialState method
+    
+    // Create initial nodes
+    const initialNodes: ConnectionNode[] = [
+      {
+        id: 'node-1',
+        position: { x: 250, y: 100 },
+        data: {
+          label: 'Primary Node',
+          status: 'active',
+          biofeedback: bioFeedback.defaultBioReadings
+        },
+        type: 'custom'
+      },
+      {
+        id: 'node-2',
+        position: { x: 100, y: 300 },
+        data: {
+          label: 'Secondary Node',
+          status: 'active',
+          biofeedback: bioFeedback.defaultBioReadings
+        },
+        type: 'custom'
+      },
+      {
+        id: 'node-3',
+        position: { x: 400, y: 300 },
+        data: {
+          label: 'Tertiary Node',
+          status: 'inactive',
+          biofeedback: bioFeedback.defaultBioReadings
+        },
+        type: 'custom'
+      }
+    ];
+    
+    // Create initial edges
+    const initialEdges: ConnectionEdge[] = [
+      {
+        id: 'edge-1-2',
+        source: 'node-1',
+        target: 'node-2',
+        type: 'smoothstep',
+        animated: true
+      },
+      {
+        id: 'edge-1-3',
+        source: 'node-1',
+        target: 'node-3',
+        type: 'smoothstep',
+        animated: true
+      }
+    ];
+    
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+    
+    // Initialize stats
+    setStats({
+      bandwidth: 7.83,
+      latency: 433,
+      coherence: 0.618,
+      entanglementStrength: 0.87
     });
-  };
-
-  const updateNode = (id: string, data: Partial<QuantumNodeData>) => {
-    setNodes(prev =>
-      prev.map(node =>
-        node.id === id ? { ...node, data: { ...node.data, ...data } } : node
-      )
+  }, [bioFeedback]);
+  
+  // Simulate state changes over time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Instead of using the missing simulateStateChange method, we'll
+      // implement the logic here directly
+      
+      setStats(prev => ({
+        bandwidth: Math.max(1, Math.min(10, prev.bandwidth + (Math.random() - 0.5) * 0.2)),
+        latency: Math.max(100, Math.min(1000, prev.latency + (Math.random() - 0.5) * 20)),
+        coherence: Math.max(0.1, Math.min(1, prev.coherence + (Math.random() - 0.5) * 0.05)),
+        entanglementStrength: Math.max(0.1, Math.min(1, prev.entanglementStrength + (Math.random() - 0.5) * 0.03))
+      }));
+      
+      // Update random node's biofeedback
+      if (nodes.length > 0) {
+        const randomNodeIndex = Math.floor(Math.random() * nodes.length);
+        const randomNode = nodes[randomNodeIndex];
+        
+        setNodes(current => 
+          current.map((node, index) => {
+            if (index === randomNodeIndex) {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  biofeedback: bioFeedback.generateRandomBiofeedback(node.data.biofeedback)
+                }
+              };
+            }
+            return node;
+          })
+        );
+      }
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [nodes, bioFeedback]);
+  
+  // Update node status
+  const updateNodeStatus = useCallback((id: string, status: TriadConnectionStatus) => {
+    setNodes(current =>
+      current.map(node => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              status
+            }
+          };
+        }
+        return node;
+      })
     );
-  };
-
-  const removeNode = (id: string) => {
-    setNodes(prev => prev.filter(node => node.id !== id));
-    setEdges(prev => prev.filter(edge => edge.source !== id && edge.target !== id));
-    toast({
-      title: "Quantum Node Removed",
-      description: `Node has been removed from the entanglement network`,
-    });
-  };
-
-  const addEdge = (source: string, target: string) => {
-    const newEdge: ConnectionEdge = {
-      id: uuidv4(),
-      source: source,
-      target: target,
-      type: 'quantumEdge',
-      animated: true,
-    };
-
-    setEdges(prev => [...prev, newEdge]);
-    setConnectionStatus('entangled');
-    toast({
-      title: "Quantum Entanglement Established",
-      description: `Connection established between nodes`,
-    });
-  };
-
-  const removeEdge = (id: string) => {
-    setEdges(prev => prev.filter(edge => edge.id !== id));
-    setConnectionStatus('disconnected');
-    toast({
-      title: "Quantum Entanglement Broken",
-      description: `Connection broken between nodes`,
-    });
-  };
-
-  const toggleStreaming = () => {
-    setIsStreaming(prev => !prev);
-    toast({
-      title: `Quantum Streaming ${isStreaming ? "Stopped" : "Started"}`,
-      description: `Data stream ${isStreaming ? "terminated" : "initialized"}`,
-    });
-  };
-
-  const triggerDissonanceEvent = () => {
-    const newDissonance = Math.max(5, Math.min(95, dissonanceLevel + Math.floor(Math.random() * 20) - 10));
-    setDissonanceLevel(newDissonance);
-    toast({
-      title: "Dissonance Event Triggered",
-      description: `Quantum dissonance levels fluctuating`,
-    });
-  };
-
+  }, []);
+  
   return {
     nodes,
     edges,
-    connectionStatus,
-    streamStats,
-    dissonanceLevel,
-    showSpeciesDropdown,
+    stats,
     selectedNode,
-    isStreaming,
-    quantumState,
-    bioData,
-    setNodes,
-    setEdges,
-    setConnectionStatus,
-    setStreamStats,
-    setDissonanceLevel,
-    setShowSpeciesDropdown,
-    setSelectedNode,
-    setIsStreaming,
-    setQuantumState,
-    setBioData,
-    addNode,
-    updateNode,
-    removeNode,
-    addEdge,
-    removeEdge,
-    toggleStreaming,
-    triggerDissonanceEvent
+    updateNodeStatus,
+    setSelectedNode
   };
-}
+};
+
+export default useQuantumEntanglement;

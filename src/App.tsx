@@ -6,6 +6,7 @@ import SoulStreamPage from "./pages/SoulStreamPage";
 import PublicModules from "./pages/PublicModules";
 import StargirlBackline from "./pages/StargirlBackline";
 import QuantumStabilizerPage from "./pages/QuantumStabilizer";
+import AlienLanguageScannerPage from "./pages/AlienLanguageScanner";
 import '@/App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
       <Route path="/public-modules" element={<PublicModules />} />
       <Route path="/stargirl-backline" element={<StargirlBackline />} />
       <Route path="/quantum-stabilizer" element={<QuantumStabilizerPage />} />
+      <Route path="/alien-language-scanner" element={<AlienLanguageScannerPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

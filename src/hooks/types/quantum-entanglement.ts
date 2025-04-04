@@ -1,65 +1,35 @@
 
-export type EmotionalState = 
-  | 'neutral'
-  | 'calm' 
-  | 'focused'
-  | 'peaceful'
-  | 'excited'
-  | 'joyful'
-  | 'concerned'
-  | 'uncertain'
-  | 'distressed'
-  | 'joy'
-  | 'peace'
-  | 'love'
-  | 'awe'
-  | 'contemplation'
-  | string; // Allow string for backward compatibility
+import { Bioreadings } from "@/utils/biofeedbackSimulator";
 
-export interface EntanglementState {
-  active: boolean;
-  entangledWith: string | null;
-  strength: number;
-  emotion: EmotionalState;
+export type TriadConnectionStatus = 'active' | 'inactive' | 'pending' | 'error';
+
+export interface QuantumNodeData {
+  label: string;
+  status: TriadConnectionStatus;
+  biofeedback: Bioreadings;
 }
 
-export interface UserProfile {
+export interface ConnectionNode {
   id: string;
-  name: string;
-  coherenceLevel: number;
-  emotionalState: EmotionalState;
-  lastContact: string; // ISO date string
-}
-
-// Add EntityProfile as an alias for UserProfile to maintain compatibility
-export type EntityProfile = UserProfile;
-
-export interface BiofeedbackResult {
-  coherent: boolean;
-  metrics: {
-    hrv: number;
-    eeg: {
-      gamma: number;
-      theta: number;
-    }
+  position: {
+    x: number;
+    y: number;
   };
-  hrv: number;
-  eeg: {
-    gamma: number;
-    theta: number;
-  };
-  dominantEmotion?: EmotionalState;
+  data: QuantumNodeData;
+  type: 'custom';
 }
 
-export interface ResonanceResult {
-  success: boolean;
-  resonanceLevel?: number;
-  message?: string;
-}
-
-export interface DivinePresence {
-  active: boolean;
+export interface ConnectionEdge {
+  id: string;
   source: string;
-  intensity: number;
-  clarity: number;
+  target: string;
+  type: 'smoothstep';
+  animated: boolean;
+}
+
+export interface QuantumStreamStats {
+  bandwidth: number;
+  latency: number;
+  coherence: number;
+  entanglementStrength: number;
 }
