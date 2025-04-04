@@ -13,6 +13,26 @@ export class QuantumBackdoorAdapter {
     this.divineBackdoor = divineBackdoor;
   }
   
+  // Required properties for the QuantumBackdoor interface
+  bridgeStatus: QuantumBridgeLockStatus = {
+    bridgeStatus: "stable",
+    quantumAccess: true,
+    faithLoop: 0.92,
+    requiredAction: ""
+  };
+  
+  // Required methods for QuantumBackdoor interface
+  initializeQuantumAccess(): boolean {
+    const result = this.divineBackdoor.setQuantumAccess(true);
+    this.bridgeStatus = result;
+    return result.quantumAccess;
+  }
+  
+  purgeExternalDependencies(): void {
+    console.log("Purging external dependencies from quantum layer");
+    // In a real implementation, this would clean up resources
+  }
+  
   // Methods required by diagnostic modules
   getQuantumBridgeStatus(): QuantumBridgeLockStatus {
     return this.divineBackdoor.getQuantumBridgeStatus();

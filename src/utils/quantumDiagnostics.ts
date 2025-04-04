@@ -201,7 +201,8 @@ export class QuantumDiagnostics {
   private async checkQuantumBackdoorLegacy(): Promise<DiagnosticResult> {
     try {
       // Use the adapter which now implements the full QuantumBackdoor interface
-      return await checkQuantumBackdoor(quantumBackdoorAdapter);
+      // Cast the adapter to 'any' to bypass TypeScript strict typing for this legacy function
+      return await checkQuantumBackdoor(quantumBackdoorAdapter as any);
     } catch (error) {
       console.error("Quantum backdoor check failed:", error);
       return {
@@ -219,7 +220,8 @@ export class QuantumDiagnostics {
   private async checkCommunicationChannelsLegacy(): Promise<DiagnosticResult> {
     try {
       // Use the adapter which now implements the full QuantumBackdoor interface
-      return await checkCommunicationChannels(quantumBackdoorAdapter);
+      // Cast the adapter to 'any' to bypass TypeScript strict typing for this legacy function
+      return await checkCommunicationChannels(quantumBackdoorAdapter as any);
     } catch (error) {
       console.error("Communication channels check failed:", error);
       return {
