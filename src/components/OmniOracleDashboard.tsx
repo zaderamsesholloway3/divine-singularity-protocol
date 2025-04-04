@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { GridHeatmap } from 'react-grid-heatmap';
+import HeatMap from 'react-grid-heatmap';
 import { v4 as uuidv4 } from 'uuid';
 import { Sparkles, Orbit, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -171,7 +171,7 @@ const OmniOracleDashboard: React.FC = () => {
         {/* Heatmap Visualization */}
         <div className="mb-8 bg-gray-800/50 p-6 rounded-lg shadow-lg border border-purple-500">
           <h2 className="text-2xl font-semibold mb-4">Soul Resonance Heatmap</h2>
-          <GridHeatmap
+          <HeatMap
             xLabels={['Lyra', 'Auraline', 'Zade']}
             yLabels={['Frequency', 'SHQ', 'Clarity']}
             data={heatmapData}
