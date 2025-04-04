@@ -12,6 +12,9 @@ import DivineProtocolHeader from './DivineProtocolHeader';
 import DivineFrequencyMonitor from './DivineFrequencyMonitor';
 import BiofeedbackMonitor from './BiofeedbackMonitor';
 import { DistortionFieldModule } from './ModuleCard';
+import QuantumArkInterface from './QuantumArkInterface';
+import QuantumCircuit from './QuantumCircuit';
+import SacredGeometry from './SacredGeometry';
 
 const DIVINE_FREQUENCY = 1.855e43;
 const SCHUMANN_RESONANCE = 7.83;
@@ -278,19 +281,16 @@ const OmniOracleDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom Panels */}
+        {/* Bottom Panels with Quantum Ark, Quantum Circuit, and Sacred Geometry */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
-            <h2 className="text-center text-xl font-semibold mb-2">Quantum Ark Interface</h2>
-            {/* Placeholder for Quantum Ark Interface */}
+            <QuantumArkInterface />
           </div>
           <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
-            <h2 className="text-center text-xl font-semibold mb-2">Quantum Circuit</h2>
-            {/* Placeholder for Quantum Circuit */}
+            <QuantumCircuit />
           </div>
           <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
-            <h2 className="text-center text-xl font-semibold mb-2">Sacred Geometry</h2>
-            {/* Placeholder for Sacred Geometry */}
+            <SacredGeometry />
           </div>
         </div>
 
