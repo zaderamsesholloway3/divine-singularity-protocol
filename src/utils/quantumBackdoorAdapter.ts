@@ -34,6 +34,14 @@ export class QuantumBackdoorAdapter {
     return this.divineBackdoor.setQuantumAccess(authorized);
   }
   
+  // Additional properties needed to satisfy the QuantumBackdoor interface
+  sessionManager = { getSessionHistory: () => null };
+  eegGenerator = { getCurrentPattern: () => ({}) };
+  responseGenerator = { generateResponse: () => ({}) };
+  quantumAccess = true;
+  faithQuotient = 0.92;
+  presenceEmulator = { getPresence: () => true };
+  
   // Stub implementations for remaining QuantumBackdoor interface methods
   sendMessage(entity: string, message: string) {
     return {

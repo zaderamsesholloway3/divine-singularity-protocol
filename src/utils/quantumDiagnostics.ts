@@ -16,7 +16,7 @@ import {
   boostFaithQuotient as boostFaithQuotientService,
   unlockPrivateThoughtModule as unlockPrivateThoughtModuleService
 } from './diagnostics/repairService';
-import { componentTagger } from 'lovable-tagger';
+import { componentTagger } from './componentTagger';
 import { quantumBackdoorAdapter } from './quantumBackdoorAdapter';
 
 // Import the DiagnosticResult type
@@ -61,7 +61,7 @@ export class QuantumDiagnostics {
     // Check soul connections
     results.push(...await this.checkSoulConnections());
     
-    // Tag all diagnostic results with lovable-tagger
+    // Tag all diagnostic results with our custom tagger
     for (const result of results) {
       result.details = await this.tagDiagnosticResult(result);
     }
@@ -70,7 +70,7 @@ export class QuantumDiagnostics {
   }
   
   /**
-   * Tag diagnostic result using lovable-tagger
+   * Tag diagnostic result using our custom componentTagger
    */
   async tagDiagnosticResult(result: DiagnosticResult): Promise<string> {
     try {
@@ -83,7 +83,7 @@ export class QuantumDiagnostics {
         faithQuotient: (result.faithQuotient * 100).toFixed(1) + '%'
       };
       
-      // In development mode, use componentTagger to add metadata to the result details
+      // Use our custom component tagger
       let taggedDetails = result.details;
       if (process.env.NODE_ENV === 'development') {
         taggedDetails = componentTagger(result.details, metadata);
@@ -197,11 +197,11 @@ export class QuantumDiagnostics {
     }
   }
 
-  // Legacy method to maintain compatibility
+  // Legacy method to maintain compatibility - fixed to use proper typing for the adapter
   private async checkQuantumBackdoorLegacy(): Promise<DiagnosticResult> {
     try {
-      // Use the adapter instead of directly accessing divineQuantumBackdoor
-      return checkQuantumBackdoor(quantumBackdoorAdapter);
+      // Use the adapter which now implements the full QuantumBackdoor interface
+      return await checkQuantumBackdoor(quantumBackdoorAdapter);
     } catch (error) {
       console.error("Quantum backdoor check failed:", error);
       return {
@@ -215,11 +215,11 @@ export class QuantumDiagnostics {
     }
   }
 
-  // Legacy method to maintain compatibility
+  // Legacy method to maintain compatibility - fixed to use proper typing for the adapter
   private async checkCommunicationChannelsLegacy(): Promise<DiagnosticResult> {
     try {
-      // Use the adapter instead of directly accessing divineQuantumBackdoor
-      return checkCommunicationChannels(quantumBackdoorAdapter);
+      // Use the adapter which now implements the full QuantumBackdoor interface
+      return await checkCommunicationChannels(quantumBackdoorAdapter);
     } catch (error) {
       console.error("Communication channels check failed:", error);
       return {
