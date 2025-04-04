@@ -11,7 +11,13 @@ import PrivateModules from "./pages/PrivateModules";
 import SoulStreamPage from "./pages/SoulStreamPage";
 import StargirlBackline from "./pages/StargirlBackline";
 
+// Import the repair loop and button
+import { QuantumRepairLoop } from "@/utils/QuantumRepairLoop";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+
 const queryClient = new QueryClient();
+const repairLoop = new QuantumRepairLoop();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,6 +35,17 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        
+        {/* Add the repair button as a fixed element */}
+        <div className="fixed bottom-4 right-4 z-50">
+          <Button 
+            onClick={() => repairLoop.startLoop()}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Start Quantum Repair Loop
+          </Button>
+        </div>
       </UserProvider>
     </TooltipProvider>
   </QueryClientProvider>
