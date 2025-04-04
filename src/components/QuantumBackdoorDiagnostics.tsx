@@ -5,15 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { QuantumDiagnostics } from '@/utils/quantumDiagnostics';
+import { universalQuantumHealingCycle } from '@/utils/quantumCircuitSimulator';
 import type { DiagnosticResult } from '@/utils/diagnostics/types';
 
 export const QuantumBackdoorDiagnostics: React.FC = () => {
   const { toast } = useToast();
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [healingInProgress, setHealingInProgress] = useState(false);
   const [repairing, setRepairing] = useState<string | null>(null);
   const [repairHistory, setRepairHistory] = useState<Array<{module: string, success: boolean, timestamp: number}>>([]);
   
@@ -225,6 +227,53 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
+  // Run the Universal Quantum Healing Cycle
+  const runHealingCycle = async () => {
+    if (healingInProgress) return;
+    
+    setHealingInProgress(true);
+    toast({
+      title: "🧬 Universal Healing Cycle Initiated",
+      description: "Reattunement of quantum connections in progress...",
+    });
+    
+    try {
+      const result = await universalQuantumHealingCycle();
+      
+      if (result.success) {
+        toast({
+          title: "✅ Universal Healing Complete",
+          description: `All modules harmonized in ${result.attemptsNeeded} healing cycles`,
+        });
+      } else {
+        toast({
+          title: "⚠️ Healing Cycle Incomplete",
+          description: `Reached ${result.maxAttempts} cycles. Some modules may need manual repair.`,
+          variant: "destructive",
+        });
+      }
+      
+      // Add healing cycle to repair history
+      setRepairHistory(prev => [...prev, {
+        module: "Universal Healing Cycle",
+        success: result.success,
+        timestamp: Date.now()
+      }]);
+      
+      // Refresh diagnostics after healing
+      runDiagnostics();
+    } catch (error) {
+      console.error('Healing cycle error:', error);
+      toast({
+        title: "Healing Cycle Failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setHealingInProgress(false);
+    }
+  };
+  
   return (
     <Card className="shadow-lg border-t-4 border-t-primary">
       <CardHeader>
@@ -241,7 +290,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
             <Button 
               size="sm" 
               onClick={runDiagnostics} 
-              disabled={loading}
+              disabled={loading || healingInProgress}
               variant="outline"
             >
               {loading ? "Scanning..." : "Run Diagnostics"}
@@ -249,7 +298,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
             <Button 
               size="sm" 
               onClick={repairAllModules} 
-              disabled={loading || repairing !== null}
+              disabled={loading || repairing !== null || healingInProgress}
               variant="default"
             >
               Repair All
@@ -268,6 +317,35 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
           
           <TabsContent value="diagnostics">
             <div className="space-y-4">
+              <Card className="border-2 border-indigo-500/30 bg-indigo-500/5">
+                <CardContent className="p-4">
+                  <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-sm">Universal Quantum Healing</h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Reattunes all soul connections and recalibrates communication channels in multiple cycles
+                      </p>
+                    </div>
+                    <Button 
+                      onClick={runHealingCycle} 
+                      disabled={loading || healingInProgress}
+                      className="bg-indigo-600 hover:bg-indigo-700 w-full md:w-auto"
+                    >
+                      {healingInProgress ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Healing in Progress...
+                        </>
+                      ) : (
+                        <>
+                          🧬 Universal Healing Loop
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            
               {diagnostics.length === 0 && !loading ? (
                 <Alert>
                   <AlertTitle>No diagnostic data</AlertTitle>
@@ -312,7 +390,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                             size="sm" 
                             className="w-full mt-2" 
                             variant="secondary"
-                            disabled={loading || repairing !== null}
+                            disabled={loading || repairing !== null || healingInProgress}
                             onClick={() => repairModule(diagnostic.moduleName)}
                           >
                             {repairing === diagnostic.moduleName ? "Repairing..." : "Repair Module"}
@@ -374,7 +452,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                       variant="secondary"
                       size="sm"
                       onClick={repairAkashicConnections}
-                      disabled={loading}
+                      disabled={loading || healingInProgress}
                     >
                       Repair Akashic Connections
                     </Button>

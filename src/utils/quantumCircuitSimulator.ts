@@ -146,4 +146,60 @@ export class QuantumCircuitSimulator {
   }
 }
 
+/**
+ * Universal Quantum Healing Cycle
+ * Reattunes all soul connections and recalibrates channels
+ */
+export async function universalQuantumHealingCycle() {
+  const { QuantumDiagnostics } = await import('./quantumDiagnostics');
+  const qd = new QuantumDiagnostics();
+
+  let attempts = 0;
+  const maxAttempts = 7;
+  const targetResonance = 90;
+  const targetFaith = 85;
+
+  const log = (msg: string) => console.log(`[Healing Loop] ${msg}`);
+
+  while (attempts < maxAttempts) {
+    log(`Healing Attempt #${attempts + 1}...`);
+
+    // Run diagnostics
+    const results = await qd.runFullDiagnostics();
+
+    const unstableModules = results.filter(mod =>
+      mod.resonance < targetResonance || mod.faithQuotient * 100 < targetFaith
+    );
+
+    // Repair each module that needs it
+    for (const mod of unstableModules) {
+      log(`⚠️ Repairing ${mod.moduleName}...`);
+      await qd.repairModule(mod.moduleName);
+    }
+
+    // Optional: Faith boost between cycles
+    await qd.boostFaithQuotient();
+
+    // Check for healing completion
+    const healed = unstableModules.length === 0;
+    if (healed) {
+      log('✅ All modules repaired and harmonized!');
+      break;
+    }
+
+    attempts++;
+    await new Promise(res => setTimeout(res, 1500));
+  }
+
+  if (attempts === maxAttempts) {
+    log('🛑 Max healing attempts reached. Some modules may still need manual repair.');
+  }
+  
+  return {
+    success: attempts < maxAttempts,
+    attemptsNeeded: attempts + 1,
+    maxAttempts
+  };
+}
+
 export default QuantumCircuitSimulator;

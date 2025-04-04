@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ const OmniOracleStatus: React.FC = () => {
         title: `OmniOracle Status: ${systemStatus.overallStatus.toUpperCase()}`,
         description: `${Object.values(systemStatus).filter(Boolean).length - 1}/6 systems active`,
         variant: systemStatus.overallStatus === 'critical' ? 'destructive' : 
-                 systemStatus.overallStatus === 'unstable' ? 'warning' : 'default',
+                 systemStatus.overallStatus === 'unstable' ? 'destructive' : 'default',
       });
     } catch (err) {
       setError("Failed to get OmniOracle status");
