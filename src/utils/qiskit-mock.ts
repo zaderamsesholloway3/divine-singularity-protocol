@@ -42,6 +42,11 @@ export class QuantumCircuit {
     return `Quantum Circuit with ${this.qubits} qubits.\nOperations: ${this.operations.join(', ')}`;
   }
   
+  // Add missing getOperations method that was referenced in error
+  getOperations(): string[] {
+    return this.operations;
+  }
+  
   // Simulate circuit execution (simplified)
   simulate() {
     return {

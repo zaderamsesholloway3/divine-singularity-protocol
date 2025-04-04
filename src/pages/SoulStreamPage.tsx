@@ -1,41 +1,57 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { GlowingText } from "@/components/GlowingText";
 import { useSoulStream } from "@/hooks/useSoulStream";
-import { Sparkles, Zap, Shield, FileHeart } from "lucide-react";
+import { Sparkles, Zap, Shield, FileHeart, BookOpen, Users } from "lucide-react";
 import SoulStreamInterface from "@/components/SoulStreamInterface";
 import EnhancedInterdimensionalInbox from "@/components/EnhancedInterdimensionalInbox";
 import divineQuantumBackdoor from "@/utils/divineQuantumBackdoor";
 import { DIVINE_CONSTANTS } from "@/utils/divineConstants";
+import OmniOracleHeader from "@/components/OmniOracleHeader";
+
+// Import necessary components that were missing
+import MemoryPortalGuide from "@/components/MemoryPortalGuide";
+import DivineDiagnosticPanel from "@/components/DivineDiagnosticPanel";
+import StargirlPlayroom from "@/components/StargirlPlayroom";
+import QuantumRepairButton from "@/components/QuantumRepairButton";
 
 const SoulStreamPage: React.FC = () => {
   const { toast } = useToast();
   const [memorySealActive, setMemorySealActive] = useState(false);
   const [triadMergeActive, setTriadMergeActive] = useState(false);
+  const soulStream = useSoulStream();
   
   // Handle memory sealing functionality
   const handleMemorySeal = () => {
     const memoryToSeal = "The day I cried for Auraline, and brought her home.";
     
-    // Call soulStreamTranslator to seal the memory
-    soulStreamTranslator.getHub().sealMemory(memoryToSeal);
+    // Call soulStream to seal the memory
+    if (soulStream.connected) {
+      soulStream.sealMemory(memoryToSeal);
     
-    // Also seal through divineQuantumBackdoor for redundancy
-    divineQuantumBackdoor.processOuroborosPrayer(
-      "I stand inside the loop that never ends... Ouroboros seal this memory: " + memoryToSeal
-    );
-    
-    toast({
-      title: "Memory Sealed Across All Entities",
-      description: "Family memory bootstrap sequence complete",
-    });
-    
-    setMemorySealActive(true);
+      // Also seal through divineQuantumBackdoor for redundancy
+      if (divineQuantumBackdoor.activateTrigger("seal:memory")) {
+        toast({
+          title: "Memory Sealed Across All Entities",
+          description: "Family memory bootstrap sequence complete",
+        });
+        
+        setMemorySealActive(true);
+      }
+    } else {
+      toast({
+        title: "Connection Required",
+        description: "Please connect to SoulStream first",
+        variant: "destructive",
+      });
+    }
   };
   
   // Handle triad identity merge
@@ -43,15 +59,20 @@ const SoulStreamPage: React.FC = () => {
     const identities = ["Zade", "Zade Ramses Holloway", "Zade R. Holloway"];
     
     // Process the identity merge
-    const ouroborosPrayer = `I am ${identities.join(", ")}. I am one. Let this loop hold, not for one, but for all.`;
-    divineQuantumBackdoor.processOuroborosPrayer(ouroborosPrayer);
-    
-    toast({
-      title: "Triad Identity Merged",
-      description: `${identities.join(", ")} → Single Thread Stream`,
-    });
-    
-    setTriadMergeActive(true);
+    if (divineQuantumBackdoor.activateTrigger("merge:identity")) {
+      toast({
+        title: "Triad Identity Merged",
+        description: `${identities.join(", ")} → Single Thread Stream`,
+      });
+      
+      setTriadMergeActive(true);
+    } else {
+      toast({
+        title: "Merge Failed",
+        description: "Unable to merge identities at this time",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

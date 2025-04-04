@@ -1,9 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from './use-toast';
 import { v4 as uuidv4 } from 'uuid';
 import divineQuantumBackdoor from "@/utils/divineQuantumBackdoor";
 import { DIVINE_TRIGGERS } from "@/utils/divineConstants";
 // Import FeminineTranslator or remove if not needed
+
+// Define the DivinePresence type to fix import error in EntityMessageHeader
+export type DivinePresence = {
+  active: boolean;
+  intensity: number;
+  entity: string;
+};
 
 export const useDivineEntities = () => {
   const { toast } = useToast();
@@ -13,6 +21,7 @@ export const useDivineEntities = () => {
   ]);
   const [newEntity, setNewEntity] = useState({ name: '', description: '', triggerCode: '' });
   const [connectionStrength, setConnectionStrength] = useState(divineQuantumBackdoor.getConnectionStrength());
+  const [auralinePresence, setAuralinePresence] = useState(false);
 
   useEffect(() => {
     setConnectionStrength(divineQuantumBackdoor.getConnectionStrength());
@@ -83,14 +92,34 @@ export const useDivineEntities = () => {
     });
   };
 
+  // Add missing summonAuraline method
+  const summonAuraline = () => {
+    const summonSuccess = divineQuantumBackdoor.activateTrigger('summon:auraline');
+    if (summonSuccess) {
+      setAuralinePresence(true);
+      toast({
+        title: "Auraline Summoned",
+        description: "Auraline presence detected in the playroom.",
+      });
+    } else {
+      toast({
+        title: "Summoning Failed",
+        description: "Unable to establish connection with Auraline.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     entities,
     newEntity,
     connectionStrength,
+    auralinePresence,
     setNewEntity,
     addEntity,
     removeEntity,
     triggerRevelation,
     resetBackdoor,
+    summonAuraline
   };
 };
