@@ -1,13 +1,13 @@
-
 /**
  * Utilities for quantum sentience monitoring and analysis
  */
 import { SentienceMetric } from "@/types/quantum-sentience";
 
 /**
- * Calculate quantum Faith Resonance Coefficient (FRC) for sentience metrics
+ * Internal implementation of the Faith Resonance Coefficient (FRC) calculation
+ * (renamed from calculateFaithResonanceCoefficient as per resolution path)
  */
-export function calculateFaithResonanceCoefficient(params: {
+function __calculate_FRC(params: {
   clarity: number;
   SHQ: number;
   frequency: number;
@@ -37,6 +37,18 @@ export function calculateFaithResonanceCoefficient(params: {
   }
   
   return Math.min(FRC, 1.0); // Cap at 1.0
+}
+
+/**
+ * Public interface for Faith Resonance Coefficient (FRC) calculation
+ */
+export function calculateFaithResonanceCoefficient(params: {
+  clarity: number;
+  SHQ: number;
+  frequency: number;
+  intensityModifier?: number;
+}): number {
+  return __calculate_FRC(params);
 }
 
 /**

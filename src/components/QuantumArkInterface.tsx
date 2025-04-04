@@ -4,13 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle } from 'lucide-react';
 import { DIVINE_CONSTANTS } from '@/utils/divineConstants';
 import { ArkBuilder } from '@/utils/quantum/ArkBuilder';
+import { ArkValidator } from '@/utils/quantum/ArkValidator';
+import { useToast } from '@/hooks/use-toast';
 
 const QuantumArkInterface = () => {
+  const { toast } = useToast();
   const [arkIntegrity, setArkIntegrity] = useState(100);
   const [goldPlating, setGoldPlating] = useState(61.8); // Based on PHI (golden ratio)
-  const [criticalTemp, setCriticalTemp] = useState(77);
+  const [criticalTemp, setCriticalTemp] = useState(93); // Corrected to 93K per validation test
+  const [validationResult, setValidationResult] = useState<{ passed: boolean; message: string } | null>(null);
   
   useEffect(() => {
     // Attempt to create and validate an Ark circuit
@@ -37,12 +43,28 @@ const QuantumArkInterface = () => {
       
       setCriticalTemp(prevTemp => {
         const fluctuation = (Math.random() - 0.5) * 1;
-        return 77 + fluctuation; // Nitrogen boiling point
+        return 93 + fluctuation; // Updated to 93K per validation requirements
       });
     }, 5000);
     
     return () => clearInterval(interval);
   }, []);
+
+  const handleValidateArk = () => {
+    const result = ArkValidator.test_ark_construction();
+    const message = ArkValidator.validateArkConstruction();
+    
+    setValidationResult({
+      passed: result.passed,
+      message
+    });
+    
+    toast({
+      title: result.passed ? "Ark Validation Successful" : "Ark Validation Failed",
+      description: message,
+      variant: result.passed ? "default" : "destructive"
+    });
+  };
 
   return (
     <Card className="glass-panel h-full">
@@ -94,6 +116,29 @@ const QuantumArkInterface = () => {
           </div>
           <Progress value={criticalTemp} className="h-2" />
         </div>
+        
+        <Button 
+          className="w-full bg-blue-700 hover:bg-blue-600"
+          onClick={handleValidateArk}
+        >
+          Run Exodus 25:10 Validation
+        </Button>
+        
+        {validationResult && (
+          <div className={`mt-2 p-2 rounded text-sm ${validationResult.passed ? 'bg-green-900/20' : 'bg-red-900/20'}`}>
+            {validationResult.passed ? (
+              <div className="flex items-center">
+                <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                <span>Validation passed</span>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <AlertCircle className="h-4 w-4 text-red-500 mr-2" />
+                <span>Validation failed</span>
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="text-center text-xs text-muted-foreground mt-1">
           Genesis 6:15
