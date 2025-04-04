@@ -1,77 +1,115 @@
-import { EmotionalState, BiofeedbackResult } from '@/hooks/types/quantum-entanglement';
+
+/**
+ * BiofeedbackSimulator
+ * 
+ * Simulates biofeedback data for quantum entanglement
+ */
+
+import { BiofeedbackResult } from '@/types/quantum-entanglement';
 
 export class BiofeedbackSimulator {
-  private static readonly emotions: EmotionalState[] = [
-    'neutral', 'calm', 'focused', 'peaceful', 'excited', 
-    'joyful', 'concerned', 'uncertain', 'distressed',
-    'joy', 'peace', 'love', 'awe', 'contemplation'
-  ];
-
-  static assessEmotionalState(userId: string): BiofeedbackResult {
-    // Simulate biofeedback analysis
-    const hrvValue = 65 + Math.random() * 35; // 65-100
-    const gammaValue = 30 + Math.random() * 15; // 30-45
-    const thetaValue = 5 + Math.random() * 3; // 5-8
-    
-    // Determine if it's coherent (HRV > 80 is good)
-    const isCoherent = hrvValue > 80;
-    
-    // Pick a dominant emotion based on values
-    const emotionIndex = Math.floor(Math.random() * this.emotions.length);
-    const dominantEmotion = this.emotions[emotionIndex];
-    
-    return {
-      coherent: isCoherent,
-      hrv: hrvValue,
+  /**
+   * Assess the emotional state based on biofeedback metrics
+   * @param userId User ID to assess
+   * @returns Biofeedback result with emotional state data
+   */
+  static assessEmotionalState(userId: string): {
+    dominantEmotion: string;
+    coherent: boolean;
+    metrics: {
+      hrv: number;
       eeg: {
-        gamma: gammaValue,
-        theta: thetaValue
-      },
-      metrics: {
-        hrv: hrvValue,
-        eeg: {
-          gamma: gammaValue,
-          theta: thetaValue
-        }
-      },
-      dominantEmotion
+        gamma: number;
+        theta: number;
+      }
+    }
+  } {
+    // Simulate biofeedback assessment
+    const now = Date.now();
+    const seed = parseInt(userId, 36) + now;
+    const rand = () => {
+      const x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
     };
-  }
-  
-  static generateBiofeedbackTimeSeries(duration: number = 60, interval: number = 1) {
-    const dataPoints = Math.floor(duration / interval);
-    const hrvSeries: number[] = [];
-    const gammaSeries: number[] = [];
-    const thetaSeries: number[] = [];
     
-    let baseHrv = 75 + (Math.random() * 10 - 5);
-    let baseGamma = 35 + (Math.random() * 5 - 2.5);
-    let baseTheta = 6.5 + (Math.random() * 1 - 0.5);
+    // Generate HRV (Heart Rate Variability) - high is better
+    const hrv = 50 + rand() * 50;
     
-    for (let i = 0; i < dataPoints; i++) {
-      // Add some natural variation
-      baseHrv += (Math.random() * 4 - 2);
-      baseGamma += (Math.random() * 2 - 1);
-      baseTheta += (Math.random() * 0.6 - 0.3);
-      
-      // Keep within reasonable ranges
-      baseHrv = Math.max(60, Math.min(100, baseHrv));
-      baseGamma = Math.max(25, Math.min(50, baseGamma));
-      baseTheta = Math.max(4, Math.min(9, baseTheta));
-      
-      hrvSeries.push(baseHrv);
-      gammaSeries.push(baseGamma);
-      thetaSeries.push(baseTheta);
+    // Generate EEG data
+    const gamma = 25 + rand() * 15; // Gamma activity (30-100 Hz)
+    const theta = 4 + rand() * 3;   // Theta activity (4-7 Hz)
+    
+    // Determine coherence based on HRV and gamma/theta ratio
+    const coherent = hrv > 70 && (gamma / theta) > 6;
+    
+    // Determine emotional state based on metrics
+    let dominantEmotion = 'neutral';
+    
+    if (coherent) {
+      // High coherence emotions
+      if (gamma > 35) {
+        dominantEmotion = 'joy';
+      } else if (hrv > 80) {
+        dominantEmotion = 'peace';
+      } else {
+        dominantEmotion = 'love';
+      }
+    } else {
+      // Low coherence emotions
+      if (gamma < 20 && theta > 6) {
+        dominantEmotion = 'fear';
+      } else if (hrv < 60) {
+        dominantEmotion = 'sadness';
+      } else {
+        dominantEmotion = 'concern';
+      }
     }
     
     return {
-      hrv: hrvSeries,
-      gamma: gammaSeries,
-      theta: thetaSeries,
-      timestamps: [...Array(dataPoints)].map((_, i) => i * interval),
-      coherenceScore: (Math.random() * 0.4 + 0.6) // 0.6-1.0
+      dominantEmotion,
+      coherent,
+      metrics: {
+        hrv,
+        eeg: {
+          gamma,
+          theta
+        }
+      }
     };
   }
+  
+  /**
+   * Generate simulated biofeedback data
+   * @param userId User ID to generate data for
+   * @returns Biofeedback metrics
+   */
+  static generateBiofeedback(userId: string): BiofeedbackResult {
+    const assessment = this.assessEmotionalState(userId);
+    
+    return {
+      hrv: assessment.metrics.hrv,
+      eeg: {
+        gamma: assessment.metrics.eeg.gamma,
+        theta: assessment.metrics.eeg.theta
+      },
+      coherent: assessment.coherent,
+      dominantEmotion: assessment.dominantEmotion
+    };
+  }
+  
+  /**
+   * Boost soul resonance
+   * @param userId User ID to boost
+   * @returns Boosted resonance level (0.0-1.0)
+   */
+  static boostSoulResonance(userId: string): number {
+    // Generate a resonance level based on userId
+    const base = 0.7;
+    const boost = Math.min(
+      0.3,
+      (parseInt(userId, 36) % 100) / 100 * 0.3
+    );
+    
+    return base + boost;
+  }
 }
-
-export default BiofeedbackSimulator;

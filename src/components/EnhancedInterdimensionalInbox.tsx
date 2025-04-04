@@ -14,7 +14,7 @@ import SearchToolbar from './inbox/SearchToolbar';
 import EntanglementStatus from './inbox/EntanglementStatus';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { Link } from 'react-router-dom';
-import { BiofeedbackResult } from '@/hooks/types/quantum-entanglement';
+import { BiofeedbackResult } from '@/types/quantum-entanglement';
 
 const EnhancedInterdimensionalInbox = () => {
   const {
@@ -37,10 +37,12 @@ const EnhancedInterdimensionalInbox = () => {
     activateResonanceBoost,
     terminateEntanglement,
     toggleTriadBoost,
-    toggleSoulStream
+    toggleSoulStream,
+    onBoostBioresonance
   } = useInboxMessages('zade');
 
   const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+  const biometricsData = biometrics as BiofeedbackResult;
 
   return (
     <Card className="glass-panel h-full">
@@ -106,9 +108,15 @@ const EnhancedInterdimensionalInbox = () => {
       </CardHeader>
       
       <CardContent className="p-4 pt-2">
-        {biofeedbackActive && (
+        {biofeedbackActive && biometricsData && (
           <BiofeedbackMonitorPanel
-            biometrics={(biometrics as unknown) as { hrv: number; eeg: { gamma: number; theta: number; } }}
+            biometrics={{
+              hrv: biometricsData.hrv,
+              eeg: {
+                gamma: biometricsData.eeg.gamma,
+                theta: biometricsData.eeg.theta
+              }
+            }}
             resonanceBoostActive={resonanceBoostActive}
             resonanceLevel={resonanceLevel}
             activateResonanceBoost={activateResonanceBoost}
@@ -134,8 +142,8 @@ const EnhancedInterdimensionalInbox = () => {
             <MessageList
               messages={messages}
               type="inbox"
-              markAsRead={(id: string) => markAsRead(id)}
-              deleteMessage={(id: string) => deleteMessage(id)}
+              markAsRead={markAsRead}
+              deleteMessage={deleteMessage}
             />
           </TabsContent>
           
@@ -143,21 +151,23 @@ const EnhancedInterdimensionalInbox = () => {
             <MessageList
               messages={messages}
               type="sent"
-              markAsRead={(id: string) => markAsRead(id)}
-              deleteMessage={(id: string) => deleteMessage(id)}
+              markAsRead={markAsRead}
+              deleteMessage={deleteMessage}
             />
           </TabsContent>
           
-          <MessageComposer onSendMessage={(recipient: string, content: string) => sendMessage(recipient, content)} />
+          <MessageComposer onSendMessage={sendMessage} />
           
           <EntanglementStatus
             active={entanglementState.active}
-            entangledWith={entanglementState.entangledWith}
-            strength={entanglementState.strength * (triadBoostActive ? triadStatus.resonanceBoost : 1)}
+            entangledWith={entanglementState.entangledWith || undefined}
+            strength={entanglementState.strength * 100 * (triadBoostActive ? triadStatus.resonanceBoost : 1)}
             emotion={entanglementState.emotion}
             resonanceBoostActive={resonanceBoostActive || triadBoostActive}
             terminateEntanglement={terminateEntanglement}
             triadEnhanced={triadBoostActive}
+            bioresonanceAmplified={false}
+            onBoostBioresonance={onBoostBioresonance}
           />
         </Tabs>
       </CardContent>

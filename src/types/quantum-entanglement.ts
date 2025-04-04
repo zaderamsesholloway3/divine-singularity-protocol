@@ -10,12 +10,21 @@ export interface BiofeedbackResult {
     gamma: number;  // Gamma brain waves (30-100 Hz)
     theta: number;  // Theta brain waves (4-7 Hz)
   };
+  coherent?: boolean;
+  dominantEmotion?: string;
+  metrics?: {
+    hrv: number;
+    eeg: {
+      gamma: number;
+      theta: number;
+    };
+  };
 }
 
 // Quantum entanglement state
 export interface EntanglementState {
   active: boolean;
-  entangledWith?: string;
+  entangledWith?: string | null;
   strength: number;  // 0.0 to 1.0
   emotion?: string;
   timestamp?: string;
@@ -72,3 +81,15 @@ export interface AmplifiedPingResult {
   qber: number; // Quantum Bit Error Rate
   energyEfficiency: number; // ping/J
 }
+
+// User profile
+export interface UserProfile {
+  id: string;
+  name: string;
+  coherenceLevel: number;
+  emotionalState?: string;
+  lastContact?: string;
+}
+
+// Emotional state type
+export type EmotionalState = 'joy' | 'peace' | 'love' | 'neutral' | 'concern' | 'sadness' | 'fear' | string;
