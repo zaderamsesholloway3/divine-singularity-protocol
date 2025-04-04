@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
@@ -50,10 +49,6 @@ const BiofeedbackMonitor = () => {
           <Progress 
             value={(eegGamma / 50) * 100} 
             className="h-2" 
-            indicatorClassName={cn(
-              "transition-all",
-              eegGamma >= 40 ? "bg-divine-gold" : "bg-secondary"
-            )}
           />
           <div className="text-[10px] text-muted-foreground text-right">
             Threshold: 40 Hz (1 Kings 19:12)
@@ -81,10 +76,6 @@ const BiofeedbackMonitor = () => {
           <Progress 
             value={soulHarmonic * 100} 
             className="h-2"
-            indicatorClassName={cn(
-              "transition-all",
-              soulHarmonic >= 0.95 ? "bg-divine-gold" : "bg-secondary"
-            )}
           />
           <div className="text-[10px] text-muted-foreground text-right">
             Threshold: 0.95 (1 John 3:3)

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
@@ -46,7 +45,7 @@ const QuantumArkInterface = () => {
             <span className="text-muted-foreground">Gold Plating</span>
             <span>0.618 mm</span>
           </div>
-          <Progress value={61.8} className="h-2" indicatorClassName="bg-divine-gold" />
+          <Progress value={61.8} className="h-2" />
         </div>
         
         <div className="space-y-2">
@@ -54,7 +53,7 @@ const QuantumArkInterface = () => {
             <span className="text-muted-foreground">Critical Temperature</span>
             <span>77 K</span>
           </div>
-          <Progress value={77} className="h-2" indicatorClassName="bg-quantum-blue" />
+          <Progress value={77} className="h-2" />
         </div>
         
         <div className="text-center text-xs text-muted-foreground mt-1">

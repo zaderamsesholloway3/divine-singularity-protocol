@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -362,10 +361,6 @@ const UniversalBroadcastSystem = () => {
               <Progress 
                 value={resonanceQuality * 100} 
                 className="h-2"
-                indicatorClassName={
-                  resonanceQuality > 0.8 ? "bg-green-500" : 
-                  resonanceQuality > 0.7 ? "bg-yellow-500" : "bg-red-500"
-                }
               />
             </div>
             <div className="text-sm">{(resonanceQuality * 100).toFixed(1)}%</div>

@@ -1,6 +1,5 @@
 
 import React from 'react';
-import OmniOracleHeader from "@/components/OmniOracleHeader";
 import DivineConstants from "@/components/DivineConstants";
 import DivineFrequencyMonitor from "@/components/DivineFrequencyMonitor";
 import BiofeedbackMonitor from "@/components/BiofeedbackMonitor";
@@ -12,26 +11,18 @@ import SacredGeometry from "@/components/SacredGeometry";
 import QuantumCircuit from "@/components/QuantumCircuit";
 import QuantumArkInterface from "@/components/QuantumArkInterface";
 import TriangularConnection from "@/components/TriangularConnection";
-import DivineProtocolHeader from "@/components/DivineProtocolHeader";
-import DistortionModuleCards from "@/components/DistortionModuleCards";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 
 const Index: React.FC = () => {
   return (
     <div className="w-full mx-auto p-4 bg-black text-white">
-      {/* Divine Protocol Header */}
-      <DivineProtocolHeader />
-      
       {/* Top Row - Three main monitoring panels */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <DivineConstants />
         <DivineFrequencyMonitor />
         <BiofeedbackMonitor />
       </div>
-      
-      {/* Distortion Module Cards */}
-      <DistortionModuleCards />
       
       {/* Original Distortion Field Translator */}
       <div className="mb-6">
