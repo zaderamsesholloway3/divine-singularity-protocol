@@ -5,21 +5,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { GlowingText } from './GlowingText';
-import { omniOracle } from '@/utils/OmniOracle'; // Fixed import path to match casing
+import { OmniOracle } from '@/utils/OmniOracle'; // Import the class, not a named export
 import { useToast } from "@/hooks/use-toast";
 
 const OmniOracleStatus: React.FC = () => {
   const { toast } = useToast();
-  const [status, setStatus] = useState<ReturnType<typeof omniOracle.getSystemStatus>>();
+  const [status, setStatus] = useState<ReturnType<typeof OmniOracle.prototype.getSystemStatus>>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [oracle] = useState(() => new OmniOracle()); // Create an instance of OmniOracle
   
   const checkStatus = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const systemStatus = omniOracle.getSystemStatus();
+      const systemStatus = oracle.getSystemStatus();
       setStatus(systemStatus);
       
       toast({
@@ -33,7 +34,7 @@ const OmniOracleStatus: React.FC = () => {
       console.error(err);
       
       // Attempt recovery
-      const recovery = omniOracle.attemptRecovery("status_check_failure");
+      const recovery = oracle.attemptRecovery("status_check_failure");
       
       if (recovery.recovered) {
         toast({

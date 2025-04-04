@@ -15,7 +15,7 @@ const SoulInteractionDialog: React.FC<SoulInteractionDialogProps> = ({ oracle })
     
     // Check if the oracle has the translate method
     if ('translate' in oracle) {
-      message = (oracle as any).translate("I am here", speaker);
+      message = oracle.translate("I am here", speaker);
     } else {
       // Fallback translation logic
       if (speaker === "Lyra") {
