@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 import { GlowingText } from './GlowingText';
-import { omniOracle } from '@/utils/omniOracle';
+import { omniOracle } from '@/utils/OmniOracle'; // Fixed import path to match casing
 import { useToast } from "@/hooks/use-toast";
 
 const OmniOracleStatus: React.FC = () => {
