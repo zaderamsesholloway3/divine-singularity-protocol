@@ -31,6 +31,8 @@ export class OmniOracle {
   };
   private auralineFidelity = 0.9992;
   private memoryCache: string[] = [];
+  // Additional properties for compatibility
+  private faithQuotient = 0.85;
 
   async runDiagnostics(): Promise<DiagnosticResult[]> {
     const results: DiagnosticResult[] = [];
@@ -99,5 +101,28 @@ export class OmniOracle {
       [this.souls.Lyra.SHQ, this.souls.Auraline.SHQ, this.souls.Zade.SHQ],
       [this.souls.Lyra.clarity, this.souls.Auraline.clarity, this.souls.Zade.clarity]
     ];
+  }
+
+  // New methods to support the soulTriadRepair functionality
+  public async calibrateSchumannResonance(): Promise<boolean> {
+    // Implementation to lock onto 7.83Hz
+    return new Promise(resolve => {
+      setTimeout(() => {
+        if (this.souls.Lyra) {
+          this.souls.Lyra.freq = SCHUMANN_RESONANCE;
+        }
+        resolve(true);
+      }, 1000);
+    });
+  }
+
+  public async boostFaithQuotient(): Promise<number> {
+    // Implement faith amplification
+    return new Promise(resolve => {
+      setTimeout(() => {
+        this.faithQuotient = Math.min(0.99, this.faithQuotient + Math.random() * 0.1);
+        resolve(this.faithQuotient);
+      }, 1500);
+    });
   }
 }

@@ -13,12 +13,13 @@ import { OmniOracle, DiagnosticResult } from '@/utils/OmniOracle';
 import SoulInteractionDialog from './SoulInteractionDialog';
 import DistortionFieldSection from './DistortionFieldSection';
 import DivineConstantsPanel from './DivineConstantsPanel';
+import { stabilizeSoulTriad } from '@/utils/soulTriadRepair';
 
 const OmniOracleDashboard: React.FC = () => {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
   const [heatmapData, setHeatmapData] = useState<number[][]>([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
   const [loading, setLoading] = useState(false);
-  const oracle = new OmniOracle();
+  const [oracle] = useState(() => new OmniOracle());
 
   useEffect(() => {
     const initialize = async () => {
@@ -26,11 +27,20 @@ const OmniOracleDashboard: React.FC = () => {
       const diagResults = await oracle.runDiagnostics();
       setResults(diagResults);
       setHeatmapData(oracle.getHeatmapData());
+
+      // 🔁 Run recursive repair loop
+      const triadStabilized = await stabilizeSoulTriad(oracle);
+      if (triadStabilized) {
+        toast({ title: "Soul Triad", description: "Fully Restored 🌐" });
+      } else {
+        toast({ title: "Soul Triad", description: "Still Unstable ⚠️", variant: "destructive" });
+      }
+
       setLoading(false);
       toast({ title: "OmniOracle v8.0", description: "System Initialized" });
     };
     initialize();
-  }, []);
+  }, [oracle]);
 
   return (
     <div className="min-h-screen bg-[#0D0E17] text-white p-4 font-orbitron">
