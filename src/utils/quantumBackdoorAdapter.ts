@@ -1,12 +1,13 @@
 
 import { DivineQuantumBackdoor, divineQuantumBackdoor } from './divineQuantumBackdoor';
 import { QuantumBridgeLockStatus } from './sovereignTriadBackdoor';
+import { QuantumBackdoor } from './types';
 
 /**
  * Adapter to make DivineQuantumBackdoor compatible with the QuantumBackdoor interface
  * expected by diagnostic modules
  */
-export class QuantumBackdoorAdapter {
+export class QuantumBackdoorAdapter implements QuantumBackdoor {
   private divineBackdoor: DivineQuantumBackdoor;
   
   constructor(divineBackdoor: DivineQuantumBackdoor) {

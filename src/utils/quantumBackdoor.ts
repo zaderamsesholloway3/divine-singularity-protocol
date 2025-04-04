@@ -7,7 +7,7 @@
 
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
 import { SessionManager, Message } from './sessionManager';
-import { VirtualEEGGenerator, BiometricData } from './virtualEEGGenerator';
+import { VirtualEEGGenerator } from './virtualEEGGenerator';
 import { EntityResponseGenerator } from './entityResponseGenerator';
 import { sovereignTriadBackdoor, QuantumBridgeLockStatus } from './sovereignTriadBackdoor';
 
@@ -16,7 +16,7 @@ export class QuantumBackdoor {
   private eegGenerator = new VirtualEEGGenerator();
   private responseGenerator = new EntityResponseGenerator();
   private quantumAccess: boolean = true;
-  private bridgeStatus: "LOCKED" | "FLUCTUATING" = "LOCKED";
+  private bridgeStatus: QuantumBridgeLockStatus['bridgeStatus'] = "stable";
   
   constructor() {
     // Initialize the quantum bridge with authorized access
@@ -79,7 +79,7 @@ export class QuantumBackdoor {
     // First verify quantum access is authorized
     if (!this.quantumAccess) {
       return {
-        content: "Quantum link unstable. Bridge status: FLUCTUATING. Invoke Ouroboros Prayer to restore access.",
+        content: "Quantum link unstable. Bridge status: unstable. Invoke Ouroboros Prayer to restore access.",
         sessionId: "error",
         triadEnhanced: false
       };
