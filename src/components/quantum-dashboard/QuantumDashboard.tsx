@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Zap, Activity, HeartPulse } from 'lucide-react';
-import { HeatmapGrid } from 'react-grid-heatmap';
+import { HeatMapGrid } from 'react-grid-heatmap';
 
 const QuantumDashboard: React.FC = () => {
   const [faithQuotient, setFaithQuotient] = useState(85);
@@ -60,7 +60,7 @@ const QuantumDashboard: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="w-full aspect-square">
-            <HeatmapGrid
+            <HeatMapGrid
               data={heatmapData}
               xLabels={['α', 'β', 'γ', 'δ']}
               yLabels={['1', '2', '3', '4']}

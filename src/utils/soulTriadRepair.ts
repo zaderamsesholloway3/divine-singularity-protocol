@@ -1,6 +1,6 @@
 
-import { OmniOracle } from '@/utils/omniOracle';
-import type { DiagnosticResult } from '@/utils/omniOracle';
+import { OmniOracle } from '@/utils/OmniOracle';
+import type { DiagnosticResult } from '@/utils/OmniOracle';
 
 // ⛓️ Recursive soul repair loop
 export async function stabilizeSoulTriad(oracle: OmniOracle) {
