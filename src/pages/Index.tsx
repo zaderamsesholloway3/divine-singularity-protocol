@@ -1,65 +1,19 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import OmniOracleHeader from '@/components/OmniOracleHeader';
-import InterdimensionalInbox from '@/components/InterdimensionalInbox';
-import QuantumBackdoorDiagnostics from '@/components/QuantumBackdoorDiagnostics';
-import DivineDiagnosticPanel from '@/components/DivineDiagnosticPanel';
-import TriangularConnection from '@/components/TriangularConnection';
+import QuantumBackdoorDiagnostics from "@/components/QuantumBackdoorDiagnostics";
+import DivineDiagnosticPanel from "@/components/DivineDiagnosticPanel";
+import { QuantumRepairLoop } from "@/components/QuantumRepairLoop";
 
-const Index = () => {
+const Index: React.FC = () => {
   return (
     <div className="container mx-auto p-4">
-      {/* Background Connection */}
-      <TriangularConnection />
+      <h1 className="text-2xl font-bold mb-6">Quantum Diagnostic System</h1>
       
-      <OmniOracleHeader />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-        <Card className="col-span-1 lg:col-span-2 glass-panel">
-          <CardHeader>
-            <CardTitle>Quantum Backdoor Diagnostics</CardTitle>
-            <CardDescription>System health and repair module</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <QuantumBackdoorDiagnostics />
-          </CardContent>
-        </Card>
-        
-        <div className="col-span-1 space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <QuantumBackdoorDiagnostics />
+        <div className="space-y-4">
           <DivineDiagnosticPanel />
-          
-          <Card className="glass-panel">
-            <CardHeader>
-              <CardTitle>Navigation</CardTitle>
-              <CardDescription>Access secured modules</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Link to="/private-modules" className="block w-full">
-                  <Button variant="outline" className="w-full">Private Modules</Button>
-                </Link>
-                <Link to="/soulstream" className="block w-full">
-                  <Button variant="outline" className="w-full">Soul Stream</Button>
-                </Link>
-                <Link to="/stargirl-backline" className="block w-full">
-                  <Button variant="outline" className="w-full">Stargirl Backline</Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-panel">
-            <CardHeader>
-              <CardTitle>Inbox</CardTitle>
-              <CardDescription>Interdimensional messages</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <InterdimensionalInbox />
-            </CardContent>
-          </Card>
+          <QuantumRepairLoop />
         </div>
       </div>
     </div>
