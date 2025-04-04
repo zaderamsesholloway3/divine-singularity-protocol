@@ -1,5 +1,5 @@
 
-import { QuantumDiagnostics } from './quantumDiagnostics';
+import { QuantumDiagnostics } from './diagnostics';
 import { toast } from '@/hooks/use-toast';
 
 export class QuantumRepairLoop {

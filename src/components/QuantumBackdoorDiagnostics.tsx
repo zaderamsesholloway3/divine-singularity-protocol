@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,9 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { QuantumDiagnostics } from '@/utils/quantumDiagnostics';
+import { QuantumDiagnostics } from '@/utils/diagnostics';
 import { universalQuantumHealingCycle } from '@/utils/quantumCircuitSimulator';
-import type { DiagnosticResult } from '@/utils/diagnostics/types';
+import type { DiagnosticResult } from '@/utils/diagnostics';
 
 export const QuantumBackdoorDiagnostics: React.FC = () => {
   const { toast } = useToast();
@@ -19,12 +18,10 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
   const [repairing, setRepairing] = useState<string | null>(null);
   const [repairHistory, setRepairHistory] = useState<Array<{module: string, success: boolean, timestamp: number}>>([]);
   
-  // Run diagnostics on component mount
   useEffect(() => {
     runDiagnostics();
   }, []);
   
-  // Run quantum diagnostics
   const runDiagnostics = async () => {
     setLoading(true);
     try {
@@ -58,14 +55,12 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
-  // Repair a specific module
   const repairModule = async (moduleName: string) => {
     setRepairing(moduleName);
     try {
       const qd = new QuantumDiagnostics();
       const success = await qd.repairModule(moduleName);
       
-      // Log repair attempt
       setRepairHistory(prev => [...prev, {
         module: moduleName,
         success,
@@ -78,7 +73,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
           description: `${moduleName} restored to optimal state`,
         });
         
-        // Refresh diagnostics after successful repair
         runDiagnostics();
       } else {
         toast({
@@ -99,7 +93,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
-  // Get status icon based on module status
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'optimal':
@@ -115,7 +108,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
-  // Get badge color based on status
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'optimal':
@@ -131,7 +123,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
-  // Get module icon based on module name
   const getModuleIcon = (moduleName: string) => {
     if (moduleName.includes('Quantum')) return <Zap className="h-4 w-4" />;
     if (moduleName.includes('Akashic')) return <Database className="h-4 w-4" />;
@@ -140,7 +131,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     return <Cpu className="h-4 w-4" />;
   };
   
-  // Repair all unstable or critical modules
   const repairAllModules = async () => {
     const modulesToRepair = diagnostics.filter(
       d => d.status === 'unstable' || d.status === 'critical'
@@ -169,7 +159,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
         const success = await qd.repairModule(moduleName);
         if (success) successCount++;
         
-        // Log repair attempt
         setRepairHistory(prev => [...prev, {
           module: moduleName,
           success,
@@ -179,7 +168,6 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       } catch (error) {
         console.error(`Repair error for ${moduleName}:`, error);
       }
-      // Small delay between modules
       await new Promise(r => setTimeout(r, 500));
     }
     
@@ -191,11 +179,9 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       description: `Successfully repaired ${successCount}/${modulesToRepair.length} modules`,
     });
     
-    // Refresh diagnostics
     runDiagnostics();
   };
   
-  // Special action: repair Akashic connections
   const repairAkashicConnections = async () => {
     setLoading(true);
     try {
@@ -223,11 +209,10 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       });
     } finally {
       setLoading(false);
-      runDiagnostics(); // Refresh diagnostics
+      runDiagnostics();
     }
   };
   
-  // Run the Universal Quantum Healing Cycle
   const runHealingCycle = async () => {
     if (healingInProgress) return;
     
@@ -253,14 +238,12 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
         });
       }
       
-      // Add healing cycle to repair history
       setRepairHistory(prev => [...prev, {
         module: "Universal Healing Cycle",
         success: result.success,
         timestamp: Date.now()
       }]);
       
-      // Refresh diagnostics after healing
       runDiagnostics();
     } catch (error) {
       console.error('Healing cycle error:', error);
