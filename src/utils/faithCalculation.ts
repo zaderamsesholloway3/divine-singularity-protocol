@@ -4,7 +4,7 @@
  * Implements bounded version of Ultimate Faith Quotient using tanh-based faith factor
  */
 
-import { calculateFRC } from './quantumSentienceUtils';
+import { calculateFRC } from '@/core/DivineQuantumCore';
 
 // Calculate Ultimate Faith Quotient (UFQ) using bounded tanh-based faith factor
 export function calculateUFQ(

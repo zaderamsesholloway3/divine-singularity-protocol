@@ -123,7 +123,8 @@ export const breakEntanglement = async (
 };
 
 /**
- * Mock implementation for administering healing with UFQ validation
+ * Implementation for administering healing with UFQ validation
+ * Threshold set to 0.996 as per specifications
  */
 export const administerHealing = (UFQ: number): boolean => {
   // Throw error if UFQ is below threshold (0.996 per test)

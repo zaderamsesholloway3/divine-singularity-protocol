@@ -1,130 +1,114 @@
 
 import React from 'react';
-import { GlowingText } from "@/components/GlowingText";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, Network, AlertTriangle, Zap, Stars } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { DivinePresence } from '@/hooks/useDivineEntities';
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Sparkles, Network, Zap, X, Shield } from 'lucide-react';
+import { DivinePresence } from '@/hooks/types/quantum-entanglement';
 
 interface EntityMessageHeaderProps {
+  entityName: string;
+  divinePresence: DivinePresence;
   triadBoostActive: boolean;
   toggleTriadBoost: () => void;
-  emergencyProtocolActive?: boolean;
-  activateEmergencyProtocol?: () => void;
-  faithQuotient?: number;
-  lyraPresence?: DivinePresence;
-  auralinePresence?: DivinePresence;
-  onSummonEntity?: (entity: 'Lyra' | 'Auraline') => void;
+  emergencyProtocolActive: boolean;
+  activateEmergencyProtocol: () => void;
+  faithQuotient: number;
+  onClose?: () => void;
 }
 
-const EntityMessageHeader: React.FC<EntityMessageHeaderProps> = ({ 
-  triadBoostActive, 
+const EntityMessageHeader: React.FC<EntityMessageHeaderProps> = ({
+  entityName,
+  divinePresence,
+  triadBoostActive,
   toggleTriadBoost,
-  emergencyProtocolActive = false,
+  emergencyProtocolActive,
   activateEmergencyProtocol,
-  faithQuotient = 0,
-  lyraPresence,
-  auralinePresence,
-  onSummonEntity
+  faithQuotient,
+  onClose
 }) => {
-  // Calculate the faith-based resonance enhancement
-  const faithEnhancement = faithQuotient > 0.95 ? 'Ultimate' : 
-                          faithQuotient > 0.8 ? 'High' : 
-                          faithQuotient > 0.6 ? 'Moderate' : 'Low';
-  
   return (
-    <div className="flex justify-between items-center">
-      <div className="flex items-center">
-        <MessageSquare className="mr-2 h-4 w-4 divine-glow" />
-        <div>
-          <GlowingText className="divine-glow text-sm font-medium">
-            Quantum Messaging Interface
-          </GlowingText>
-          <div className="flex items-center gap-1">
-            <p className="text-xs text-muted-foreground">
-              Divine Quantum Backdoor 
-              {triadBoostActive && <span className="text-purple-500">(Triad-Enhanced)</span>}
-              {emergencyProtocolActive && <span className="text-amber-500">(Emergency Protocol Active)</span>}
-            </p>
-            {faithQuotient > 0.8 && (
-              <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-indigo-500/10 text-indigo-600 border-indigo-500">
-                <span>FRC: {faithEnhancement}</span>
-              </Badge>
-            )}
-            {lyraPresence?.isActive && (
-              <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-purple-500/10 text-purple-600 border-purple-500">
-                <span>Lyra</span>
-              </Badge>
-            )}
-            {auralinePresence?.isActive && (
-              <Badge variant="outline" className="h-4 px-1 text-[0.6rem] bg-pink-500/10 text-pink-600 border-pink-500">
-                <Stars className="h-2 w-2 mr-0.5" />
-                <span>Auraline</span>
-              </Badge>
-            )}
-          </div>
+    <div className="flex flex-col gap-2 px-1 py-2">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold">{entityName}</h3>
+          
+          {divinePresence.active && (
+            <Badge 
+              variant="outline" 
+              className="h-5 text-[0.65rem] bg-purple-500/10 text-purple-400 border-purple-400"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              <span>Divine</span>
+            </Badge>
+          )}
+          
+          {triadBoostActive && (
+            <Badge 
+              variant="outline" 
+              className="h-5 text-[0.65rem] bg-blue-500/10 text-blue-400 border-blue-400"
+            >
+              <Network className="h-3 w-3 mr-1" />
+              <span>Triad</span>
+            </Badge>
+          )}
+          
+          {emergencyProtocolActive && (
+            <Badge 
+              variant="outline" 
+              className="h-5 text-[0.65rem] bg-red-500/10 text-red-400 border-red-400"
+            >
+              <Zap className="h-3 w-3 mr-1" />
+              <span>Emergency</span>
+            </Badge>
+          )}
         </div>
+        
+        {onClose && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6"
+            onClick={onClose}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
       </div>
       
-      <div className="flex gap-2">
-        {emergencyProtocolActive ? (
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="bg-amber-500/20 text-amber-700"
-            disabled
-          >
-            <Zap className="h-3.5 w-3.5 mr-1" />
-            Ouroboros Sync Active
-          </Button>
-        ) : (
-          <>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={triadBoostActive ? "bg-purple-500/20" : ""}
-              onClick={toggleTriadBoost}
-            >
-              <Network className="h-3.5 w-3.5 mr-1" />
-              {triadBoostActive ? "Disable" : "Enable"} Triad Boost
-            </Button>
-            
-            {activateEmergencyProtocol && (
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="text-amber-700"
-                onClick={activateEmergencyProtocol}
-              >
-                <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                Force Sync
-              </Button>
-            )}
-            
-            {onSummonEntity && (
-              <div className="flex gap-1">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-purple-700"
-                  onClick={() => onSummonEntity('Lyra')}
-                >
-                  <Stars className="h-3.5 w-3.5 mr-1" />
-                  Lyra
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="text-pink-700"
-                  onClick={() => onSummonEntity('Auraline')}
-                >
-                  <Stars className="h-3.5 w-3.5 mr-1" />
-                  Auraline
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <span className={divinePresence.active ? "text-purple-400" : "text-muted-foreground"}>
+            Clarity: {(divinePresence.clarity * 100).toFixed(1)}%
+          </span>
+        </div>
+        <Separator orientation="vertical" className="h-3" />
+        <span>FQ: {(faithQuotient * 100).toFixed(1)}%</span>
+        <Separator orientation="vertical" className="h-3" />
+        <span>Signal: {divinePresence.active ? "1.855e43 Hz" : "7.83 Hz"}</span>
+      </div>
+      
+      <div className="flex gap-1 pt-1">
+        <Button
+          variant="outline"
+          size="sm"
+          className={`text-xs h-7 ${triadBoostActive ? "bg-blue-900/20" : ""}`}
+          onClick={toggleTriadBoost}
+        >
+          <Network className="h-3 w-3 mr-1" />
+          Triad Boost
+        </Button>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className={`text-xs h-7 ${emergencyProtocolActive ? "bg-red-900/20" : ""}`}
+          onClick={activateEmergencyProtocol}
+          disabled={emergencyProtocolActive}
+        >
+          <Shield className="h-3 w-3 mr-1" />
+          Emergency Protocol
+        </Button>
       </div>
     </div>
   );

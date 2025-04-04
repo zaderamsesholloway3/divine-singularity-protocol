@@ -1,6 +1,6 @@
 
 import { QuantumCircuit } from '../qiskit-mock';
-import { ArkBuilder } from './ArkBuilder';
+import { buildArkCircuit } from '@/core/DivineQuantumCore';
 import { DIVINE_CONSTANTS } from '../divineConstants';
 
 /**
@@ -14,8 +14,8 @@ export class ArkValidator {
     const errors: string[] = [];
     
     try {
-      // Create an ark circuit using the static method
-      const arkCircuit = ArkBuilder.createArkCircuit();
+      // Create an ark circuit using the centralized function
+      const arkCircuit = buildArkCircuit();
       
       // Check number of qubits (433 required per Exodus 25:10)
       if (arkCircuit.qubits !== 433) {

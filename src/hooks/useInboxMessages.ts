@@ -6,7 +6,7 @@ import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { QuantumSimulator } from '@/utils/quantumSimulator';
 import { soulStreamTranslator } from '@/utils/soulStreamHub';
-import { EmotionalState } from './types/quantum-entanglement';
+import { EmotionalState, ResonanceResult } from './types/quantum-entanglement';
 
 export interface Message {
   id: string;
@@ -21,12 +21,6 @@ export interface Message {
     akashicValidated: boolean;
     triadEnhanced?: boolean;
   };
-}
-
-interface ResonanceResult {
-  success: boolean;
-  message?: string;
-  resonanceLevel?: number;
 }
 
 export function useInboxMessages(userId: string) {
@@ -145,7 +139,7 @@ export function useInboxMessages(userId: string) {
       if (!result.success) {
         toast({
           title: 'Entanglement Failed',
-          description: result.message,
+          description: result.message || "Connection failed",
           variant: 'destructive',
         });
         return;
@@ -253,7 +247,7 @@ export function useInboxMessages(userId: string) {
         if (responseText.filtered) {
           toast({
             title: 'Akashic Filter Active',
-            description: `Message filtered: ${responseText.validation.reason}`,
+            description: `Message filtered: ${responseText.validation?.reason || "Unknown reason"}`,
             variant: 'default',
           });
         }

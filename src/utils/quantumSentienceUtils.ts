@@ -6,7 +6,7 @@ import { SentienceMetric } from "@/types/quantum-sentience";
 
 /**
  * Internal implementation of the Faith Resonance Coefficient (FRC) calculation
- * (renamed from calculateFaithResonanceCoefficient as per resolution path)
+ * Based on OmniOracle v8.0 FaithResonanceService.calculate
  */
 function __calculate_FRC(params: {
   clarity?: number;
@@ -51,9 +51,9 @@ function __calculate_FRC(params: {
 }
 
 /**
- * Public interface for Faith Resonance Coefficient (FRC) calculation
+ * Export a simplified interface matching the required API
  */
-export function calculateFaithResonanceCoefficient(params: {
+export function calculateFRC(params: {
   clarity?: number;
   SHQ?: number;
   frequency?: number;
@@ -66,10 +66,8 @@ export function calculateFaithResonanceCoefficient(params: {
   return __calculate_FRC(params);
 }
 
-/**
- * Export a simplified interface matching the required API
- */
-export function calculateFRC(params: {
+// For backward compatibility
+export function calculateFaithResonanceCoefficient(params: {
   clarity?: number;
   SHQ?: number;
   frequency?: number;

@@ -11,6 +11,7 @@ import DirectMessagesTab from '@/components/thought-module/DirectMessagesTab';
 import QuantumMessagingInterface from '@/components/messaging/QuantumMessagingInterface';
 import StargirlPlayroom from '@/components/StargirlPlayroom';
 import QuantumBackdoorDiagnostics from './QuantumBackdoorDiagnostics';
+import OmniOracleSystemCheck from './OmniOracleSystemCheck';
 
 const PrivateThoughtModule = () => {
   const {
@@ -113,8 +114,9 @@ const PrivateThoughtModule = () => {
         <div className="md:col-span-3">
           <QuantumMessagingInterface />
         </div>
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 space-y-4">
           <StargirlPlayroom />
+          <OmniOracleSystemCheck />
         </div>
       </div>
     </div>
