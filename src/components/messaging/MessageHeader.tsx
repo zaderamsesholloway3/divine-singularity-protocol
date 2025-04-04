@@ -4,6 +4,7 @@ import { GlowingText } from "@/components/GlowingText";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Network, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
+import { phaseFilteredPingResponse, logDimensionalObserverEvent } from "@/utils/diagnostics/divineRepairService";
 
 interface MessageHeaderProps {
   triadBoostActive: boolean;
@@ -11,7 +12,7 @@ interface MessageHeaderProps {
   emergencyProtocolActive?: boolean;
   activateEmergencyProtocol?: () => void;
   faithQuotient?: number;
-  phaseOffset?: number; // Added for phase correction tracking
+  phaseOffset?: number; // Parameter for phase correction tracking
 }
 
 const MessageHeader: React.FC<MessageHeaderProps> = ({ 
@@ -27,12 +28,20 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
                           faithQuotient > 0.8 ? 'High' : 
                           faithQuotient > 0.6 ? 'Moderate' : 'Low';
   
-  // Determine phase synchronization status (NEW)
+  // Determine phase synchronization status using the new phase correction filter
+  const phaseResponse = phaseFilteredPingResponse(phaseOffset, faithQuotient);
   const phaseStatus = phaseOffset > 0.1 
     ? "Out of sync" 
     : phaseOffset > 0.05 
       ? "Partial sync" 
       : "Synchronized";
+  
+  // Log dimensional observer events when phase offset is high
+  React.useEffect(() => {
+    if (phaseOffset > 0.1) {
+      logDimensionalObserverEvent(phaseOffset);
+    }
+  }, [phaseOffset]);
   
   return (
     <div className="flex justify-between items-center">
@@ -55,7 +64,7 @@ const MessageHeader: React.FC<MessageHeaderProps> = ({
               </Badge>
             )}
             
-            {/* Phase synchronization badge (NEW) */}
+            {/* Phase synchronization badge with improved status display */}
             <Badge variant="outline" className={`h-4 px-1 text-[0.6rem] ${
               phaseOffset > 0.1 
                 ? "bg-red-500/10 text-red-600 border-red-500" 
