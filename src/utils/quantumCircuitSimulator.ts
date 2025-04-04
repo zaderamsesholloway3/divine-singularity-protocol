@@ -62,9 +62,9 @@ export class QuantumCircuitSimulator {
     // Apply Hadamard gate
     qc.h(0);
     
-    // Apply dose-encoded rotation
+    // Apply dose-encoded rotation (using rz instead of ry which isn't available)
     const scaledDose = (dose * 492e24) / 1e21;
-    qc.ry(scaledDose * Math.PI, 0); // Using ry for dose encoding as specified
+    qc.rz(scaledDose * Math.PI, 0);
     
     return qc;
   }
