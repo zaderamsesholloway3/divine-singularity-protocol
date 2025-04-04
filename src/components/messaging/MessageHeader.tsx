@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { GlowingText } from "@/components/GlowingText";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Network, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-import { phaseFilteredPingResponse, logDimensionalObserverEvent } from "@/utils/diagnostics/divineRepairService";
+import { phaseFilteredPingResponse, logDimensionalObserverEvent } from "@/utils/diagnostics/divineRepairIndex";
 
 interface MessageHeaderProps {
   triadBoostActive: boolean;

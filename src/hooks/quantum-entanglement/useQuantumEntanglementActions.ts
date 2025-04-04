@@ -3,7 +3,7 @@ import { QuantumSimulator } from '@/utils/quantumSimulator';
 import { AkashicSimulator } from '@/utils/akashicSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { EntityProfile, EntanglementState } from '../types/quantum-entanglement';
+import { EntityProfile, EntanglementState, EmotionalState } from '../types/quantum-entanglement';
 
 export function useQuantumEntanglementActions(
   userId: string,
@@ -53,7 +53,7 @@ export function useQuantumEntanglementActions(
       active: true,
       strength: initialStrength,
       entangledWith: targetName,
-      emotion: 'focused'
+      emotion: 'focused' as EmotionalState
     });
     
     return {

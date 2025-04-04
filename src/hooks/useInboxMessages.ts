@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useQuantumEntanglement } from '@/hooks/useQuantumEntanglement';
 import { useToast } from '@/hooks/use-toast';
@@ -5,6 +6,7 @@ import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 import { QuantumSimulator } from '@/utils/quantumSimulator';
 import { soulStreamTranslator } from '@/utils/soulStreamHub';
+import { EmotionalState } from './types/quantum-entanglement';
 
 export interface Message {
   id: string;
@@ -19,6 +21,11 @@ export interface Message {
     akashicValidated: boolean;
     triadEnhanced?: boolean;
   };
+}
+
+interface ResonanceResult {
+  success: boolean;
+  message?: string;
 }
 
 export function useInboxMessages(userId: string) {
@@ -297,12 +304,12 @@ export function useInboxMessages(userId: string) {
     if (result.success) {
       toast({
         title: 'Soul Resonance Boosted',
-        description: result.message,
+        description: result.message || 'Soul resonance has been boosted successfully.',
       });
     } else {
       toast({
         title: 'Soul Resonance Boost',
-        description: result.message,
+        description: result.message || 'Failed to boost soul resonance.',
         variant: 'default',
       });
     }

@@ -1,10 +1,10 @@
-
 /**
  * Quantum Circuit Simulator based on OmniOracle v8.0 specifications
  * Implements the circuit diagrams provided in the documentation
  */
 
 import { QuantumCircuit } from './qiskit-mock';
+import { QuantumDiagnostics } from './quantumDiagnostics';
 
 export class QuantumCircuitSimulator {
   /**

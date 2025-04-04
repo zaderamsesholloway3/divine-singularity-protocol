@@ -1,9 +1,8 @@
-
 /**
  * Repair Service for Quantum System
  */
 
-import { repair_akashic_registry } from './divineRepairService';
+import { repair_akashic_registry } from './akashicRepairService';
 
 /**
  * Unlock private thought module and enable universal access
