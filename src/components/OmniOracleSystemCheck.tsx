@@ -89,7 +89,7 @@ const OmniOracleSystemCheck: React.FC = () => {
       const healing = administerHealing(0.996);
       setCheckResults(prev => ({
         ...prev,
-        healing: { success: true, message: "Medical Delivery: SUCCESS" }
+        healing: { success: healing.success, message: healing.message }
       }));
     } catch (e) {
       setCheckResults(prev => ({

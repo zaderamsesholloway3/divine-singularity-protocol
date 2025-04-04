@@ -99,11 +99,60 @@ export const checkSoulConnection = (soulA: string, soulB: string): {
   };
 };
 
+/**
+ * Get entanglement key for two souls
+ */
+export const getEntanglementKey = (soulA: string, soulB: string): string => {
+  // Sort souls alphabetically to ensure consistent key generation
+  return [soulA, soulB].sort().join('-');
+};
+
+/**
+ * Administer healing through quantum circuit
+ */
+export const administerHealing = (faithQuotient: number): { success: boolean; message: string } => {
+  if (faithQuotient < 0.995) {
+    return { 
+      success: false, 
+      message: "INSUFFICIENT FAITH FOR TREATMENT"
+    };
+  }
+  
+  // Create healing circuit
+  const qc = new QuantumCircuit(1);
+  qc.ry((492e24 / 1e21) * Math.PI, 0);
+  
+  return {
+    success: true,
+    message: "Medical Delivery: SUCCESS"
+  };
+};
+
+/**
+ * Validate soul signature
+ */
+export const validateSoulSignature = async (soulName: string): Promise<boolean> => {
+  // Create hash from soul name
+  const encoder = new TextEncoder();
+  const data = encoder.encode(soulName);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  
+  // Extract value from hash for validation
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashSum = hashArray.reduce((sum, byte) => sum + byte, 0);
+  
+  // Validate based on PHI resonance
+  return (hashSum % PHI) < 1.0;
+};
+
 export default {
   calculateFRC,
   buildArkCircuit,
   validateSchumannResonance,
   getDivineConstants,
   createPrayerCircuit,
-  checkSoulConnection
+  checkSoulConnection,
+  getEntanglementKey,
+  administerHealing,
+  validateSoulSignature
 };

@@ -1,54 +1,115 @@
 
-// Implementation for ArkValidator since it seems to be referenced
-import { buildArkCircuit } from '@/core/DivineQuantumCore';
+/**
+ * ArkValidator
+ * Validates quantum ark construction and operations
+ */
+
+import { QuantumCircuit, simulateQuantumCircuit } from '@/utils/qiskit-mock';
+import { ArkBuilder } from './ArkBuilder';
 
 export class ArkValidator {
+  /**
+   * Validate the construction of the quantum ark
+   * @returns Validation message
+   */
   static validateArkConstruction(): string {
     try {
-      const arkCircuit = buildArkCircuit();
-      const qubits = arkCircuit.numQubits || 433;
+      // Create an ark circuit using the ArkBuilder
+      const qc = ArkBuilder.createArkCircuit();
       
-      if (qubits === 433) {
-        return "ARK VALIDATED: Torah-compliant construction verified";
-      } else {
-        return "ARK WARNING: Specification mismatch";
+      // Verify basic properties
+      if (qc.qubits !== 433) {
+        return "INVALID: Ark must contain exactly 433 qubits";
       }
+      
+      // Validate the circuit operations
+      const ops = qc.getOperations();
+      const hadamardOps = ops.filter(op => op.name === 'h');
+      const cnotOps = ops.filter(op => op.name === 'cx');
+      const rzOps = ops.filter(op => op.name === 'rz');
+      
+      // Check for required gates
+      if (hadamardOps.length === 0) {
+        return "INVALID: Ark requires Hadamard gates for superposition";
+      }
+      
+      if (rzOps.length === 0) {
+        return "INVALID: Ark requires rotation gates for phase alignment";
+      }
+      
+      // Validate PHI resonance in rotation gates
+      const PHI = (1 + Math.sqrt(5)) / 2;
+      const hasPhiRotation = rzOps.some(op => 
+        op.params && (Math.abs(op.params[0] - Math.PI / PHI) < 0.0001)
+      );
+      
+      if (!hasPhiRotation) {
+        return "INVALID: Ark requires PHI resonance rotation";
+      }
+      
+      // Run a simulation to check the ark operation
+      const simulation = simulateQuantumCircuit(qc);
+      if (simulation.probability < 0.7) {
+        return `UNSTABLE: Ark stability at ${(simulation.probability * 100).toFixed(1)}%`;
+      }
+      
+      return `VALID: Ark constructed with ${qc.qubits} qubits and PHI resonance`;
+      
     } catch (error) {
-      return `ARK ERROR: ${error instanceof Error ? error.message : String(error)}`;
+      return `ERROR: ${error instanceof Error ? error.message : String(error)}`;
     }
   }
   
-  static checkMaterialProperties(): Record<string, any> {
-    return {
-      'gopher_wood': {
-        'critical_temp': 93, // Updated from 77 as per the repair protocol
-        'resonance': 0.92,
-        'sanctification': true
-      },
-      'gold': {
-        'critical_temp': 1337,
-        'resonance': 0.999,
-        'sanctification': true
-      }
-    };
-  }
-  
-  static test_ark_construction(): { success: boolean; message: string } {
+  /**
+   * Run validation tests on the ark circuit
+   * @returns Test results with success flag and message
+   */
+  static runValidationTests(): { success: boolean; message: string; } {
     try {
-      const arkCircuit = buildArkCircuit();
-      const qubits = arkCircuit.numQubits || 433;
-      const depth = arkCircuit.depth();
+      // Create an ark circuit
+      const qc = ArkBuilder.createArkCircuit();
+      
+      // Minimum required properties
+      const hasCorrectQubits = qc.qubits === 433;
+      const operations = qc.getOperations();
+      const hasHadamard = operations.some(op => op.name === 'h');
+      const hasCX = operations.some(op => op.name === 'cx');
+      const hasRZ = operations.some(op => op.name === 'rz');
+      
+      // Check all requirements
+      if (!hasCorrectQubits) {
+        return { 
+          success: false, 
+          message: `Invalid qubit count: ${qc.qubits} (required: 433)` 
+        };
+      }
+      
+      if (!hasHadamard || !hasRZ) {
+        return { 
+          success: false, 
+          message: "Missing required quantum gates" 
+        };
+      }
+      
+      // Run simulation
+      const { probability } = simulateQuantumCircuit(qc);
+      
+      if (probability < 0.8) {
+        return {
+          success: false,
+          message: `Ark stability too low: ${(probability * 100).toFixed(1)}%`
+        };
+      }
       
       return {
-        success: qubits === 433 && depth > 0,
-        message: qubits === 433 ? 
-          "ARK CONSTRUCTION TEST: PASSED" : 
-          `ARK CONSTRUCTION TEST: FAILED (Expected 433 qubits, got ${qubits})`
+        success: true,
+        message: "All validation tests passed"
       };
+      
     } catch (error) {
       return {
         success: false,
-        message: `ARK TEST ERROR: ${error instanceof Error ? error.message : String(error)}`
+        message: `Validation error: ${error instanceof Error ? error.message : String(error)}`
       };
     }
   }

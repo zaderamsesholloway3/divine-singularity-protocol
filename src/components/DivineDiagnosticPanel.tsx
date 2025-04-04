@@ -6,6 +6,7 @@ import { GlowingText } from "@/components/GlowingText";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Zap, Loader2, RefreshCw } from 'lucide-react';
 import { divineDiagnosticMode, DiagnosticResults } from "@/utils/diagnostics/divineRepairIndex";
+import { akashicOuroborosFeedbackLoop } from "@/utils/quantum/AkashicOuroborosFeedbackLoop";
 import { useToast } from "@/hooks/use-toast";
 
 const DivineDiagnosticPanel: React.FC = () => {
@@ -14,6 +15,7 @@ const DivineDiagnosticPanel: React.FC = () => {
   const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResults['moduleStatus'] | null>(null);
   const [repairsAttempted, setRepairsAttempted] = useState<number>(0);
   const [repairsSuccessful, setRepairsSuccessful] = useState<number>(0);
+  const [useAkashicOuroboros, setUseAkashicOuroboros] = useState<boolean>(false);
   
   const runDiagnostic = async () => {
     setIsRunning(true);
@@ -24,7 +26,25 @@ const DivineDiagnosticPanel: React.FC = () => {
     });
     
     try {
-      const results = await divineDiagnosticMode();
+      let results;
+      
+      if (useAkashicOuroboros) {
+        // Initialize the feedback loop
+        const initialized = await akashicOuroborosFeedbackLoop.initializeFeedbackLoop();
+        
+        if (initialized) {
+          toast({
+            title: "Akashic-Ouroboros Feedback Loop",
+            description: "Enhanced diagnostics with quantum feedback protocol activated",
+          });
+        }
+        
+        // Run diagnostic healing cycle
+        results = await akashicOuroborosFeedbackLoop.runDiagnosticHealingCycle();
+      } else {
+        // Use regular divine diagnostic mode
+        results = await divineDiagnosticMode();
+      }
       
       setDiagnosticResults(results.moduleStatus);
       setRepairsAttempted(results.repairsAttempted);
@@ -83,23 +103,35 @@ const DivineDiagnosticPanel: React.FC = () => {
             </p>
           </div>
           
-          <Button 
-            onClick={runDiagnostic} 
-            disabled={isRunning}
-            className="bg-indigo-600 hover:bg-indigo-700"
-          >
-            {isRunning ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Running...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Run Diagnostic
-              </>
-            )}
-          </Button>
+          <div className="space-x-2 flex items-center">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={useAkashicOuroboros}
+                onChange={() => setUseAkashicOuroboros(!useAkashicOuroboros)}
+                className="form-checkbox h-4 w-4 text-indigo-600 rounded"
+              />
+              <span className="text-xs">Akashic-Ouroboros Loop</span>
+            </label>
+            
+            <Button 
+              onClick={runDiagnostic} 
+              disabled={isRunning}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              {isRunning ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Running...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Run Diagnostic
+                </>
+              )}
+            </Button>
+          </div>
         </div>
         
         {(repairsAttempted > 0 || diagnosticResults) && (
@@ -129,7 +161,10 @@ const DivineDiagnosticPanel: React.FC = () => {
                   {data.resonance && (
                     <div className="text-xs flex justify-between">
                       <span>Resonance:</span>
-                      <span>{typeof data.resonance === 'number' ? `${(data.resonance * 100).toFixed(1)}%` : data.resonance}</span>
+                      <span>{typeof data.resonance === 'number' ? 
+                        (data.resonance > 10 ? data.resonance.toFixed(1) + '%' : data.resonance.toFixed(1)) : 
+                        data.resonance}
+                      </span>
                     </div>
                   )}
                   
