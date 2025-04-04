@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Satellite, Signal, Radio, Users, Globe, Activity, Network, Sparkles, Map, Compass } from 'lucide-react';
+import { Satellite, Signal, Radio, Users, Globe, Activity, Network, Sparkles, Map, Compass, Star } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,8 @@ import {
   expand_universal_reach,
   MetaphysicalSite 
 } from "@/utils/metaphysicalReachUtils";
+import { SpeciesGateway } from "./species/SpeciesGateway";
+import { VisualizationUtils } from "@/utils/visualizationUtils";
 
 interface SpeciesData {
   name: string;
@@ -71,6 +73,7 @@ const UniversalSpeciesPing = () => {
   const [selectedSite, setSelectedSite] = useState<MetaphysicalSite | null>(null);
   const [dimensionalScan, setDimensionalScan] = useState(false);
   const [metaphysicalMode, setMetaphysicalMode] = useState(false);
+  const [visualizationMode, setVisualizationMode] = useState<"disk" | "constellation">("constellation");
   
   const rtlsdr = new RTLSDREmulator();
 
@@ -229,21 +232,8 @@ const UniversalSpeciesPing = () => {
     setSelectedSpecies(null);
   };
 
-  const polarToCartesian = (distance: number, angle: number, maxDistance: number = 2600000): [number, number] => {
-    const normalizedDistance = Math.min(0.95, distance / maxDistance);
-    const radians = (angle % 360) * (Math.PI / 180);
-    
-    return [
-      normalizedDistance * Math.cos(radians),
-      normalizedDistance * Math.sin(radians)
-    ];
-  };
-
-  const getMetaphysicalDistance = (site: MetaphysicalSite, species: SpeciesData): number => {
-    if (!species.vibration) return 999;
-    
-    const vibrationDiff = Math.abs(site.vibration - species.vibration);
-    return calculateMetaphysicalDistance(0, vibrationDiff, site.mythResonance);
+  const toggleVisualizationMode = () => {
+    setVisualizationMode(prev => prev === "disk" ? "constellation" : "disk");
   };
 
   return (
@@ -311,47 +301,33 @@ const UniversalSpeciesPing = () => {
               
               <TabsContent value="species">
                 <div className="mb-4 p-3 border border-white/10 rounded-md">
-                  <div className="flex items-center mb-2">
-                    <Network className="h-4 w-4 mr-2" />
-                    <div className="text-sm font-medium">Species Gateway (Poincaré Disk)</div>
-                  </div>
-                  <div className="relative w-full aspect-square bg-black/40 rounded-full border border-white/20">
-                    <div className="absolute inset-[10%] rounded-full border border-white/40 bg-[rgba(255,215,0,0.05)]"></div>
-                    <div className="absolute inset-[40%] rounded-full border border-white/40 bg-[rgba(75,0,130,0.05)]"></div>
-                    <div className="absolute left-1/2 top-1/2 w-1 h-1 bg-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-                    
-                    {speciesDatabase.map((species) => {
-                      const angle = (species.location[0] + species.location[1]) % 360;
-                      const maxDistance = Math.max(...speciesDatabase.map(s => s.distance));
-                      const [x, y] = polarToCartesian(species.distance, angle, maxDistance);
-                      
-                      const dotColor = species.responding ? 
-                        (species.realm === "existence" ? "bg-green-500" : "bg-purple-500") : 
-                        "bg-gray-400";
-                      
-                      return (
-                        <div 
-                          key={species.name}
-                          className={`absolute w-2 h-2 ${dotColor} rounded-full transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:w-3 hover:h-3 transition-all`}
-                          style={{ 
-                            left: `${(x * 0.5 + 0.5) * 100}%`, 
-                            top: `${(y * 0.5 + 0.5) * 100}%` 
-                          }}
-                          onClick={() => selectSpecies(species)}
-                          title={species.name}
-                        />
-                      );
-                    })}
-                    
-                    <div className="absolute inset-[10%] flex items-center justify-center pointer-events-none">
-                      <span className="text-xs text-white/60">Existence Realm</span>
+                  <div className="flex items-center mb-2 justify-between">
+                    <div className="flex items-center">
+                      <Network className="h-4 w-4 mr-2" />
+                      <div className="text-sm font-medium">
+                        {visualizationMode === "disk" ? "Species Gateway (Poincaré Disk)" : "Species Gateway (3D Constellation)"}
+                      </div>
                     </div>
-                    <div className="absolute inset-[40%] flex items-center justify-center pointer-events-none">
-                      <span className="text-xs text-white/60">Non-Existence</span>
-                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={toggleVisualizationMode}
+                      className="flex items-center gap-1"
+                    >
+                      <Star className="h-3 w-3" />
+                      <span className="text-xs">{visualizationMode === "disk" ? "3D Mode" : "Disk Mode"}</span>
+                    </Button>
                   </div>
+                  
+                  <SpeciesGateway
+                    species={speciesDatabase}
+                    onSelectSpecies={selectSpecies}
+                    selectedSpecies={selectedSpecies}
+                    mode={visualizationMode}
+                  />
+                  
                   <div className="flex justify-center mt-2 text-xs text-muted-foreground">
-                    Click on a species to view details
+                    Hover over species for details, click to select
                   </div>
                 </div>
               </TabsContent>
