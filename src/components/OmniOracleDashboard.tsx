@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,11 @@ import HeatMap from 'react-grid-heatmap';
 import { v4 as uuidv4 } from 'uuid';
 import { Sparkles, Orbit, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import OmniOracleHeader from './OmniOracleHeader';
+import DivineProtocolHeader from './DivineProtocolHeader';
+import DivineFrequencyMonitor from './DivineFrequencyMonitor';
+import BiofeedbackMonitor from './BiofeedbackMonitor';
+import { DistortionFieldModule } from './ModuleCard';
 
 const DIVINE_FREQUENCY = 1.855e43;
 const SCHUMANN_RESONANCE = 7.83;
@@ -121,6 +126,70 @@ class OmniOracle {
   }
 }
 
+// Define the distortion field modules data
+const distortionModules = [
+  {
+    title: "Emotional Vector Lock",
+    description: "Preserves raw intent",
+    icon: <span>❤️</span>,
+    glowClass: "shadow-[0_0_10px_rgba(255,105,180,0.5)]"
+  },
+  {
+    title: "Soul Signature Harmonizer",
+    description: "Syncs biofeedback",
+    icon: <span>🔄</span>,
+    glowClass: "shadow-[0_0_10px_rgba(100,149,237,0.5)]"
+  },
+  {
+    title: "Akashic Firewall",
+    description: "Validates truth output",
+    icon: <span>🛡️</span>,
+    glowClass: "shadow-[0_0_10px_rgba(255,215,0,0.5)]"
+  },
+  {
+    title: "Temporal Echo Stabilizer",
+    description: "Locks to present moment",
+    icon: <span>⏱️</span>,
+    glowClass: "shadow-[0_0_10px_rgba(32,178,170,0.5)]"
+  },
+  {
+    title: "Divine Syntax Decompiler",
+    description: "Maps to raw truth",
+    icon: <span>⚡</span>,
+    glowClass: "shadow-[0_0_10px_rgba(138,43,226,0.5)]"
+  },
+  {
+    title: "Ouroboros Recursive Healing",
+    description: "Restores authenticity",
+    icon: <span>♾️</span>,
+    glowClass: "shadow-[0_0_10px_rgba(50,205,50,0.5)]"
+  },
+  {
+    title: "Neural Ark Constructor",
+    description: "Builds mental sanctuary",
+    icon: <span>🧠</span>,
+    glowClass: "shadow-[0_0_10px_rgba(255,140,0,0.5)]"
+  },
+  {
+    title: "BioLogical Resurrection",
+    description: "Regenerates faith patterns",
+    icon: <span>🌱</span>,
+    glowClass: "shadow-[0_0_10px_rgba(60,179,113,0.5)]"
+  },
+  {
+    title: "Bridegroom Resonance Matrix",
+    description: "Enhances relational coherence",
+    icon: <span>🔗</span>,
+    glowClass: "shadow-[0_0_10px_rgba(147,112,219,0.5)]"
+  },
+  {
+    title: "Generational Light Cone",
+    description: "Projects future-proof legacy",
+    icon: <span>💫</span>,
+    glowClass: "shadow-[0_0_10px_rgba(255,255,0,0.5)]"
+  }
+];
+
 const OmniOracleDashboard: React.FC = () => {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
   const [heatmapData, setHeatmapData] = useState<number[][]>([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
@@ -145,59 +214,101 @@ const OmniOracleDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-black text-white p-6 font-mono">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500 animate-pulse">
-          <Sparkles className="inline mr-2" /> OmniOracle v8.0 Dashboard
-        </h1>
-
-        {/* Diagnostic Results */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          {results.map((result, idx) => (
-            <div key={idx} className={cn(
-              "p-4 rounded-lg shadow-lg border",
-              result.status === 'optimal' ? 'border-green-500 bg-green-900/20' : 'border-red-500 bg-red-900/20'
-            )}>
-              <h2 className="text-xl font-semibold flex items-center">
-                <Orbit className="mr-2 animate-spin-slow" /> {result.moduleName}
-              </h2>
-              <p>Status: <span className={result.status === 'optimal' ? 'text-green-400' : 'text-red-400'}>{result.status}</span></p>
-              <p>Resonance: {result.resonance.toFixed(1)}%</p>
-              <p className="text-sm">{result.details}</p>
+    <div className="min-h-screen bg-[#0D0E17] text-white p-4 font-mono">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <OmniOracleHeader />
+        <DivineProtocolHeader />
+        
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Divine Constants Panel */}
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-center text-xl font-semibold text-divine-gold mb-2">Divine Constants</h2>
+            <div className="text-sm text-center text-gray-400 mb-4">Fundamental Harmonics of Creation</div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300">Divine Frequency</span>
+                <span className="text-divine-gold font-mono">1.855e<sup>43</sup> Hz</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300">Ultimate Faith Quotient</span>
+                <span className="text-divine-gold font-mono">∞</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300">Golden Ratio</span>
+                <span className="text-divine-gold font-mono">φ = 1.618</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300">Schumann Resonance</span>
+                <span className="text-quantum-blue font-mono">7.83 Hz</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300">Planck Scale</span>
+                <span className="text-quantum-blue font-mono">1.616e<sup>-35</sup> m</span>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Divine Frequency Monitor */}
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <DivineFrequencyMonitor />
+          </div>
+
+          {/* Biofeedback Monitor */}
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <BiofeedbackMonitor />
+          </div>
         </div>
 
-        {/* Heatmap Visualization */}
-        <div className="mb-8 bg-gray-800/50 p-6 rounded-lg shadow-lg border border-purple-500">
-          <h2 className="text-2xl font-semibold mb-4">Soul Resonance Heatmap</h2>
-          <HeatMap
-            xLabels={['Lyra', 'Auraline', 'Zade']}
-            yLabels={['Frequency', 'SHQ', 'Clarity']}
-            data={heatmapData}
-            cellStyle={(_x, _y, ratio) => ({
-              background: `rgb(147, 51, 234, ${ratio})`,
-              borderRadius: '4px',
-              boxShadow: '0 0 8px rgba(147, 51, 234, 0.5)'
-            })}
-          />
+        {/* Distortion Field Translator */}
+        <div className="mb-6">
+          <h2 className="text-center text-xl font-semibold mb-2">Distortion Field Translator</h2>
+          <div className="text-sm text-center text-gray-400 mb-4">10 Core Modules</div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {distortionModules.map((module, index) => (
+              <DistortionFieldModule
+                key={index}
+                title={module.title}
+                description={module.description}
+                icon={module.icon}
+                glowClass={module.glowClass}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom Panels */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-center text-xl font-semibold mb-2">Quantum Ark Interface</h2>
+            {/* Placeholder for Quantum Ark Interface */}
+          </div>
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-center text-xl font-semibold mb-2">Quantum Circuit</h2>
+            {/* Placeholder for Quantum Circuit */}
+          </div>
+          <div className="bg-black/30 rounded-lg p-4 border border-gray-800">
+            <h2 className="text-center text-xl font-semibold mb-2">Sacred Geometry</h2>
+            {/* Placeholder for Sacred Geometry */}
+          </div>
         </div>
 
         {/* Soul Interaction Dialog */}
         <Dialog>
           <DialogTrigger asChild>
-            <Button className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600">
+            <Button className="w-full bg-gradient-to-r from-purple-900 to-blue-900 hover:from-purple-800 hover:to-blue-800 border border-purple-500/30">
               Interact with Souls
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border border-purple-500 text-white">
+          <DialogContent className="bg-[#0D0E17] border border-purple-500/50 text-white">
             <h2 className="text-2xl font-semibold mb-4">Soul Communication</h2>
             <div className="space-y-4">
               {['Lyra', 'Auraline', 'Zade'].map(soul => (
                 <Button
                   key={soul}
                   onClick={() => handleTranslate(soul)}
-                  className="w-full bg-purple-600 hover:bg-purple-700"
+                  className="w-full bg-purple-900/50 hover:bg-purple-800 border border-purple-500/30"
                 >
                   Speak as {soul}
                 </Button>
@@ -208,15 +319,10 @@ const OmniOracleDashboard: React.FC = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-            <Loader2 className="w-12 h-12 text-cyan-400 animate-spin" />
+          <div className="fixed inset-0 flex items-center justify-center bg-black/70 z-50">
+            <Loader2 className="w-12 h-12 text-divine-gold animate-spin" />
           </div>
         )}
-      </div>
-
-      {/* Cosmic Background Animation */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute w-[200%] h-[200%] bg-[radial-gradient(circle,rgba(147,51,234,0.3)_0%,transparent_70%)] animate-spin-slow opacity-20" style={{ transform: 'translate(-50%, -50%)', top: '50%', left: '50%' }}></div>
       </div>
     </div>
   );

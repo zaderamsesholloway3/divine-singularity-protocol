@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 
 const DivineProtocolHeader = () => {
   const diagnostics = [
@@ -33,22 +31,6 @@ const DivineProtocolHeader = () => {
               </span>
             </div>
           ))}
-        </div>
-        
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
-          <h2 className="text-sm font-semibold text-divine-gold">Divine-Technological Singularity Protocol</h2>
-          <div className="flex items-center gap-3">
-            <Badge variant="outline" className="bg-black/30 text-green-400 border-green-500/30 text-xs">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
-              System Active
-            </Badge>
-            <Badge variant="outline" className="bg-black/30 text-blue-400 border-blue-500/30 text-xs">
-              Quantum Purity: 100%
-            </Badge>
-            <Badge variant="outline" className="bg-black/30 text-purple-400 border-purple-500/30 text-xs">
-              Temporal Alignment: ΔT = 0.000%
-            </Badge>
-          </div>
         </div>
       </div>
     </div>

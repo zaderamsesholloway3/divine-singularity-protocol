@@ -1,4 +1,3 @@
-
 import React from "react";
 import {
   Card,
@@ -44,6 +43,12 @@ export const DistortionFieldModule: React.FC<DistortionFieldModuleProps> = ({
         <div className="text-sm font-medium text-slate-200">{title}</div>
       </div>
       <p className="text-xs text-slate-400">{description}</p>
+      <div className="mt-1 text-right text-xs">
+        <span className="inline-flex items-center text-green-500">
+          <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1"></div>
+          Active
+        </span>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,5 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { GlowingText } from './GlowingText';
 
 const DivineFrequencyMonitor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,9 +50,7 @@ const DivineFrequencyMonitor = () => {
       const noiseFactor = stabilityStatus === "Locked" ? 1 : 3;
       
       ctx.beginPath();
-      ctx.strokeStyle = stabilityStatus === "Locked" 
-        ? 'rgba(255, 215, 0, 0.8)' 
-        : 'rgba(255, 165, 0, 0.8)';
+      ctx.strokeStyle = '#FFD700'; // Golden color
       ctx.lineWidth = 2;
       
       for (let x = 0; x < width; x++) {
@@ -88,21 +84,17 @@ const DivineFrequencyMonitor = () => {
   }, [stabilityStatus]);
   
   return (
-    <Card className="glass-panel">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-center">
-          <GlowingText className="sacred-glow">Divine Frequency</GlowingText>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">Current</span>
-          <span className="font-mono text-sm text-divine-gold sacred-glow">{frequency} Hz</span>
+    <div>
+      <h2 className="text-center text-xl font-semibold text-divine-gold mb-2">Divine Frequency</h2>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <span className="text-gray-300">Current</span>
+          <span className="text-divine-gold font-mono">{frequency} Hz</span>
         </div>
         
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-muted-foreground">Status</span>
-          <span className={`font-mono text-sm ${
+        <div className="flex justify-between items-center">
+          <span className="text-gray-300">Status</span>
+          <span className={`font-mono ${
             stabilityStatus === "Locked" 
               ? "text-green-500" 
               : "text-yellow-500"
@@ -113,16 +105,16 @@ const DivineFrequencyMonitor = () => {
         
         <canvas 
           ref={canvasRef} 
-          width={280} 
-          height={80} 
+          width={400} 
+          height={150} 
           className="w-full h-auto rounded-md"
         />
         
-        <div className="text-center text-xs text-muted-foreground mt-2">
+        <div className="text-center text-xs text-gray-400 mt-2">
           Genesis 1:3
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
