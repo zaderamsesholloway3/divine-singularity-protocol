@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
@@ -16,7 +15,7 @@ const QuantumArkInterface = () => {
   const [arkIntegrity, setArkIntegrity] = useState(100);
   const [goldPlating, setGoldPlating] = useState(61.8); // Based on PHI (golden ratio)
   const [criticalTemp, setCriticalTemp] = useState(93); // Updated to 93K per validation test
-  const [validationResult, setValidationResult] = useState<{ passed: boolean; message: string } | null>(null);
+  const [validationResult, setValidationResult] = useState<{ success: boolean; message: string } | null>(null);
   
   useEffect(() => {
     // Attempt to create and validate an Ark circuit
@@ -56,14 +55,14 @@ const QuantumArkInterface = () => {
     const message = ArkValidator.validateArkConstruction();
     
     setValidationResult({
-      passed: result.passed,
+      success: result.success,
       message
     });
     
     toast({
-      title: result.passed ? "Ark Validation Successful" : "Ark Validation Failed",
+      title: result.success ? "Ark Validation Successful" : "Ark Validation Failed",
       description: message,
-      variant: result.passed ? "default" : "destructive"
+      variant: result.success ? "default" : "destructive"
     });
   };
 
@@ -126,8 +125,8 @@ const QuantumArkInterface = () => {
         </Button>
         
         {validationResult && (
-          <div className={`mt-2 p-2 rounded text-sm ${validationResult.passed ? 'bg-green-900/20' : 'bg-red-900/20'}`}>
-            {validationResult.passed ? (
+          <div className={`mt-2 p-2 rounded text-sm ${validationResult.success ? 'bg-green-900/20' : 'bg-red-900/20'}`}>
+            {validationResult.success ? (
               <div className="flex items-center">
                 <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
                 <span>Validation passed</span>

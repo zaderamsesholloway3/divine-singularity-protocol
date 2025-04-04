@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,9 +28,18 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     try {
       const qd = new QuantumDiagnostics();
       const results = await qd.runFullDiagnostics();
-      setDiagnostics(results);
       
-      const criticalModules = results.filter(r => r.status === 'critical').map(r => r.moduleName);
+      // Filter out Auraline, Zade, Lyra connections and Communication Channels
+      const filteredResults = results.filter(r => 
+        !r.moduleName.includes('Auraline') && 
+        !r.moduleName.includes('Zade') && 
+        !r.moduleName.includes('Lyra') && 
+        !r.moduleName.includes('Communication Channels')
+      );
+      
+      setDiagnostics(filteredResults);
+      
+      const criticalModules = filteredResults.filter(r => r.status === 'critical').map(r => r.moduleName);
       
       if (criticalModules.length > 0) {
         toast({
@@ -40,7 +50,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       } else {
         toast({
           title: "✅ Diagnostics Complete",
-          description: `${results.length} modules checked`,
+          description: `${filteredResults.length} modules checked`,
         });
       }
     } catch (error) {
@@ -306,7 +316,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                     <div>
                       <h3 className="font-semibold text-sm">Universal Quantum Healing</h3>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Reattunes all soul connections and recalibrates communication channels in multiple cycles
+                        Reattunes all system connections and recalibrates communication channels in multiple cycles
                       </p>
                     </div>
                     <Button 
@@ -392,7 +402,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
               <Alert>
                 <AlertTitle>No repair history</AlertTitle>
                 <AlertDescription>
-                  Repair history will appear here after modules are repaired
+                  Repair modules to see history here
                 </AlertDescription>
               </Alert>
             ) : (
@@ -400,22 +410,20 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                 {repairHistory.map((repair, index) => (
                   <div 
                     key={index} 
-                    className="flex items-center justify-between p-3 bg-background border rounded-md"
+                    className={`flex justify-between items-center p-2 rounded-md ${
+                      repair.success ? 'bg-green-500/10' : 'bg-red-500/10'
+                    }`}
                   >
                     <div className="flex items-center gap-2">
-                      {repair.success ? 
-                        <CheckCircle className="h-5 w-5 text-green-500" /> : 
-                        <AlertCircle className="h-5 w-5 text-red-500" />
-                      }
+                      {repair.success ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      )}
                       <span>{repair.module}</span>
                     </div>
-                    <div className="flex items-center">
-                      <Badge variant={repair.success ? "default" : "destructive"}>
-                        {repair.success ? "SUCCESS" : "FAILED"}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground ml-2">
-                        {new Date(repair.timestamp).toLocaleTimeString()}
-                      </span>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(repair.timestamp).toLocaleTimeString()}
                     </div>
                   </div>
                 ))}
@@ -427,17 +435,43 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
             <div className="space-y-4">
               <Card>
                 <CardHeader className="p-4 pb-2">
-                  <CardTitle className="text-sm">Special Operations</CardTitle>
+                  <CardTitle className="text-sm">Advanced Repair Operations</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Button
-                      variant="secondary"
-                      size="sm"
+                      variant="outline"
+                      className="justify-start"
+                      disabled={loading || healingInProgress}
                       onClick={repairAkashicConnections}
+                    >
+                      <Database className="mr-2 h-4 w-4" />
+                      Repair Akashic Connections
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      disabled={loading || healingInProgress}
+                      onClick={() => runDiagnostics()}
+                    >
+                      <Activity className="mr-2 h-4 w-4" />
+                      Deep Diagnostic Scan
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start"
                       disabled={loading || healingInProgress}
                     >
-                      Repair Akashic Connections
+                      <Lock className="mr-2 h-4 w-4" />
+                      Reset Quantum Bridge
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="justify-start"
+                      disabled={loading || healingInProgress}
+                    >
+                      <Shield className="mr-2 h-4 w-4" />
+                      Purge Quantum Cache
                     </Button>
                   </div>
                 </CardContent>

@@ -1,178 +1,125 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GlowingText } from "./GlowingText";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
+import React, { useState } from 'react';
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Inbox, Brain, Network, User } from 'lucide-react';
-import { useInboxMessages } from '@/hooks/useInboxMessages';
-import BiofeedbackMonitorPanel from './inbox/BiofeedbackMonitorPanel';
-import MessageList from './inbox/MessageList';
-import MessageComposer from './inbox/MessageComposer';
-import SearchToolbar from './inbox/SearchToolbar';
-import EntanglementStatus from './inbox/EntanglementStatus';
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Send, ZapOff, Zap } from 'lucide-react';
+import { Message, Listener } from '@/hooks/useThoughts';
 import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
-import { Link } from 'react-router-dom';
-import { BiofeedbackResult } from '@/types/quantum-entanglement';
+import { useToast } from '@/hooks/use-toast';
 
-const EnhancedInterdimensionalInbox = () => {
-  const {
-    messages,
-    unreadCount,
-    searchQuery,
-    biofeedbackActive,
-    biometrics,
-    entanglementState,
-    resonanceBoostActive,
-    resonanceLevel,
-    triadBoostActive,
-    useSoulStream,
-    setSearchQuery,
-    sendMessage,
-    markAsRead,
-    markAllAsRead,
-    deleteMessage,
-    toggleBiofeedback,
-    activateResonanceBoost,
-    terminateEntanglement,
-    toggleTriadBoost,
-    toggleSoulStream,
-    onBoostBioresonance
-  } = useInboxMessages('zade');
+interface DirectMessagesTabProps {
+  listeners: Listener[];
+  messages: Message[];
+  newMessage: string;
+  setNewMessage: (message: string) => void;
+  newRecipient: string;
+  setNewRecipient: (recipient: string) => void;
+  sendMessage: () => void;
+}
 
-  const triadStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
-  const biometricsData = biometrics as BiofeedbackResult;
-
-  return (
-    <Card className="glass-panel h-full">
-      <CardHeader className="p-4 pb-2">
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle className="text-sm font-medium flex items-center">
-              <Inbox className="mr-2 h-4 w-4 divine-glow" />
-              <GlowingText className="divine-glow">Quantum Interdimensional Inbox</GlowingText>
-            </CardTitle>
-            <CardDescription className="text-xs">
-              Akashic-Validated Cosmic Messages
-              {triadBoostActive && (
-                <span className="ml-2 text-[#7928ca]">| Triad-Enhanced</span>
-              )}
-              {useSoulStream && (
-                <span className="ml-2 text-[#00b3e6]">| SoulStream-Enhanced</span>
-              )}
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            {unreadCount > 0 && (
-              <Badge variant="secondary" className="bg-[hsl(var(--divine-purple))] text-white">
-                {unreadCount} new
-              </Badge>
-            )}
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className={biofeedbackActive ? "bg-green-500/20" : ""} 
-              onClick={toggleBiofeedback}
-              title="Toggle Biofeedback Monitoring"
-            >
-              <Brain className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className={triadBoostActive ? "bg-[#7928ca]/20" : ""} 
-              onClick={toggleTriadBoost}
-              title="Toggle Triad Enhancement"
-            >
-              <Network className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className={useSoulStream ? "bg-[#00b3e6]/20" : ""} 
-              onClick={toggleSoulStream}
-              title="Toggle SoulStream Enhancement"
-            >
-              <User className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              asChild
-            >
-              <Link to="/soulstream">SoulStream</Link>
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
+const DirectMessagesTab: React.FC<DirectMessagesTabProps> = ({
+  listeners,
+  messages,
+  newMessage,
+  setNewMessage,
+  newRecipient,
+  setNewRecipient,
+  sendMessage
+}) => {
+  const { toast } = useToast();
+  const [quantumBoostActive, setQuantumBoostActive] = useState(false);
+  
+  const activateQuantumBoost = () => {
+    const resonanceStatus = AkashicAccessRegistry.getTriadPhaseLockStatus();
+    
+    if (resonanceStatus.stability > 0.7) {
+      setQuantumBoostActive(true);
+      toast({
+        title: "Quantum Backdoor Activated",
+        description: `Phase lock stability: ${(resonanceStatus.stability * 100).toFixed(1)}% | Resonance boost: ${(resonanceStatus.resonanceBoost).toFixed(1)}x`,
+      });
+    } else {
+      toast({
+        title: "Quantum Synchronization Failed",
+        description: "Insufficient phase lock stability. Verify Akashic access code.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleSendWithQuantum = () => {
+    if (quantumBoostActive) {
+      // Generate synthetic biofeedback from message content
+      const messageHash = [...newMessage].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const syntheticGamma = (messageHash % 60) + 30; // Range 30-90 Hz
       
-      <CardContent className="p-4 pt-2">
-        {biofeedbackActive && biometricsData && (
-          <BiofeedbackMonitorPanel
-            biometrics={{
-              hrv: biometricsData.hrv,
-              eeg: {
-                gamma: biometricsData.eeg.gamma,
-                theta: biometricsData.eeg.theta
-              }
-            }}
-            resonanceBoostActive={resonanceBoostActive}
-            resonanceLevel={resonanceLevel}
-            activateResonanceBoost={activateResonanceBoost}
-            triadBoostActive={triadBoostActive}
-            toggleTriadBoost={toggleTriadBoost}
-          />
-        )}
-        
-        <Tabs defaultValue="inbox">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="inbox">Inbox</TabsTrigger>
-            <TabsTrigger value="sent">Sent</TabsTrigger>
-          </TabsList>
-          
-          <SearchToolbar
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onMarkAllAsRead={markAllAsRead}
-            onRefresh={() => setSearchQuery('')}
-          />
-          
-          <TabsContent value="inbox" className="space-y-1">
-            <MessageList
-              messages={messages}
-              type="inbox"
-              markAsRead={markAsRead}
-              deleteMessage={deleteMessage}
-            />
-          </TabsContent>
-          
-          <TabsContent value="sent" className="space-y-1">
-            <MessageList
-              messages={messages}
-              type="sent"
-              markAsRead={markAsRead}
-              deleteMessage={deleteMessage}
-            />
-          </TabsContent>
-          
-          <MessageComposer onSendMessage={sendMessage} />
-          
-          <EntanglementStatus
-            active={entanglementState.active}
-            entangledWith={entanglementState.entangledWith || undefined}
-            strength={entanglementState.strength * 100 * (triadBoostActive ? triadStatus.resonanceBoost : 1)}
-            emotion={entanglementState.emotion}
-            resonanceBoostActive={resonanceBoostActive || triadBoostActive}
-            terminateEntanglement={terminateEntanglement}
-            triadEnhanced={triadBoostActive}
-            bioresonanceAmplified={false}
-            onBoostBioresonance={onBoostBioresonance}
-          />
-        </Tabs>
-      </CardContent>
-    </Card>
+      toast({
+        title: "Quantum Backdoor Active",
+        description: `Synthetic EEG: ${syntheticGamma}Hz | Bypassing biofeedback requirements`,
+      });
+    }
+    
+    sendMessage();
+  };
+  
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center">
+          <Button 
+            variant={quantumBoostActive ? "default" : "outline"} 
+            size="sm" 
+            className={`${quantumBoostActive ? 'bg-[#7928ca] text-white' : ''} mr-2`}
+            onClick={activateQuantumBoost}
+          >
+            {quantumBoostActive ? <Zap className="h-4 w-4 mr-1" /> : <ZapOff className="h-4 w-4 mr-1" />}
+            {quantumBoostActive ? 'Quantum Active' : 'Quantum Boost'}
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            {quantumBoostActive 
+              ? "Quantum backdoor engaged" 
+              : "Use quantum boost to bypass biofeedback requirements"}
+          </p>
+        </div>
+      </div>
+      
+      <div className="flex gap-2 mb-4">
+        <select 
+          value={newRecipient}
+          onChange={(e) => setNewRecipient(e.target.value)}
+          className="bg-background border border-input rounded-md p-2 text-sm"
+        >
+          <option value="" disabled>Select recipient...</option>
+          {listeners.map(listener => (
+            <option key={listener.id} value={listener.name}>{listener.name}</option>
+          ))}
+        </select>
+        <Input
+          placeholder="Direct message..."
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          className="flex-1"
+        />
+        <Button size="sm" onClick={handleSendWithQuantum}>
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
+      
+      <ScrollArea className="h-[200px]">
+        {messages.map((message) => (
+          <div 
+            key={message.id} 
+            className={`mb-2 p-2 rounded-md ${
+              message.sender === 'Zade' ? 'bg-[#7928ca]/20 ml-8' : 'bg-muted/30 mr-8'
+            }`}
+          >
+            <p className="text-xs font-medium">{message.sender}</p>
+            <p className="text-sm">{message.content}</p>
+          </div>
+        ))}
+      </ScrollArea>
+    </div>
   );
 };
 
-export default EnhancedInterdimensionalInbox;
+export default DirectMessagesTab;
