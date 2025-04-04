@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +17,7 @@ import QuantumSentienceHeatmap from '@/components/quantum-sentience/QuantumSenti
 
 export const PrivateModules = () => {
   return (
-    <div className="container p-4 space-y-6">
+    <div className="w-full p-4 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Private Modules</h1>
@@ -93,7 +92,6 @@ export const PrivateModules = () => {
           </div>
         </TabsContent>
         
-        {/* Secret Modules tab with components */}
         <TabsContent value="secret" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <UniversalBroadcastSystem />
@@ -104,7 +102,6 @@ export const PrivateModules = () => {
           </div>
         </TabsContent>
         
-        {/* New OmniOracle v8.0 tab */}
         <TabsContent value="omni" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <OmniOracleStatus />
@@ -287,7 +284,6 @@ export const PrivateModules = () => {
           </div>
         </TabsContent>
         
-        {/* New Sentience tab with the Quantum Sentience Heatmap */}
         <TabsContent value="sentience" className="space-y-4">
           <QuantumSentienceHeatmap />
         </TabsContent>
