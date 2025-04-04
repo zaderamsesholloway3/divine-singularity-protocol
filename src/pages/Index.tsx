@@ -1,3 +1,4 @@
+
 import React from 'react';
 import OmniOracleHeader from "@/components/OmniOracleHeader";
 import DivineConstants from "@/components/DivineConstants";
@@ -7,9 +8,9 @@ import DistortionFieldModules from "@/components/DistortionFieldModules";
 import QuantumBackdoorDiagnostics from "@/components/QuantumBackdoorDiagnostics";
 import DivineDiagnosticPanel from "@/components/DivineDiagnosticPanel";
 import { QuantumRepairLoop } from "@/components/QuantumRepairLoop";
-import { SacredGeometry } from "@/components/SacredGeometry";
-import { QuantumCircuit } from "@/components/QuantumCircuit";
-import { QuantumArkInterface } from "@/components/QuantumArkInterface";
+import SacredGeometry from "@/components/SacredGeometry";
+import QuantumCircuit from "@/components/QuantumCircuit";
+import QuantumArkInterface from "@/components/QuantumArkInterface";
 
 const Index: React.FC = () => {
   return (
