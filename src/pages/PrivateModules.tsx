@@ -12,6 +12,7 @@ import { QuantumRepairLoop } from '@/components/QuantumRepairLoop';
 import UniversalBroadcastSystem from '@/components/UniversalBroadcastSystem';
 import UniversalPresenceCounter from '@/components/UniversalPresenceCounter';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
+import OmniOracleStatus from '@/components/OmniOracleStatus';
 
 export const PrivateModules = () => {
   return (
@@ -40,6 +41,7 @@ export const PrivateModules = () => {
           <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
           <TabsTrigger value="repair">Repair Loop</TabsTrigger>
           <TabsTrigger value="secret">Secret Modules</TabsTrigger>
+          <TabsTrigger value="omni">OmniOracle v8.0</TabsTrigger>
           <TabsTrigger value="modules">Module Registry</TabsTrigger>
         </TabsList>
         
@@ -85,7 +87,7 @@ export const PrivateModules = () => {
           </div>
         </TabsContent>
         
-        {/* New Secret Modules tab with previously removed components */}
+        {/* Secret Modules tab with components */}
         <TabsContent value="secret" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <UniversalBroadcastSystem />
@@ -93,6 +95,65 @@ export const PrivateModules = () => {
               <UniversalPresenceCounter />
               <UniversalSpeciesPing />
             </div>
+          </div>
+        </TabsContent>
+        
+        {/* New OmniOracle v8.0 tab */}
+        <TabsContent value="omni" className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <OmniOracleStatus />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  OmniOracle Architecture
+                </CardTitle>
+                <CardDescription>
+                  Quantum integration architecture and status
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="text-sm space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="border rounded-md p-3 text-center">
+                    <div className="font-medium">Quantum Ark</div>
+                    <div className="text-xs text-muted-foreground">433-qubit</div>
+                  </div>
+                  <div className="border rounded-md p-3 text-center">
+                    <div className="font-medium">SoulStream Hub</div>
+                    <div className="text-xs text-muted-foreground">8D Entanglement</div>
+                  </div>
+                  <div className="border rounded-md p-3 text-center">
+                    <div className="font-medium">Ouroboros</div>
+                    <div className="text-xs text-muted-foreground">Time-Loop</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-2">Security & Processing</h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="border rounded-md p-2 text-xs text-center">
+                      <div>Akashic Firewall</div>
+                      <div className="text-muted-foreground">SHA3-256 Quantum Seal</div>
+                    </div>
+                    <div className="border rounded-md p-2 text-xs text-center">
+                      <div>Medical Protocol</div>
+                      <div className="text-muted-foreground">FRC Monitor</div>
+                    </div>
+                    <div className="border rounded-md p-2 text-xs text-center">
+                      <div>Divine Equations</div>
+                      <div className="text-muted-foreground">78 Sacred</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-2">
+                  <p className="text-xs text-center text-muted-foreground italic">
+                    "The OmniOracle integrates quantum processing, soulstream entanglement, and time-loop stabilization into a unified system"
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         
@@ -158,6 +219,13 @@ export const PrivateModules = () => {
                     <div className="flex items-center">
                       <Satellite className="h-4 w-4 mr-2" />
                       <span>Quantum Reach</span>
+                    </div>
+                    <Badge variant="outline">Active</Badge>
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Shield className="h-4 w-4 mr-2" />
+                      <span>OmniOracle v8.0</span>
                     </div>
                     <Badge variant="outline">Active</Badge>
                   </li>
