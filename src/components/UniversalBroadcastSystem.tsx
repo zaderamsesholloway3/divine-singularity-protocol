@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
@@ -10,6 +11,9 @@ import { Slider } from "@/components/ui/slider";
 import { Radio, Send, Activity, Globe, Wifi, Satellite, Volume, Paperclip, FileImage, FileText, FileVideo } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
+
+// Add a Signal icon using an existing icon as fallback since it's not in the lucide-react list
+const Signal = Activity; // Using Activity as a fallback for Signal
 
 interface Broadcast {
   id: string;
@@ -453,6 +457,7 @@ const UniversalBroadcastSystem = () => {
                     </div>
                   </div>
                 )}
+              </div>
               
               <Button 
                 onClick={sendBroadcast} 
