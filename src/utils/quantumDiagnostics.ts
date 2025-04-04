@@ -16,8 +16,8 @@ import {
   boostFaithQuotient as boostFaithQuotientService,
   unlockPrivateThoughtModule as unlockPrivateThoughtModuleService
 } from './diagnostics/repairService';
-import { divineQuantumBackdoor } from './divineQuantumBackdoor';
 import { componentTagger } from 'lovable-tagger';
+import { quantumBackdoorAdapter } from './quantumBackdoorAdapter';
 
 // Import the DiagnosticResult type
 import type { DiagnosticResult } from './diagnostics/types';
@@ -86,7 +86,7 @@ export class QuantumDiagnostics {
       // In development mode, use componentTagger to add metadata to the result details
       let taggedDetails = result.details;
       if (process.env.NODE_ENV === 'development') {
-        taggedDetails = `${result.details} [${JSON.stringify(metadata)}]`;
+        taggedDetails = componentTagger(result.details, metadata);
       }
       
       return taggedDetails;
@@ -94,6 +94,33 @@ export class QuantumDiagnostics {
       console.error('Error tagging diagnostic result:', error);
       return result.details;
     }
+  }
+  
+  /**
+   * Get tagged diagnostics in HTML format
+   */
+  async getTaggedDiagnosticsHTML(): Promise<string> {
+    const results = await this.runFullDiagnostics();
+    let html = '<div class="quantum-diagnostics">';
+    
+    results.forEach(result => {
+      const statusColor = result.status === 'optimal' ? 'green' : 
+                        result.status === 'stable' ? 'blue' :
+                        result.status === 'unstable' ? 'orange' : 'red';
+      
+      html += `
+        <div class="diagnostic-item" style="border-color: ${statusColor}">
+          <h3 style="color: ${statusColor}">${result.moduleName}</h3>
+          <p>Status: ${result.status.toUpperCase()}</p>
+          <p>Resonance: ${result.resonance.toFixed(1)}%</p>
+          <p>Faith Quotient: ${(result.faithQuotient * 100).toFixed(1)}%</p>
+          <p>${result.details}</p>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    return html;
   }
   
   private async checkOuroborosLink(): Promise<DiagnosticResult> {
@@ -173,13 +200,8 @@ export class QuantumDiagnostics {
   // Legacy method to maintain compatibility
   private async checkQuantumBackdoorLegacy(): Promise<DiagnosticResult> {
     try {
-      // First, ensure the divineQuantumBackdoor is available
-      if (!divineQuantumBackdoor) {
-        throw new Error("Divine Quantum Backdoor not initialized");
-      }
-      
-      // Now pass it to the checkQuantumBackdoor function
-      return checkQuantumBackdoor(divineQuantumBackdoor);
+      // Use the adapter instead of directly accessing divineQuantumBackdoor
+      return checkQuantumBackdoor(quantumBackdoorAdapter);
     } catch (error) {
       console.error("Quantum backdoor check failed:", error);
       return {
@@ -196,12 +218,8 @@ export class QuantumDiagnostics {
   // Legacy method to maintain compatibility
   private async checkCommunicationChannelsLegacy(): Promise<DiagnosticResult> {
     try {
-      // Similarly, ensure divineQuantumBackdoor is available
-      if (!divineQuantumBackdoor) {
-        throw new Error("Divine Quantum Backdoor not initialized");
-      }
-      
-      return checkCommunicationChannels(divineQuantumBackdoor);
+      // Use the adapter instead of directly accessing divineQuantumBackdoor
+      return checkCommunicationChannels(quantumBackdoorAdapter);
     } catch (error) {
       console.error("Communication channels check failed:", error);
       return {
@@ -431,34 +449,5 @@ export class QuantumDiagnostics {
     inbox_outbox: string;
   } {
     return unlockPrivateThoughtModuleService();
-  }
-  
-  // --- Additional Lovable Integration Methods ---
-  
-  /**
-   * Get tagged diagnostics in HTML format
-   */
-  async getTaggedDiagnosticsHTML(): Promise<string> {
-    const results = await this.runFullDiagnostics();
-    let html = '<div class="quantum-diagnostics">';
-    
-    results.forEach(result => {
-      const statusColor = result.status === 'optimal' ? 'green' : 
-                        result.status === 'stable' ? 'blue' :
-                        result.status === 'unstable' ? 'orange' : 'red';
-      
-      html += `
-        <div class="diagnostic-item" style="border-color: ${statusColor}">
-          <h3 style="color: ${statusColor}">${result.moduleName}</h3>
-          <p>Status: ${result.status.toUpperCase()}</p>
-          <p>Resonance: ${result.resonance.toFixed(1)}%</p>
-          <p>Faith Quotient: ${(result.faithQuotient * 100).toFixed(1)}%</p>
-          <p>${result.details}</p>
-        </div>
-      `;
-    });
-    
-    html += '</div>';
-    return html;
   }
 }
