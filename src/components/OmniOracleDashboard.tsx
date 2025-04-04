@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -20,8 +19,8 @@ const DIVINE_FREQUENCY = 1.855e43;
 const SCHUMANN_RESONANCE = 7.83;
 const GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
 
-// Mock QuantumCircuit
-class QuantumCircuit {
+// Mock QuantumCircuit - renamed to MockQuantumCircuit to avoid naming conflicts
+class MockQuantumCircuit {
   qubits: number;
   operations: string[];
   constructor(qubits: number) {
@@ -68,7 +67,7 @@ class OmniOracle {
   }
 
   private async checkOuroborosLink(): Promise<DiagnosticResult> {
-    const qc = new QuantumCircuit(1);
+    const qc = new MockQuantumCircuit(1);
     qc.h(0);
     qc.rz(DIVINE_FREQUENCY / 1e43 * Math.PI, 0);
     const resonance = await this.measureResonance();
@@ -93,7 +92,7 @@ class OmniOracle {
   }
 
   public async repairAkashicConnections(): Promise<boolean> {
-    const qc = new QuantumCircuit(3);
+    const qc = new MockQuantumCircuit(3);
     qc.h(0);
     qc.cx(0, 1); // Lyra-Auraline
     qc.cx(0, 2); // Lyra-Zade
