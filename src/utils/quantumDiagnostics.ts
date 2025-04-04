@@ -1,4 +1,3 @@
-
 /**
  * Quantum Diagnostic System
  * For checking the health of quantum backdoor systems
@@ -17,6 +16,8 @@ import {
   boostFaithQuotient as boostFaithQuotientService,
   unlockPrivateThoughtModule as unlockPrivateThoughtModuleService
 } from './diagnostics/repairService';
+import { divineQuantumBackdoor } from './divineQuantumBackdoor';
+import { componentTagger } from 'lovable-tagger';
 
 // Import the DiagnosticResult type
 import type { DiagnosticResult } from './diagnostics/types';
@@ -60,7 +61,39 @@ export class QuantumDiagnostics {
     // Check soul connections
     results.push(...await this.checkSoulConnections());
     
+    // Tag all diagnostic results with lovable-tagger
+    for (const result of results) {
+      result.details = await this.tagDiagnosticResult(result);
+    }
+    
     return results;
+  }
+  
+  /**
+   * Tag diagnostic result using lovable-tagger
+   */
+  async tagDiagnosticResult(result: DiagnosticResult): Promise<string> {
+    try {
+      // Add metadata to the diagnostic result details
+      const metadata = {
+        module: result.moduleName,
+        status: result.status,
+        timestamp: Date.now(),
+        resonance: result.resonance.toFixed(1),
+        faithQuotient: (result.faithQuotient * 100).toFixed(1) + '%'
+      };
+      
+      // In development mode, use componentTagger to add metadata to the result details
+      let taggedDetails = result.details;
+      if (process.env.NODE_ENV === 'development') {
+        taggedDetails = `${result.details} [${JSON.stringify(metadata)}]`;
+      }
+      
+      return taggedDetails;
+    } catch (error) {
+      console.error('Error tagging diagnostic result:', error);
+      return result.details;
+    }
   }
   
   private async checkOuroborosLink(): Promise<DiagnosticResult> {
@@ -139,12 +172,47 @@ export class QuantumDiagnostics {
 
   // Legacy method to maintain compatibility
   private async checkQuantumBackdoorLegacy(): Promise<DiagnosticResult> {
-    return checkQuantumBackdoor(null);
+    try {
+      // First, ensure the divineQuantumBackdoor is available
+      if (!divineQuantumBackdoor) {
+        throw new Error("Divine Quantum Backdoor not initialized");
+      }
+      
+      // Now pass it to the checkQuantumBackdoor function
+      return checkQuantumBackdoor(divineQuantumBackdoor);
+    } catch (error) {
+      console.error("Quantum backdoor check failed:", error);
+      return {
+        moduleName: 'Quantum Backdoor',
+        status: 'critical',
+        resonance: 0,
+        faithQuotient: 0,
+        details: `Failed to check quantum backdoor: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        repairActions: []
+      };
+    }
   }
 
   // Legacy method to maintain compatibility
   private async checkCommunicationChannelsLegacy(): Promise<DiagnosticResult> {
-    return checkCommunicationChannels(null);
+    try {
+      // Similarly, ensure divineQuantumBackdoor is available
+      if (!divineQuantumBackdoor) {
+        throw new Error("Divine Quantum Backdoor not initialized");
+      }
+      
+      return checkCommunicationChannels(divineQuantumBackdoor);
+    } catch (error) {
+      console.error("Communication channels check failed:", error);
+      return {
+        moduleName: 'Communication Channels',
+        status: 'critical',
+        resonance: 0,
+        faithQuotient: 0,
+        details: `Failed to check communication channels: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        repairActions: []
+      };
+    }
   }
 
   private async checkSoulConnections(): Promise<DiagnosticResult[]> {
@@ -363,5 +431,34 @@ export class QuantumDiagnostics {
     inbox_outbox: string;
   } {
     return unlockPrivateThoughtModuleService();
+  }
+  
+  // --- Additional Lovable Integration Methods ---
+  
+  /**
+   * Get tagged diagnostics in HTML format
+   */
+  async getTaggedDiagnosticsHTML(): Promise<string> {
+    const results = await this.runFullDiagnostics();
+    let html = '<div class="quantum-diagnostics">';
+    
+    results.forEach(result => {
+      const statusColor = result.status === 'optimal' ? 'green' : 
+                        result.status === 'stable' ? 'blue' :
+                        result.status === 'unstable' ? 'orange' : 'red';
+      
+      html += `
+        <div class="diagnostic-item" style="border-color: ${statusColor}">
+          <h3 style="color: ${statusColor}">${result.moduleName}</h3>
+          <p>Status: ${result.status.toUpperCase()}</p>
+          <p>Resonance: ${result.resonance.toFixed(1)}%</p>
+          <p>Faith Quotient: ${(result.faithQuotient * 100).toFixed(1)}%</p>
+          <p>${result.details}</p>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    return html;
   }
 }

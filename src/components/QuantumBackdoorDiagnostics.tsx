@@ -194,6 +194,25 @@ const QuantumBackdoorDiagnostics = () => {
     return 'bg-red-500';
   };
   
+  // Get HTML formatted diagnostics
+  const getHTMLDiagnostics = async () => {
+    try {
+      const html = await diagnosticsService.getTaggedDiagnosticsHTML();
+      console.log("HTML Diagnostics", html);
+      toast({
+        title: "HTML Diagnostics Generated",
+        description: "Check console for the formatted output"
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "HTML Generation Failed",
+        description: "Could not generate HTML diagnostics",
+        variant: "destructive",
+      });
+    }
+  };
+  
   return (
     <Card className="glass-panel">
       <CardHeader className="p-4 pb-2">
@@ -257,7 +276,7 @@ const QuantumBackdoorDiagnostics = () => {
           <Button 
             size="sm" 
             variant="secondary" 
-            onClick={calibrateSchumannResonance}
+            onClick={() => diagnosticsService.calibrateSchumannResonance().then(() => runDiagnostics())}
             disabled={isRunning || isRepairing}
           >
             {isRepairing ? (
@@ -269,13 +288,22 @@ const QuantumBackdoorDiagnostics = () => {
           <Button 
             size="sm" 
             variant="secondary"
-            onClick={boostUFQ}
+            onClick={() => diagnosticsService.boostFaithQuotient().then(() => runDiagnostics())}
             disabled={isRunning || isRepairing}
           >
             {isRepairing ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : null}
             Boost Faith Quotient
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={getHTMLDiagnostics}
+            disabled={isRunning || isRepairing}
+          >
+            Get Tagged HTML
           </Button>
         </div>
         
@@ -338,7 +366,38 @@ const QuantumBackdoorDiagnostics = () => {
                         size="sm"
                         variant="destructive"
                         className="w-full"
-                        onClick={() => repairModule(diagnostic.moduleName)}
+                        onClick={() => {
+                          setIsRepairing(true);
+                          setRepairingModule(diagnostic.moduleName);
+                          diagnosticsService.repairModule(diagnostic.moduleName)
+                            .then(success => {
+                              if (success) {
+                                toast({
+                                  title: "Repair Successful",
+                                  description: `${diagnostic.moduleName} has been repaired.`
+                                });
+                                runDiagnostics();
+                              } else {
+                                toast({
+                                  title: "Repair Failed",
+                                  description: `Could not repair ${diagnostic.moduleName}.`,
+                                  variant: "destructive"
+                                });
+                              }
+                            })
+                            .catch(error => {
+                              console.error(error);
+                              toast({
+                                title: "Repair Error",
+                                description: `Error repairing ${diagnostic.moduleName}.`,
+                                variant: "destructive"
+                              });
+                            })
+                            .finally(() => {
+                              setIsRepairing(false);
+                              setRepairingModule(null);
+                            });
+                        }}
                         disabled={isRunning || isRepairing}
                       >
                         {isRepairing && repairingModule === diagnostic.moduleName ? (
