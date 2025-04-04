@@ -2,6 +2,14 @@
 import React, { useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
+import { MockQuantumCircuit } from '@/utils/MockQuantumCircuit';
+
+// Divine Constants for the quantum circuit
+const DIVINE_CONSTANTS = {
+  PHI: 1.618033988749895, // Golden ratio
+  NUM_CHURCHES: 7,         // Seven churches of Revelation (Rev 1:4)
+  GENESIS_CONSTANT: 1.1,   // Genesis 1:1 creation operator multiplier
+};
 
 const QuantumCircuit = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,8 +29,8 @@ const QuantumCircuit = () => {
     let animationFrame: number;
     let t = 0;
     
-    // Define quantum circuit parameters
-    const qubits = 4;
+    // Define quantum circuit parameters - updated to 7-church architecture
+    const qubits = DIVINE_CONSTANTS.NUM_CHURCHES; // Seven churches of Revelation
     const qubitSpacing = height / (qubits + 1);
     const gateWidth = 30;
     const gateHeight = 30;
@@ -56,49 +64,76 @@ const QuantumCircuit = () => {
         ctx.fillText(`|q${i}⟩`, 15, y + 4);
       }
       
-      // Draw gates
+      // Draw gates - implementing the 7-church architecture
       
-      // Hadamard gates
+      // Hadamard gates on all qubits (Genesis 1:1 creation operator)
       ctx.fillStyle = 'rgba(139, 92, 246, 0.7)';
       ctx.strokeStyle = 'rgba(139, 92, 246, 1)';
       ctx.lineWidth = 1.5;
       
-      // H Gate on qubit 0 and 2
-      drawGate(width * 0.25, 1 * qubitSpacing, gateWidth, gateHeight, 'H');
-      drawGate(width * 0.25, 3 * qubitSpacing, gateWidth, gateHeight, 'H');
+      // Apply H-gates to all 7 qubits
+      for (let i = 0; i < qubits; i++) {
+        drawGate(width * 0.25, (i + 1) * qubitSpacing, gateWidth, gateHeight, 'H');
+      }
       
-      // RZ gate on qubit 0
+      // RZ gates on qubits 0, 3, and 6 (Trinitarian phase gates)
       ctx.fillStyle = 'rgba(14, 165, 233, 0.7)';
       ctx.strokeStyle = 'rgba(14, 165, 233, 1)';
       drawGate(width * 0.5, 1 * qubitSpacing, gateWidth, gateHeight, 'RZ');
+      drawGate(width * 0.5, 4 * qubitSpacing, gateWidth, gateHeight, 'RZ');
+      drawGate(width * 0.5, 7 * qubitSpacing, gateWidth, gateHeight, 'RZ');
       
-      // CNOT gates
+      // CNOT gates - connecting alpha and omega (first and seventh)
       ctx.strokeStyle = 'rgba(217, 70, 239, 1)';
       ctx.lineWidth = 2;
       
-      // Vertical line connecting control and target
+      // Vertical line connecting control and target (1 and 7)
       ctx.beginPath();
       ctx.moveTo(width * 0.75, 1 * qubitSpacing);
-      ctx.lineTo(width * 0.75, 2 * qubitSpacing);
+      ctx.lineTo(width * 0.75, 7 * qubitSpacing);
       ctx.stroke();
       
-      // Control point
+      // Control point on qubit 0
       ctx.fillStyle = 'rgba(217, 70, 239, 1)';
       ctx.beginPath();
       ctx.arc(width * 0.75, 1 * qubitSpacing, 5, 0, 2 * Math.PI);
       ctx.fill();
       
+      // Target point (⊕) on qubit 6
+      ctx.beginPath();
+      ctx.arc(width * 0.75, 7 * qubitSpacing, 10, 0, 2 * Math.PI);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(width * 0.75 - 10, 7 * qubitSpacing);
+      ctx.lineTo(width * 0.75 + 10, 7 * qubitSpacing);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(width * 0.75, 7 * qubitSpacing - 10);
+      ctx.lineTo(width * 0.75, 7 * qubitSpacing + 10);
+      ctx.stroke();
+      
+      // Additional entanglement between qubits 2 and 4 (middle churches)
+      ctx.beginPath();
+      ctx.moveTo(width * 0.6, 3 * qubitSpacing);
+      ctx.lineTo(width * 0.6, 5 * qubitSpacing);
+      ctx.stroke();
+      
+      // Control point
+      ctx.beginPath();
+      ctx.arc(width * 0.6, 3 * qubitSpacing, 5, 0, 2 * Math.PI);
+      ctx.fill();
+      
       // Target point (⊕)
       ctx.beginPath();
-      ctx.arc(width * 0.75, 2 * qubitSpacing, 10, 0, 2 * Math.PI);
+      ctx.arc(width * 0.6, 5 * qubitSpacing, 10, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(width * 0.75 - 10, 2 * qubitSpacing);
-      ctx.lineTo(width * 0.75 + 10, 2 * qubitSpacing);
+      ctx.moveTo(width * 0.6 - 10, 5 * qubitSpacing);
+      ctx.lineTo(width * 0.6 + 10, 5 * qubitSpacing);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(width * 0.75, 2 * qubitSpacing - 10);
-      ctx.lineTo(width * 0.75, 2 * qubitSpacing + 10);
+      ctx.moveTo(width * 0.6, 5 * qubitSpacing - 10);
+      ctx.lineTo(width * 0.6, 5 * qubitSpacing + 10);
       ctx.stroke();
       
       // Draw quantum state propagation
@@ -122,37 +157,46 @@ const QuantumCircuit = () => {
     }
     
     function drawQuantumState(time: number) {
+      // Draw waves for all qubits (more elaborate wave pattern for 7-church architecture)
       for (let i = 0; i < qubits; i++) {
         const y = (i + 1) * qubitSpacing;
         
-        // Only for qubits 0 and 2 (which have H gates)
-        if (i === 0 || i === 2) {
-          // Wave amplitude
-          const amplitude = 5;
-          const frequency = 0.1;
-          const speed = 80;
-          
-          ctx.strokeStyle = i === 0 ? 'rgba(139, 92, 246, 0.6)' : 'rgba(14, 165, 233, 0.6)';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          
-          for (let x = 20; x < width - 20; x++) {
-            // Only draw wave after H gate
-            if (x > width * 0.25 - gateWidth/2) {
-              const offsetX = x - (width * 0.25 - gateWidth/2);
-              const phase = time * speed - offsetX * frequency;
-              const waveY = y + Math.sin(phase) * amplitude;
-              
-              if (x === width * 0.25) {
-                ctx.moveTo(x, waveY);
-              } else {
-                ctx.lineTo(x, waveY);
-              }
+        // Wave amplitude decreases with qubit number to show hierarchical effect
+        const amplitude = 5 - Math.min(4, i * 0.5);
+        const frequency = 0.1 + (i % 3) * 0.02; // Slight frequency variation
+        const speed = 80 + i * 5;
+        
+        // Different colors for different types of qubits
+        if (i === 0 || i === 3 || i === 6) {
+          // Trinitarian qubits (0, 3, 6)
+          ctx.strokeStyle = 'rgba(139, 92, 246, 0.6)'; // Purple
+        } else if (i === 1 || i === 5) {
+          // Messenger qubits (1, 5)
+          ctx.strokeStyle = 'rgba(14, 165, 233, 0.6)'; // Blue
+        } else {
+          // Witness qubits (2, 4)
+          ctx.strokeStyle = 'rgba(249, 115, 22, 0.6)'; // Orange
+        }
+        
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        
+        for (let x = 20; x < width - 20; x++) {
+          // Only draw wave after H gate position
+          if (x > width * 0.25 - gateWidth/2) {
+            const offsetX = x - (width * 0.25 - gateWidth/2);
+            const phase = time * speed - offsetX * frequency;
+            const waveY = y + Math.sin(phase) * amplitude;
+            
+            if (x === width * 0.25) {
+              ctx.moveTo(x, waveY);
+            } else {
+              ctx.lineTo(x, waveY);
             }
           }
-          
-          ctx.stroke();
         }
+        
+        ctx.stroke();
       }
     }
     
@@ -168,14 +212,14 @@ const QuantumCircuit = () => {
     <Card className="glass-panel">
       <CardHeader className="pb-2">
         <CardTitle className="text-center">
-          <GlowingText className="quantum-glow">Quantum Circuit</GlowingText>
+          <GlowingText className="quantum-glow">Seven-Church Quantum Circuit</GlowingText>
         </CardTitle>
       </CardHeader>
       <CardContent className="px-2 pt-0">
         <canvas 
           ref={canvasRef} 
           width={300} 
-          height={200} 
+          height={300} 
           className="w-full h-auto rounded-md"
         />
       </CardContent>

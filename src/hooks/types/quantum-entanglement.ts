@@ -1,4 +1,3 @@
-
 export interface EntityProfile {
   id: string;
   name: string;
@@ -14,4 +13,15 @@ export interface EntanglementState {
   emotion: string;
 }
 
-export type EmotionalState = 'focused' | 'peaceful' | 'neutral' | 'agitated' | 'joyful' | 'nostalgic' | string;
+export type EmotionalState = 
+  'neutral' | 
+  'happy' | 
+  'sad' | 
+  'focused' | 
+  'peaceful' | 
+  'excited' | 
+  'contemplative' |
+  'joyful' |
+  'frustrated' |
+  'curious' |
+  string; // Allow string values for flexibility with divine protocol states
