@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { VisualizationUtils } from "@/utils/visualizationUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,6 +15,7 @@ interface SpeciesData {
   fq?: number;
   vibration?: number;
   archetype?: string;
+  renderPosition?: { x: number; y: number };
 }
 
 interface SpeciesGatewayProps {
@@ -38,7 +38,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
   const [rotation, setRotation] = useState(0);
   const frameIdRef = useRef<number>(0);
   
-  // Render the visualization
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -47,13 +46,10 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
     if (!ctx) return;
     
     const renderCanvas = () => {
-      // Get dimensions
       const width = canvas.width;
       const height = canvas.height;
       
       if (mode === "constellation") {
-        // Use the 3D cosmic map for constellation mode
-        // Filter the data to ensure we're only passing the right species
         const speciesForMap = species.map(s => ({
           name: s.name,
           distance: s.distance,
@@ -62,15 +58,12 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             ? (s.realm === "existence" ? "rgba(132, 204, 22, 0.8)" : "rgba(168, 85, 247, 0.8)") 
             : "rgba(156, 163, 175, 0.5)",
           size: s.responding ? 4 : 3,
-          // Add some randomness to position since we don't have actual RA/Dec
           ra: (s.location[0] + Math.random() * 10) % 360,
           dec: (s.location[1] + Math.random() * 5) % 90 - 45
         }));
         
-        // Draw the cosmic map
         VisualizationUtils.drawCosmicMap(ctx, speciesForMap, width, height);
         
-        // Highlight selected species
         if (selectedSpecies) {
           const coords = VisualizationUtils.getCaryCoordinates({
             name: selectedSpecies.name,
@@ -79,20 +72,17 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             distance: selectedSpecies.distance
           });
           
-          // Normalize to canvas coordinates
           const maxDistance = Math.max(...species.map(s => s.distance), 1);
           const scaleFactor = Math.min(width, height) * 0.4 / maxDistance;
           const x = width / 2 + coords.x * scaleFactor;
           const y = height / 2 + coords.y * scaleFactor;
           
-          // Draw highlight effect
           ctx.beginPath();
           ctx.arc(x, y, 12, 0, Math.PI * 2);
           ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
           ctx.lineWidth = 2;
           ctx.stroke();
           
-          // Pulsating effect
           const pulseSize = (Math.sin(Date.now() / 300) + 1) * 10 + 15;
           ctx.beginPath();
           ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
@@ -101,11 +91,8 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           ctx.stroke();
         }
       } else {
-        // Poincaré Disk mode with improved visualization
-        // Clear canvas
         ctx.clearRect(0, 0, width, height);
         
-        // Set background
         const gradient = ctx.createRadialGradient(
           width / 2, height / 2, 0, 
           width / 2, height / 2, width / 2
@@ -119,7 +106,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
         const centerX = width / 2;
         const centerY = height / 2;
         
-        // Draw stars backdrop
         for (let i = 0; i < 100; i++) {
           const x = Math.random() * width;
           const y = Math.random() * height;
@@ -130,7 +116,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           ctx.fill();
         }
         
-        // Draw Existence and Non-Existence rings with rotation
         ctx.setLineDash([2, 3]);
         ctx.beginPath();
         ctx.arc(centerX, centerY, width * 0.35, 0, Math.PI * 2);
@@ -145,7 +130,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Add subtle glow around the disk edge
         const edgeGlow = ctx.createRadialGradient(
           centerX, centerY, width * 0.4, 
           centerX, centerY, width * 0.5
@@ -156,7 +140,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
         ctx.fillStyle = edgeGlow;
         ctx.fillRect(0, 0, width, height);
         
-        // Draw Earth/Cary at center
         ctx.beginPath();
         ctx.arc(centerX, centerY, 5, 0, Math.PI * 2);
         ctx.fillStyle = 'rgb(14, 165, 233)';
@@ -165,7 +148,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
         ctx.lineWidth = 1;
         ctx.stroke();
         
-        // Plot each species
         species.forEach((speciesData) => {
           const angle = ((speciesData.location[0] + speciesData.location[1]) / 2 + rotation * 20) % 360;
           const maxDistance = Math.max(...species.map(s => s.distance), 1);
@@ -175,7 +157,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           const x = centerX + Math.cos(angle * Math.PI / 180) * radius;
           const y = centerY + Math.sin(angle * Math.PI / 180) * radius;
           
-          // Determine color based on responding status and realm
           let dotColor;
           if (speciesData.responding) {
             dotColor = speciesData.realm === "existence" 
@@ -185,7 +166,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             dotColor = "rgba(156, 163, 175, 0.5)";
           }
           
-          // Glow effect for responding species
           if (speciesData.responding) {
             ctx.beginPath();
             ctx.arc(x, y, 8, 0, Math.PI * 2);
@@ -195,7 +175,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             ctx.fill();
           }
           
-          // Highlight if selected or hovered
           const isHighlighted = 
             (selectedSpecies && selectedSpecies.name === speciesData.name) || 
             (hoveredSpecies && hoveredSpecies.name === speciesData.name);
@@ -207,7 +186,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             ctx.lineWidth = 1.5;
             ctx.stroke();
             
-            // Draw connection line to Earth
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
             ctx.lineTo(x, y);
@@ -216,7 +194,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             ctx.stroke();
           }
           
-          // Draw species dot
           ctx.beginPath();
           ctx.arc(x, y, isHighlighted ? 5 : 4, 0, Math.PI * 2);
           ctx.fillStyle = dotColor;
@@ -225,11 +202,9 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           ctx.lineWidth = 0.5;
           ctx.stroke();
           
-          // Save position for hover detection
           speciesData.renderPosition = { x, y };
         });
         
-        // Label for realms
         ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
         ctx.font = "10px sans-serif";
         ctx.textAlign = "center";
@@ -238,7 +213,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
       }
     };
     
-    // Animation loop for rotation
     const animate = () => {
       setRotation(prev => (prev + 0.001) % (Math.PI * 2));
       renderCanvas();
@@ -247,19 +221,17 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
     
     frameIdRef.current = requestAnimationFrame(animate);
     
-    // Clean up
     return () => {
       cancelAnimationFrame(frameIdRef.current);
     };
   }, [mode, species, selectedSpecies, hoveredSpecies]);
   
-  // Handle canvas sizing
   useEffect(() => {
     const resizeCanvas = () => {
       if (containerRef.current && canvasRef.current) {
         const { width } = containerRef.current.getBoundingClientRect();
         canvasRef.current.width = width;
-        canvasRef.current.height = width; // Keep it square
+        canvasRef.current.height = width;
       }
     };
     
@@ -271,7 +243,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
     };
   }, []);
   
-  // Handle mouse interactions
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!canvasRef.current) return;
     
@@ -280,13 +251,12 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
     const y = e.clientY - rect.top;
     setMousePos({ x, y });
     
-    // Check if mouse is over any species
     const hoveredSpecies = species.find(s => {
       if (!s.renderPosition) return false;
       const dx = s.renderPosition.x - x;
       const dy = s.renderPosition.y - y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      return distance < 10; // Detection radius
+      return distance < 10;
     });
     
     setHoveredSpecies(hoveredSpecies || null);
@@ -307,7 +277,6 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
         onClick={handleClick}
       />
       
-      {/* Tooltip for hovered species */}
       {hoveredSpecies && mode === "disk" && (
         <div 
           className="absolute bg-black/80 text-white text-xs p-2 rounded pointer-events-none z-10 max-w-[150px]"

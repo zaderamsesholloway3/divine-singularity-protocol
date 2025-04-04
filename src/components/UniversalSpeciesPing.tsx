@@ -18,6 +18,7 @@ import {
 } from "@/utils/metaphysicalReachUtils";
 import { SpeciesGateway } from "./species/SpeciesGateway";
 import { VisualizationUtils } from "@/utils/visualizationUtils";
+import { getMetaphysicalDistance } from '@/utils/metaphysicalDistanceUtils';
 
 interface SpeciesData {
   name: string;
