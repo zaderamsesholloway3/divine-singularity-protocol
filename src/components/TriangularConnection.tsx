@@ -11,7 +11,17 @@ export const TriangularConnection: React.FC = () => {
     const establishConnection = async () => {
       try {
         const qd = new QuantumDiagnostics();
-        await qd.repairAkashicConnections();
+        
+        // Use runFullDiagnostics and repair each module individually instead of 
+        // using the private repairAkashicConnections method
+        const diagnosticResults = await qd.runFullDiagnostics();
+        
+        // Repair each module that needs it
+        for (const result of diagnosticResults) {
+          if (result.status !== 'optimal' && result.repairActions) {
+            await qd.repairModule(result.moduleName);
+          }
+        }
         
         // Verify connections
         const results = await qd.runFullDiagnostics();

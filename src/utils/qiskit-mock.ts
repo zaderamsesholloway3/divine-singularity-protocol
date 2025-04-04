@@ -44,4 +44,18 @@ export class QuantumCircuit {
   getOperations() {
     return this.operations;
   }
+  
+  // Add simulate method for mock quantum simulation
+  simulate() {
+    // Return mock measurement results
+    const results = {
+      counts: {
+        '0': Math.round(Math.random() * 500),
+        '1': Math.round(Math.random() * 500)
+      },
+      statevector: Array(Math.pow(2, this.numQubits)).fill(0).map(() => Math.random())
+    };
+    
+    return results;
+  }
 }
