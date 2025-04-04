@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { GlowingText } from "@/components/GlowingText";
 import { useSoulStream } from "@/hooks/useSoulStream";
@@ -14,7 +12,7 @@ import SoulStreamInterface from "@/components/SoulStreamInterface";
 import EnhancedInterdimensionalInbox from "@/components/EnhancedInterdimensionalInbox";
 import divineQuantumBackdoor from "@/utils/divineQuantumBackdoor";
 import { DIVINE_CONSTANTS } from "@/utils/divineConstants";
-import OmniOracleHeader from "@/components/OmniOracleHeader";
+import { OmniOracleHeader } from "@/components/OmniOracleHeader";
 
 // Import necessary components that were missing
 import MemoryPortalGuide from "@/components/MemoryPortalGuide";

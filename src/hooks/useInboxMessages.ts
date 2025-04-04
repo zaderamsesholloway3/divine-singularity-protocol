@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useQuantumEntanglement } from '@/hooks/useQuantumEntanglement';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +26,7 @@ export interface Message {
 interface ResonanceResult {
   success: boolean;
   message?: string;
+  resonanceLevel?: number;
 }
 
 export function useInboxMessages(userId: string) {
@@ -75,14 +77,14 @@ export function useInboxMessages(userId: string) {
   
   const [triadBoostActive, setTriadBoostActive] = useState(false);
   const [useSoulStream, setUseSoulStream] = useState(false);
+  const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
+  const [resonanceLevel, setResonanceLevel] = useState(0);
   
   const { 
     entanglementState, 
     userProfile, 
-    resonanceBoostActive,
-    resonanceLevel,
     initiateEntanglement, 
-    terminateEntanglement,
+    terminateEntanglement: closeEntanglement,
     generateEntangledResponse,
     boostSoulResonance
   } = useQuantumEntanglement(userId);
@@ -108,7 +110,9 @@ export function useInboxMessages(userId: string) {
     
     const intervalId = setInterval(() => {
       const biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
-      setBiometrics(biofeedback.metrics);
+      if (biofeedback && typeof biofeedback === 'object' && 'metrics' in biofeedback) {
+        setBiometrics(biofeedback.metrics as any);
+      }
     }, 3000);
     
     return () => clearInterval(intervalId);
@@ -124,7 +128,7 @@ export function useInboxMessages(userId: string) {
       console.log("Using Triad Quantum Backdoor", biofeedback);
     } else if (biofeedbackActive && !resonanceBoostActive) {
       biofeedback = BiofeedbackSimulator.verifyEmotionalState(userId);
-      if (!biofeedback.coherent) {
+      if (biofeedback && typeof biofeedback === 'object' && 'coherent' in biofeedback && !biofeedback.coherent) {
         toast({
           title: 'Connection Blocked',
           description: 'Soul resonance too low for connection. Try to center yourself, use Resonance Boost, or activate Triad Quantum Backdoor.',
@@ -287,9 +291,9 @@ export function useInboxMessages(userId: string) {
       const biofeedbackResult = BiofeedbackSimulator.assessEmotionalState(userId);
       
       if (biofeedbackResult && typeof biofeedbackResult === 'object' && 'metrics' in biofeedbackResult) {
-        setBiometrics(biofeedbackResult.metrics || {});
+        setBiometrics(biofeedbackResult.metrics as any);
         
-        if (biofeedbackResult.coherent) {
+        if ('coherent' in biofeedbackResult && biofeedbackResult.coherent) {
           toast({
             title: "Biofeedback Monitoring",
             description: "Soul coherence detected",
@@ -300,11 +304,7 @@ export function useInboxMessages(userId: string) {
   };
   
   const activateResonanceBoost = () => {
-    const resonanceResult = { 
-      success: true, 
-      message: "Soul resonance activated", 
-      resonanceLevel: 0.95 
-    };
+    const resonanceResult = boostSoulResonance();
     
     if (resonanceResult.success) {
       setResonanceBoostActive(true);
@@ -369,12 +369,7 @@ export function useInboxMessages(userId: string) {
   };
 
   const terminateEntanglement = () => {
-    setEntanglementState({
-      active: false,
-      strength: 0,
-      entangledWith: null,
-      emotion: 'neutral'
-    });
+    closeEntanglement();
     
     toast({
       title: "Entanglement Terminated",

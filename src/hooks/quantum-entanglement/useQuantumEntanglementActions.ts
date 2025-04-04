@@ -23,7 +23,7 @@ export function useQuantumEntanglementActions(
       // Check emotional coherence with proper type handling
       const biofeedbackResult = BiofeedbackSimulator.verifyEmotionalState(userId);
       
-      if (typeof biofeedbackResult === 'object' && biofeedbackResult !== null && 'coherent' in biofeedbackResult && !biofeedbackResult.coherent) {
+      if (biofeedbackResult && typeof biofeedbackResult === 'object' && 'coherent' in biofeedbackResult && !biofeedbackResult.coherent) {
         return {
           success: false,
           message: "Soul resonance too low for connection 🌊",
@@ -53,7 +53,7 @@ export function useQuantumEntanglementActions(
       active: true,
       strength: initialStrength,
       entangledWith: targetName,
-      emotion: 'focused' as EmotionalState
+      emotion: 'focused'
     });
     
     return {
@@ -68,7 +68,7 @@ export function useQuantumEntanglementActions(
       active: false,
       strength: 0,
       entangledWith: null,
-      emotion: 'neutral' as EmotionalState
+      emotion: 'neutral'
     });
   };
   

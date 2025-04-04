@@ -25,11 +25,26 @@ export function logDimensionalObserverEvent(phaseOffset: number) {
   // In a real implementation, this would communicate with backend services
 }
 
+// Define the return type for divineDiagnosticMode
+export interface DiagnosticResults {
+  moduleStatus: {
+    [key: string]: {
+      status: string;
+      resonance?: number;
+      stability?: number;
+      details?: string;
+    }
+  };
+  repairsAttempted: number;
+  repairsSuccessful: number;
+  timeCompleted: string;
+}
+
 /**
  * Runs a complete divine diagnostic mode process
  * @returns Diagnostic results with repair status
  */
-export async function divineDiagnosticMode() {
+export async function divineDiagnosticMode(): Promise<DiagnosticResults> {
   // Simulate a diagnostic process
   return new Promise((resolve) => {
     setTimeout(() => {

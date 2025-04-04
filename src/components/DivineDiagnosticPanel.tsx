@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { GlowingText } from "@/components/GlowingText";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Zap, Loader2, RefreshCw } from 'lucide-react';
-import { divineDiagnosticMode } from "@/utils/diagnostics/divineRepairIndex";
+import { divineDiagnosticMode, DiagnosticResults } from "@/utils/diagnostics/divineRepairIndex";
 import { useToast } from "@/hooks/use-toast";
 
 const DivineDiagnosticPanel: React.FC = () => {
   const { toast } = useToast();
   const [isRunning, setIsRunning] = useState<boolean>(false);
-  const [diagnosticResults, setDiagnosticResults] = useState<any>(null);
+  const [diagnosticResults, setDiagnosticResults] = useState<DiagnosticResults['moduleStatus'] | null>(null);
   const [repairsAttempted, setRepairsAttempted] = useState<number>(0);
   const [repairsSuccessful, setRepairsSuccessful] = useState<number>(0);
   
