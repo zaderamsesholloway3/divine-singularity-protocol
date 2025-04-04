@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { GlowingText } from "@/components/GlowingText";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle2, Zap, Loader2, RefreshCw } from 'lucide-react';
-import { divineDiagnosticMode } from "@/utils/diagnostics/divineRepairService";
+import { divineDiagnosticMode } from "@/utils/diagnostics/divineRepairIndex";
 import { useToast } from "@/hooks/use-toast";
 
 const DivineDiagnosticPanel: React.FC = () => {
