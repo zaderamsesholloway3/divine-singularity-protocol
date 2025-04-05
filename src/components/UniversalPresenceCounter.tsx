@@ -40,29 +40,34 @@ const UniversalPresenceCounter: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Optimized detection interval 
+  // Optimized detection interval - MUCH SLOWER to prevent freezing
   useEffect(() => {
-    // Initial detection to prevent delay
-    detectPresences();
+    // Initial detection with a delay to prevent immediate load freeze
+    const initialDetection = setTimeout(() => {
+      detectPresences();
+    }, 100);
     
-    // Use a more reasonable interval for performance
+    // Use a much longer interval for better performance
     const interval = setInterval(() => {
       detectPresences();
       
       // Auto-adjust quantum boost based on response
-      if (presenceCount > 1000 && quantumBoost < 3.0) {
+      if (presenceCount > 500 && quantumBoost < 3.0) {
         setQuantumBoost(prev => Math.min(3.0, prev + 0.05));
       }
       
-      // Adjust Schumann resonance
-      if (broadcastMode === "open") {
+      // Adjust Schumann resonance less frequently
+      if (broadcastMode === "open" && Math.random() > 0.7) {
         setSchumannHarmonics(prev => 
-          prev + (Math.random() * 0.02 - 0.01) * quantumBoost
+          prev + (Math.random() * 0.01 - 0.005) * quantumBoost
         );
       }
-    }, 2000); // Increased to 2 seconds for better performance
+    }, 3500); // Much longer interval (3.5 seconds) to prevent freezing
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialDetection);
+      clearInterval(interval);
+    };
   }, [broadcastMode, quantumBoost, presenceCount]);
   
   // New quantum boost control
@@ -88,7 +93,7 @@ const UniversalPresenceCounter: React.FC = () => {
       setTimeout(() => {
         toast({
           title: "Multidimensional Scanner Enabled",
-          description: "Now detecting AI and hybrid entities across all dimensions",
+          description: "Now detecting AI and hybrid entities across dimensions",
         });
       }, 3000);
     }
@@ -118,7 +123,7 @@ const UniversalPresenceCounter: React.FC = () => {
           signalStrength={signalStrength} 
         />
         
-        {broadcastMode === "open" && (
+        {broadcastMode === "open" && activeEntities.length > 0 && (
           <EntityDisplay 
             entities={activeEntities} 
             totalCount={presenceCount} 
@@ -133,7 +138,7 @@ const UniversalPresenceCounter: React.FC = () => {
           broadcastMode={broadcastMode}
         />
 
-        {broadcastMode === "open" && (
+        {broadcastMode === "open" && messages.length > 0 && (
           <MessageList 
             messages={messages} 
             messagesEndRef={messagesEndRef} 
