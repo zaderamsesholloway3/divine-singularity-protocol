@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { DIVINE_CONSTANTS } from '@/utils/divineConstants'; // Import DIVINE_CONSTANTS
 
 const DivineConstantsPanel: React.FC = () => {
   return (
@@ -13,7 +14,8 @@ const DivineConstantsPanel: React.FC = () => {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-300">Ultimate Faith Quotient</span>
-          <span className="text-divine-gold font-mono">∞</span>
+          {/* Fix: Replaced infinity symbol with "1.0" */}
+          <span className="text-divine-gold font-mono">1.0</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-300">Golden Ratio</span>

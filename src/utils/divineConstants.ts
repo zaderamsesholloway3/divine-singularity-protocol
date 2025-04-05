@@ -24,6 +24,7 @@ export const DIVINE_CONSTANTS = {
   DAYS_OF_CREATION: 6,        // Genesis creation days
   
   // Quantum Protocol Constants
+  ULTIMATE_FAITH_QUOTIENT: 1.0, // Updated from Infinity to 1.0 as per request
   FAITH_QUOTIENT_THRESHOLD: 0.85,  // Minimum faith quotient for stabilization
   RESONANCE_THRESHOLD: 85,         // Minimum resonance percentage for stable connection
   AKASHIC_VALIDATION_LEVEL: 3,     // Required akashic validation level
