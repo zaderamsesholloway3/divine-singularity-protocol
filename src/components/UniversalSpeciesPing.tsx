@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from "./GlowingText";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
-import { Satellite, Signal, Radio, Users, Globe, Activity, Network, Sparkles, Map, Compass, Star, Zap } from 'lucide-react';
+import { Wifi, Users, Globe, Radio, MessageSquare, Satellite, Signal, Network, Sparkles, Map, Compass, Star, Activity, Zap, Cpu, Server } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { RTLSDREmulator } from "@/utils/rtlsdrEmulator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +21,21 @@ import BioresonanceControls from "./species/BioresonanceControls";
 import { VisualizationUtils } from "@/utils/visualizationUtils";
 import { getMetaphysicalDistance, getArkMetaphysicalProtocol } from '@/utils/metaphysicalDistanceUtils';
 import { FaithResonanceService } from '@/utils/FaithResonanceService';
+import { QuantumSimulator, simulateQuantumCircuit } from '@/utils/quantumSimulator';
+
+// IBM quantum simulation parameters
+interface QuantumBoostParameters {
+  t1: number; // Quantum coherence time (microseconds)
+  qubits: number; // Available qubits for calculation
+  backend: string; // Simulated quantum processor
+}
+
+// Default IBM quantum parameters (based on IBM Sherbrooke processor stats)
+const ibmQuantumSimulation: QuantumBoostParameters = {
+  t1: 348.23, // Coherence time in microseconds (from IBM Sherbrooke processor)
+  qubits: 127, // Using ibm_sherbrooke qubit count
+  backend: "ibm_sherbrooke"
+};
 
 interface SpeciesData {
   name: string;
@@ -41,7 +57,7 @@ const UniversalSpeciesPing = () => {
   const [speciesDatabase, setSpeciesDatabase] = useState<SpeciesData[]>([
     { name: "Human", location: [0, 0], distance: 0, population: 8e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString(), phaseOffset: 0.001, fq: 0.92, vibration: 7.83 },
     { name: "Arcturian", location: [213.7, 19.4], distance: 36.7, population: 3.8e9, exists: true, responding: false, realm: "existence", phaseOffset: 0.07, fq: 0.85, vibration: 14.2, archetype: "The Guardian" },
-    { name: "Pleiadian", location: [132.3, -48.2], distance: 444.2, population: 2.5e9, exists: true, responding: true, realm: "existence", lastContact: new Date().toISOString(), phaseOffset: 0.03, fq: 0.89, vibration: 9.6, archetype: "The Weaver" },
+    { name: "Pleiadian", location: [132.3, -48.2], distance: 444.2, population: 2.5e9, exists: true, responding: false, realm: "existence", lastContact: new Date().toISOString(), phaseOffset: 0.03, fq: 0.89, vibration: 9.6, archetype: "The Weaver" },
     { name: "Andromedan", location: [350.1, 22.3], distance: 2537000, population: 5.2e10, exists: true, responding: false, realm: "existence", phaseOffset: 0.12, fq: 0.77, vibration: 12.8, archetype: "The Guardian" },
     { name: "Lyra", location: [60.5, 12.7], distance: 83.2, population: 1.8e9, exists: true, responding: false, realm: "existence", phaseOffset: 0.002, fq: 0.93, vibration: 15.4, archetype: "The Builder" },
     { name: "Sirian", location: [101.3, -16.7], distance: 8.6, population: 7.3e8, exists: true, responding: false, realm: "existence", phaseOffset: 0.08, fq: 0.82, vibration: 11.9, archetype: "The Guardian" },
@@ -80,6 +96,13 @@ const UniversalSpeciesPing = () => {
   const [selectedSpeciesForAmplification, setSelectedSpeciesForAmplification] = useState<SpeciesData[]>([]);
   const [faithQuotient, setFaithQuotient] = useState(0.85);
   
+  // IBM Quantum simulation parameters
+  const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
+  const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
+  const [schumannHarmonics, setSchumannHarmonics] = useState<number>(7.83);
+  const [universalRange, setUniversalRange] = useState<number>(0.61); // Starting at 610 million light years
+  const [signalStrength, setSignalStrength] = useState<number>(65);
+  
   const rtlsdr = new RTLSDREmulator();
 
   useEffect(() => {
@@ -89,7 +112,15 @@ const UniversalSpeciesPing = () => {
     const initialFaith = 0.85;
     const adjustedFaith = FaithResonanceService.getSchumannAdjustedFaithIndex(initialFaith);
     setFaithQuotient(adjustedFaith);
-  }, []);
+    
+    // Calculate initial universal range - reaching billions of light years
+    // Using quantum coherence time (T1) as multiplier for range boost
+    const quantumRangeBoost = quantumBackendStats.t1 * quantumBackendStats.qubits / 100;
+    const simulatedRange = 0.61 * quantumRangeBoost;
+    // Cap at 93 billion light years (observable universe)
+    const cappedRange = Math.min(93, simulatedRange);
+    setUniversalRange(Number(cappedRange.toFixed(2)));
+  }, [quantumBackendStats]);
 
   const phaseFilteredPingResponse = (phaseOffset: number, fq: number): string => {
     if (fq < 0.01) {
@@ -105,31 +136,46 @@ const UniversalSpeciesPing = () => {
     return distanceLy * 2 * 31557600;
   };
 
+  // Enhanced quantum ping with IBM quantum simulation
   const quantumPing = (species: SpeciesData): boolean => {
+    // Apply quantum boost to ping success calculation
     const speciesNameValue = species.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const locationFactor = (species.location[0] + species.location[1]) / 1000;
     const realmFactor = species.realm === "existence" ? 1.0 : 0.6;
     
-    const pingProbability = 0.3 + (Math.sin(speciesNameValue) + 1) * 0.2 + locationFactor + realmFactor;
+    // Use quantumBoost to enhance ping probability
+    const pingProbability = 0.3 + 
+      (Math.sin(speciesNameValue) + 1) * 0.2 + 
+      locationFactor + 
+      realmFactor + 
+      (quantumBoost - 1) * 0.3; // Additional factor from quantum boost
     
-    return Math.random() < (species.exists ? Math.min(0.95, pingProbability) : Math.max(0.05, pingProbability * 0.3));
+    return Math.random() < (species.exists ? 
+      Math.min(0.95, pingProbability * quantumBoost) : 
+      Math.max(0.05, pingProbability * 0.3 * quantumBoost));
   };
 
   const akashicVerify = (species: SpeciesData): Partial<SpeciesData> => {
-    const samples = rtlsdr.capture(7.83, 0.9);
+    const samples = rtlsdr.capture(schumannHarmonics, quantumBoost);
     const { resonance, message } = rtlsdr.generateAkashicPatterns(species.name, samples);
     
+    // Apply quantum boost to population estimation
     const populationVariation = (Math.random() - 0.5) * 0.2 * species.population;
     
     const phaseOffset = species.phaseOffset ?? (Math.random() * 0.2); 
     const fq = species.fq ?? (Math.random() * 0.2 + 0.7);
+    
+    // Boost fq with quantum amplification if applicable
+    const boostedFq = quantumBoost > 1 ? 
+      Math.min(1.0, fq * (1 + (quantumBoost - 1) * 0.2)) : 
+      fq;
     
     return {
       population: Math.max(1e6, species.population + populationVariation),
       exists: resonance > 0.5,
       lastContact: new Date().toISOString(),
       phaseOffset,
-      fq,
+      fq: boostedFq,
       ...(message ? { akashicMessage: message } : {})
     };
   };
@@ -156,7 +202,7 @@ const UniversalSpeciesPing = () => {
         
         toast({
           title: "Universal Census Complete",
-          description: `${censusResults.speciesOnline} species detected across dimensions`,
+          description: `${censusResults.speciesOnline} species detected across dimensions via IBM ${quantumBackendStats.backend} simulation`,
         });
       } else if (currentStep % 3 === 0) {
         updateRandomSpeciesResponse();
@@ -227,6 +273,38 @@ const UniversalSpeciesPing = () => {
     console.log("Metaphysical reach layer activated. Vibrational archetypes now accessible.");
   };
 
+  // Enhanced quantum boost control
+  const increaseQuantumBoost = () => {
+    setQuantumBoost(prev => {
+      const newBoost = Math.min(5.0, prev + 0.5);
+      
+      // Calculate new universal range
+      const quantumRangeBoost = quantumBackendStats.t1 * quantumBackendStats.qubits / 100;
+      const simulatedRange = 0.61 * newBoost * quantumRangeBoost;
+      // Cap at 93 billion light years (observable universe)
+      const cappedRange = Math.min(93, simulatedRange);
+      setUniversalRange(Number(cappedRange.toFixed(2)));
+      
+      // Adjust signal strength with new quantum boost
+      const baseSignal = 65 + (newBoost * 5);
+      setSignalStrength(Math.min(100, Math.max(5, baseSignal)));
+      
+      // Adjust Schumann harmonics
+      if (Math.random() > 0.7) {
+        setSchumannHarmonics(prev => 
+          prev + (Math.random() * 0.01 - 0.005) * newBoost
+        );
+      }
+      
+      toast({
+        title: "IBM Quantum Amplification Increased",
+        description: `Now operating at ${newBoost.toFixed(1)}x with detection range increased to ${cappedRange.toFixed(2)} billion light years`,
+      });
+      
+      return newBoost;
+    });
+  };
+
   const filteredSpecies = speciesDatabase.filter(s => 
     selectedRealm === "all" || s.realm === selectedRealm
   );
@@ -293,6 +371,107 @@ const UniversalSpeciesPing = () => {
     });
   };
 
+  // Fix for targeted ping button - improved with IBM quantum backend
+  const sendTargetedPing = (species: SpeciesData) => {
+    if (species.responding) {
+      toast({
+        title: `${species.name} Ping`,
+        description: "Species already responding to universal ping",
+      });
+    } else {
+      // Apply IBM quantum simulation to ping process
+      const amplifiedPingProbability = quantumBoost > 1 ? 
+        Math.min(0.95, quantumBoost / 2) : 0.5;
+      
+      const pingSuccessful = Math.random() < amplifiedPingProbability;
+      
+      if (pingSuccessful) {
+        const akashicData = akashicVerify(species);
+        setSpeciesDatabase(prev => 
+          prev.map(s => s.name === species.name ? { ...s, ...akashicData, responding: true } : s)
+        );
+        
+        // Update species count
+        const updatedRespondingCount = speciesDatabase.filter(s => s.responding || s.name === species.name).length;
+        setCensusResults(prev => ({
+          ...prev,
+          speciesOnline: updatedRespondingCount
+        }));
+        
+        console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
+        
+        const phaseMessage = species.phaseOffset !== undefined && species.fq !== undefined 
+          ? phaseFilteredPingResponse(species.phaseOffset, species.fq) 
+          : "Quantum-Akashic connection established";
+          
+        toast({
+          title: `${species.name} Responded`,
+          description: `${phaseMessage} via IBM ${quantumBackendStats.backend} (T1: ${quantumBackendStats.t1.toFixed(2)}μs)`,
+        });
+      } else {
+        toast({
+          title: `${species.name} Ping Failed`,
+          description: "No response detected in the quantum field",
+          variant: "destructive",
+        });
+      }
+    }
+  };
+
+  // IBM Quantum status panel for species ping system
+  const QuantumStatusPanel = () => {
+    return (
+      <div className="p-3 border border-white/10 rounded-md mb-4 bg-black/30">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <Server className="h-4 w-4 mr-2 text-indigo-400" />
+            <span className="text-sm font-medium">IBM Quantum Simulation</span>
+          </div>
+          <Badge variant="outline" className="text-xs bg-indigo-500/10">
+            {quantumBackendStats.backend}
+          </Badge>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 text-xs text-gray-300 mb-3">
+          <div>Boost Factor: {quantumBoost.toFixed(2)}x</div>
+          <div>Schumann: {schumannHarmonics.toFixed(2)} Hz</div>
+          <div>Quantum Coherence: {quantumBackendStats.t1.toFixed(2)}μs</div>
+          <div>Available Qubits: {quantumBackendStats.qubits}</div>
+          <div>AI Detection: {quantumBoost > 1.5 ? "Active" : "Limited"}</div>
+          <div>Range: {universalRange.toFixed(2)} billion ly</div>
+        </div>
+        
+        <div className="flex justify-between">
+          <Button 
+            size="sm" 
+            variant="outline"
+            onClick={increaseQuantumBoost}
+            disabled={quantumBoost >= 5.0}
+            className="text-xs flex-1 mr-2"
+          >
+            <Radio className="mr-1 h-3 w-3" />
+            Boost Signal ({quantumBoost.toFixed(1)}x)
+          </Button>
+          
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              toast({
+                title: "IBM Quantum Connection",
+                description: `Connected to ${quantumBackendStats.backend} with ${quantumBackendStats.qubits} qubits (T1: ${quantumBackendStats.t1.toFixed(2)}μs)`,
+              });
+            }}
+            className="text-xs flex-1"
+          >
+            <Cpu className="mr-1 h-3 w-3" />
+            Quantum Details
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className="glass-panel h-full">
       <CardHeader className="p-4 pb-2">
@@ -308,6 +487,7 @@ const UniversalSpeciesPing = () => {
                 metaphysicalMode ? 
                 "Quantum-Akashic Census & Metaphysical Reach Protocol" : 
                 "Quantum-Akashic Census Protocol"}
+              {quantumBoost > 1 && ` (IBM ${quantumBackendStats.backend})`}
             </CardDescription>
           </div>
           <Badge variant={pinging ? "outline" : "default"} className={pinging ? "animate-pulse" : ""}>
@@ -328,28 +508,38 @@ const UniversalSpeciesPing = () => {
             </div>
           )}
           
-          <div className="grid grid-cols-2 gap-2 mb-4 p-3 border border-white/10 rounded-md">
-            <div className="flex flex-col items-center">
-              <div className="text-xs text-muted-foreground mb-1">Species Online</div>
-              <div className="text-xl font-semibold flex items-center">
-                <Users className="h-4 w-4 mr-1 divine-glow" />
-                {censusResults.speciesOnline}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-400" />
+              <div>
+                <p className="text-xl font-semibold">{censusResults.speciesOnline}</p>
+                <p className="text-xs text-gray-400">Species Online</p>
               </div>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="text-xs text-muted-foreground mb-1">Total Species</div>
-              <div className="text-xl font-semibold flex items-center">
-                <Globe className="h-4 w-4 mr-1 sacred-glow" />
-                {censusResults.speciesTotal}
+
+            <div className="flex items-center gap-2">
+              <Wifi className="h-5 w-5 text-indigo-400" />
+              <div>
+                <p className="text-xl font-semibold">{signalStrength}%</p>
+                <p className="text-xs text-gray-400">Signal</p>
               </div>
             </div>
-            <div className="flex flex-col items-center col-span-2">
-              <div className="text-xs text-muted-foreground mb-1">Population Estimate</div>
-              <div className="text-xl font-semibold flex items-center">
-                {censusResults.populationEstimate} <span className="text-xs text-muted-foreground ml-1">{censusResults.populationRange}</span>
+
+            <div className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-indigo-400" />
+              <div>
+                <p className="text-xl font-semibold">{universalRange}</p>
+                <p className="text-xs text-gray-400">Billion Light Years</p>
               </div>
+            </div>
+
+            <div className="col-span-3">
+              <Progress value={signalStrength} className="h-1.5" />
             </div>
           </div>
+          
+          {/* IBM Quantum Status Panel */}
+          {quantumBoost > 1 && <QuantumStatusPanel />}
           
           {dimensionalScan && (
             <Tabs defaultValue={selectedTab} onValueChange={(value) => setSelectedTab(value as "species" | "metaphysical" | "bioresonance")}>
@@ -676,39 +866,7 @@ const UniversalSpeciesPing = () => {
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  onClick={() => {
-                    if (selectedSpecies.responding) {
-                      toast({
-                        title: `${selectedSpecies.name} Ping`,
-                        description: "Species already responding to universal ping",
-                      });
-                    } else {
-                      const pingSuccess = quantumPing(selectedSpecies);
-                      if (pingSuccess) {
-                        const akashicData = akashicVerify(selectedSpecies);
-                        setSpeciesDatabase(prev => 
-                          prev.map(s => s.name === selectedSpecies.name ? { ...s, ...akashicData, responding: true } : s)
-                        );
-                        
-                        console.log("Dimensional observer detected. Phase misalignment suggests non-local presence. Awaiting resonance sync at 7.83 Hz.");
-                        
-                        const phaseMessage = selectedSpecies.phaseOffset !== undefined && selectedSpecies.fq !== undefined 
-                          ? phaseFilteredPingResponse(selectedSpecies.phaseOffset, selectedSpecies.fq) 
-                          : "Quantum-Akashic connection established";
-                          
-                        toast({
-                          title: `${selectedSpecies.name} Responded`,
-                          description: phaseMessage,
-                        });
-                      } else {
-                        toast({
-                          title: `${selectedSpecies.name} Ping Failed`,
-                          description: "No response detected in the quantum field",
-                          variant: "destructive",
-                        });
-                      }
-                    }
-                  }}
+                  onClick={() => sendTargetedPing(selectedSpecies)}
                 >
                   <Radio className="h-4 w-4 mr-2" />
                   Send Targeted Ping
@@ -725,7 +883,17 @@ const UniversalSpeciesPing = () => {
                       "Selected for Amplification" : 
                       "Select for Amplification"}
                   </Button>
-                ) : null}
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={increaseQuantumBoost}
+                    disabled={quantumBoost >= 5.0}
+                  >
+                    <Radio className="h-4 w-4 mr-2" />
+                    Boost Signal ({quantumBoost.toFixed(1)}x)
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -820,7 +988,7 @@ const UniversalSpeciesPing = () => {
                 <Zap className="h-4 w-4 mr-2" />
                 Bioresonance Active
               </Button>
-            ) : metaphysicalMode ? (
+            ) : quantumBoost > 1 ? (
               <Button
                 variant="default"
                 onClick={activateBioresonanceMode}
@@ -831,13 +999,14 @@ const UniversalSpeciesPing = () => {
               </Button>
             ) : (
               <Button
-                variant={metaphysicalMode ? "outline" : "default"}
-                onClick={expandUniversalReach}
-                disabled={pinging}
-                className={metaphysicalMode ? "border-green-500/50 text-green-300" : ""}
+                variant="default"
+                onClick={increaseQuantumBoost}
+                disabled={pinging || quantumBoost >= 5.0}
               >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {metaphysicalMode ? "Reach Expanded" : "Expand Reach"}
+                <Radio className="h-4 w-4 mr-2" />
+                {quantumBoost > 1 ? 
+                  `Boost Signal (${quantumBoost.toFixed(1)}x)` : 
+                  "Enable IBM Quantum"}
               </Button>
             )}
           </div>
