@@ -1,36 +1,48 @@
 
 import React from 'react';
-import { Users, Wifi } from 'lucide-react';
+import { Badge } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Users, Wifi, Globe } from 'lucide-react';
 
 interface PresenceStatsProps {
   presenceCount: number;
   signalStrength: number;
+  universalRange: number;
 }
 
-const PresenceStats: React.FC<PresenceStatsProps> = ({ presenceCount, signalStrength }) => {
-  // Ensure presence count is never negative
-  const displayCount = Math.max(0, presenceCount);
-  
-  // Ensure signal strength is within valid range for Progress component
-  const normalizedSignal = Math.min(100, Math.max(0, signalStrength));
-  
+const PresenceStats: React.FC<PresenceStatsProps> = ({
+  presenceCount,
+  signalStrength,
+  universalRange
+}) => {
   return (
-    <div className="flex justify-between items-center mb-4">
+    <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="flex items-center gap-2">
         <Users className="h-5 w-5 text-indigo-400" />
         <div>
-          <p className="text-2xl font-semibold">{displayCount}</p>
-          <p className="text-xs text-gray-400">Detected Presences</p>
+          <p className="text-xl font-semibold">{presenceCount}</p>
+          <p className="text-xs text-gray-400">Presences</p>
         </div>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <Wifi className="h-5 w-5 text-indigo-400" />
-        <div className="w-24">
-          <Progress value={normalizedSignal} className="h-2 bg-gray-700" />
-          <p className="text-xs text-gray-400 mt-1">Signal: {normalizedSignal}%</p>
+        <div>
+          <p className="text-xl font-semibold">{signalStrength}%</p>
+          <p className="text-xs text-gray-400">Signal</p>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Globe className="h-5 w-5 text-indigo-400" />
+        <div>
+          <p className="text-xl font-semibold">{universalRange}</p>
+          <p className="text-xs text-gray-400">Billion Light Years</p>
+        </div>
+      </div>
+
+      <div className="col-span-3">
+        <Progress value={signalStrength} className="h-1.5" />
       </div>
     </div>
   );

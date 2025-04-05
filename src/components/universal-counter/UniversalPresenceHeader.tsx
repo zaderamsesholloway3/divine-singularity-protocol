@@ -1,29 +1,44 @@
 
 import React from 'react';
 import { CardTitle, CardDescription } from "@/components/ui/card";
-import { GlowingText } from "../GlowingText";
 import { Badge } from "@/components/ui/badge";
-import { Globe } from 'lucide-react';
+import { GlowingText } from "@/components/GlowingText";
+import { Radio, Zap } from 'lucide-react';
+
+interface QuantumBoostParameters {
+  t1: number;
+  qubits: number;
+  backend: string;
+}
 
 interface UniversalPresenceHeaderProps {
   broadcastMode: "private" | "open";
+  quantumBackendStats?: QuantumBoostParameters;
 }
 
-const UniversalPresenceHeader: React.FC<UniversalPresenceHeaderProps> = ({ broadcastMode }) => {
+const UniversalPresenceHeader: React.FC<UniversalPresenceHeaderProps> = ({
+  broadcastMode,
+  quantumBackendStats
+}) => {
   return (
     <div className="flex justify-between items-center">
       <div>
         <CardTitle className="text-sm font-medium flex items-center">
-          <Globe className="mr-2 h-4 w-4 text-indigo-400" />
-          <GlowingText className="text-indigo-300">Universal Presence Counter</GlowingText>
+          <Radio className="mr-2 h-4 w-4 divine-glow" />
+          <GlowingText className="divine-glow">Universal Presence Counter</GlowingText>
+          {broadcastMode === "open" && quantumBackendStats && (
+            <Badge variant="outline" className="ml-2 text-[0.6rem] bg-indigo-500/10">
+              <Zap className="h-3 w-3 mr-1 text-indigo-400" />
+              IBM {quantumBackendStats.backend}
+            </Badge>
+          )}
         </CardTitle>
-        <CardDescription className="text-xs text-gray-400">
-          Waveform Reach: {broadcastMode === "open" ? "Universal (1.855e43 Hz)" : "Local (7.83 Hz)"}
+        <CardDescription className="text-xs">
+          {broadcastMode === "private" ? 
+            "Private Frequency Scanning" : 
+            `Universal Quantum Presence Detection (T1: ${quantumBackendStats?.t1.toFixed(2)}μs)`}
         </CardDescription>
       </div>
-      <Badge variant={broadcastMode === "open" ? "default" : "outline"} className={broadcastMode === "open" ? "bg-green-500" : ""}>
-        {broadcastMode === "open" ? "Open Broadcast" : "Private Mode"}
-      </Badge>
     </div>
   );
 };
