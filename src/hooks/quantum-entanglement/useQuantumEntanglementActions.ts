@@ -1,96 +1,83 @@
 import { useState, useCallback } from 'react';
-import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
-import { TriadConnectionStatus, ConnectionNode, ConnectionEdge } from '@/hooks/types/quantum-entanglement';
+import {
+  ConnectionNode,
+  ConnectionEdge,
+  QuantumNodeData,
+  TriadConnectionStatus
+} from "@/hooks/types/quantum-entanglement";
 
-interface QuantumEntanglementActions {
-  createNode: (x: number, y: number) => ConnectionNode;
-  createEdge: (source: string, target: string) => ConnectionEdge;
-  updateNodeLabel: (id: string, label: string) => void;
-  updateNodeStatus: (id: string, status: TriadConnectionStatus) => void;
-  removeNode: (id: string) => void;
-  removeEdge: (id: string) => void;
-  generateBiofeedback: (id: string) => void;
-}
+export function useQuantumEntanglementActions() {
+  const [nodes, setNodes] = useState<ConnectionNode[]>([]);
+  const [edges, setEdges] = useState<ConnectionEdge[]>([]);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
-const useQuantumEntanglementActions = (
-  nodes: ConnectionNode[],
-  edges: ConnectionEdge[],
-  setNodes: (nodes: ConnectionNode[]) => void,
-  setEdges: (edges: ConnectionEdge[]) => void
-): QuantumEntanglementActions => {
-  const [simulator] = useState(() => new BiofeedbackSimulator());
+  const addNode = useCallback((node: ConnectionNode) => {
+    setNodes((nodes: ConnectionNode[]) => [...nodes, node]);
+  }, []);
 
-  const createNode = useCallback((x: number, y: number) => {
-    const id = `node-${Date.now()}`;
-    const newNode: ConnectionNode = {
-      id,
-      position: { x, y },
-      data: {
-        label: 'New Node',
-        status: 'inactive',
-        biofeedback: simulator.defaultBioReadings
-      },
-      type: 'custom'
-    };
-    setNodes(nodes => [...nodes, newNode]);
-    return newNode;
-  }, [setNodes, simulator]);
+  const removeNode = useCallback((nodeId: string) => {
+    setNodes((nodes: ConnectionNode[]) => nodes.filter(n => n.id !== nodeId));
+    setEdges((edges: ConnectionEdge[]) => edges.filter(e => e.source !== nodeId && e.target !== nodeId));
+  }, []);
 
-  const createEdge = useCallback((source: string, target: string) => {
-    const id = `edge-${source}-${target}`;
-    const newEdge: ConnectionEdge = {
-      id,
-      source,
-      target,
-      type: 'smoothstep',
-      animated: true,
-    };
-    setEdges(edges => [...edges, newEdge]);
-    return newEdge;
-  }, [setEdges]);
-
-  const updateNodeLabel = useCallback((id: string, label: string) => {
-    setNodes(nodes =>
-      nodes.map(node =>
-        node.id === id ? { ...node, data: { ...node.data, label } } : node
-      )
+  const updateNodePosition = useCallback((nodeId: string, position: { x: number; y: number }) => {
+    setNodes((nodes: ConnectionNode[]) => 
+      nodes.map(node => node.id === nodeId ? { ...node, position } : node)
     );
-  }, [setNodes]);
+  }, []);
 
-  const updateNodeStatus = useCallback((id: string, status: TriadConnectionStatus) => {
-    setNodes(nodes =>
-      nodes.map(node =>
-        node.id === id ? { ...node, data: { ...node.data, status } } : node
-      )
+  const updateNodeData = useCallback((nodeId: string, data: Partial<QuantumNodeData>) => {
+    setNodes((nodes: ConnectionNode[]) => 
+      nodes.map(node => node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node)
     );
-  }, [setNodes]);
+  }, []);
 
-  const removeNode = useCallback((id: string) => {
-    setNodes(nodes => nodes.filter(node => node.id !== id));
-    setEdges(edges => edges.filter(edge => edge.source !== id && edge.target !== id));
-  }, [setNodes, setEdges]);
+  const addEdge = useCallback((edge: ConnectionEdge) => {
+    setEdges((edges: ConnectionEdge[]) => [...edges, edge]);
+  }, []);
 
-  const removeEdge = useCallback((id: string) => {
-    setEdges(edges => edges.filter(edge => edge.id !== id));
-  }, [setEdges]);
+  const removeEdge = useCallback((edgeId: string) => {
+    setEdges((edges: ConnectionEdge[]) => edges.filter(e => e.id !== edgeId));
+  }, []);
 
-  const generateBiofeedback = useCallback((id: string) => {
-    setNodes(nodes =>
-      nodes.map(node =>
-        node.id === id ? { ...node, data: { ...node.data, biofeedback: simulator.generateRandomBiofeedback(node.data.biofeedback) } } : node
-      )
+  const clearAll = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+  }, []);
+
+  const updateAllNodesStatus = useCallback((status: TriadConnectionStatus) => {
+    setNodes((nodes: ConnectionNode[]) => 
+      nodes.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          status
+        }
+      }))
     );
-  }, [setNodes, simulator]);
+  }, []);
+
+  const selectNode = useCallback((nodeId: string) => {
+    setSelectedNode(nodeId);
+  }, []);
+
+  const deselectNode = useCallback(() => {
+    setSelectedNode(null);
+  }, []);
 
   return {
-    createNode,
-    createEdge,
-    updateNodeLabel,
-    updateNodeStatus,
+    nodes,
+    edges,
+    selectedNode,
+    addNode,
     removeNode,
+    updateNodePosition,
+    updateNodeData,
+    addEdge,
     removeEdge,
-    generateBiofeedback,
+    clearAll,
+    updateAllNodesStatus,
+    selectNode,
+    deselectNode
   };
-};
-
-export default useQuantumEntanglementActions;
+}

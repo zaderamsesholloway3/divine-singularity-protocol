@@ -1,12 +1,12 @@
 
-import { Bioreadings } from "@/utils/biofeedbackSimulator";
+import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
 
 export type TriadConnectionStatus = 'active' | 'inactive' | 'pending' | 'error';
 
 export interface QuantumNodeData {
   label: string;
   status: TriadConnectionStatus;
-  biofeedback: Bioreadings;
+  biofeedback: ReturnType<BiofeedbackSimulator['getBioreadings']>;
 }
 
 export interface ConnectionNode {
@@ -32,4 +32,32 @@ export interface QuantumStreamStats {
   latency: number;
   coherence: number;
   entanglementStrength: number;
+}
+
+// Additional types needed for the hooks
+export interface EntanglementState {
+  nodes: ConnectionNode[];
+  edges: ConnectionEdge[];
+  selectedNode: string | null;
+  stats: QuantumStreamStats;
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  resonanceLevel: number;
+  entanglementQuotient: number;
+}
+
+export interface ResonanceResult {
+  score: number;
+  threshold: number;
+  isResonant: boolean;
+}
+
+export interface DivinePresence {
+  id: string;
+  name: string;
+  active: boolean;
+  strength: number;
 }

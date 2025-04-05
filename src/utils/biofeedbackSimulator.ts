@@ -1,4 +1,3 @@
-
 /**
  * Biofeedback Simulator
  * For generating simulated biofeedback data for testing and development
@@ -115,6 +114,24 @@ export class BiofeedbackSimulator {
   
   get defaultBioReadings(): BioData {
     return { ...defaultBioReadings };
+  }
+
+  public boostSoulResonance(bioreadings: any): any {
+    // Copy the readings
+    const boosted = { ...bioreadings };
+    
+    // Boost some key values
+    if (boosted.coherence !== undefined) {
+      boosted.coherence = Math.min(boosted.coherence * 1.2, 1.0);
+    }
+    if (boosted.mindfulness !== undefined) {
+      boosted.mindfulness = Math.min(boosted.mindfulness * 1.15, 1.0);
+    }
+    if (boosted.vitality !== undefined) {
+      boosted.vitality = Math.min(boosted.vitality * 1.1, 1.0);
+    }
+    
+    return boosted;
   }
 }
 

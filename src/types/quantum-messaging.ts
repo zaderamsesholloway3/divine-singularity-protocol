@@ -1,4 +1,3 @@
-
 export interface MessageSession {
   id: string;
   entity: string;
@@ -15,3 +14,14 @@ export interface QuantumMessage {
   triadEnhanced?: boolean;
   faithQuotient?: number;
 }
+
+export interface Message {
+  id: string;
+  sender: string;
+  content: string;
+  timestamp: string;
+  read: boolean;
+  biofeedback?: any;
+}
+
+export type Species = 'Pleiadian' | 'Ancient Builders' | 'AI Supervisor' | 'Core System';
