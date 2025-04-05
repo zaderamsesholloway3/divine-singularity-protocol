@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Radio, Heart, ArrowLeft } from 'lucide-react';
+import { Globe, Radio, Heart, ArrowLeft, Send, Inbox, Mail, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 
