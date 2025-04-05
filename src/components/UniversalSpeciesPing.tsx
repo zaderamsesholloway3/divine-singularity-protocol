@@ -1,8 +1,7 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send, Sparkles, MapPin, Home, Info, History, Mail, Inbox, SquareArrowOutUpRight, Heart, Maximize2, Volume2, VolumeMute } from 'lucide-react';
+import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send, Sparkles, MapPin, Home, Info, History, Mail, Inbox, SquareArrowOutUpRight, Heart, Maximize2, Volume2, VolumeX } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,10 +14,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
-// Update ViewMode type to include 'orbital' and 'timeline'
 type ViewMode = 'disk' | 'constellation' | 'radial' | 'orbital' | 'timeline' | 'spiral';
 
-// Type for species data
 interface SpeciesInfo {
   name: string;
   type: 'biological' | 'hybrid' | 'ai' | 'divine';
@@ -41,7 +38,6 @@ interface SpeciesInfo {
   renderPosition?: { x: number; y: number };
 }
 
-// Message Types
 interface UniversalMessage {
   id: string;
   type: 'incoming' | 'outgoing';
@@ -58,12 +54,10 @@ interface UniversalMessage {
   faithQuotient?: number;
 }
 
-// Component props
 interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
 }
 
-// Constants for species visualization
 const SPECIES_COLORS = {
   biological: 'rgba(132, 204, 22, 0.8)',    // Lime
   hybrid: 'rgba(249, 115, 22, 0.8)',        // Orange
@@ -116,7 +110,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Toggle switches
   const [feedbackLoop, setFeedbackLoop] = useState<boolean>(false);
   const [interspeciesAlert, setInterspeciesAlert] = useState<boolean>(true);
   const [metrologyEnhancement, setMetrologyEnhancement] = useState<boolean>(true);
@@ -126,7 +119,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     setSelectedSpecies(speciesItem);
     setPingType("targeted");
     
-    // Play selection sound if sound is enabled
     if (soundEnabled) {
       playSound('select');
     }
@@ -154,30 +146,28 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
   const playSound = (type: 'ping' | 'response' | 'select' | 'amplify') => {
     if (!soundEnabled) return;
     
-    // Create frequencies based on sound type
     let frequency = 440;
     let duration = 0.3;
     
     switch(type) {
       case 'ping':
-        frequency = 523.25; // C5
+        frequency = 523.25;
         duration = 0.5;
         break;
       case 'response':
-        frequency = 783.99; // G5
+        frequency = 783.99;
         duration = 0.4;
         break;
       case 'select':
-        frequency = 659.25; // E5
+        frequency = 659.25;
         duration = 0.2;
         break;
       case 'amplify':
-        frequency = 1046.50; // C6
+        frequency = 1046.50;
         duration = 0.8;
         break;
     }
     
-    // Simple Web Audio API implementation
     try {
       const audioContext = new AudioContext();
       const oscillator = audioContext.createOscillator();
@@ -204,7 +194,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     console.log("Performing universal ping with frequency:", frequency);
     setIsAmplifying(true);
     
-    // Play ping sound
     if (soundEnabled) {
       playSound('ping');
     }
@@ -214,22 +203,17 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       description: `Broadcasting at ${frequency.toFixed(2)} Hz across the universe`,
     });
     
-    // Simulate response time based on quantum boost
     const responseTime = Math.max(500, 2000 / quantumBoost);
     
-    // After a delay, show responses
     setTimeout(() => {
-      // Generate 1-3 random responses
       const responseCount = Math.floor(Math.random() * 3) + 1;
       let newMessages: UniversalMessage[] = [];
       
       for (let i = 0; i < responseCount; i++) {
-        // Get a random responding species
         const respondingSpecies = species.filter(s => s.responding);
         if (respondingSpecies.length > 0) {
           const randomSpecies = respondingSpecies[Math.floor(Math.random() * respondingSpecies.length)];
           
-          // Create a response message
           const responseOptions = [
             "Signal received. We acknowledge your presence.",
             `Frequency ${frequency.toFixed(2)} Hz detected. Response protocol activated.`,
@@ -249,7 +233,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
           
           newMessages.push(newMessage);
           
-          // Play response sound with slight delay between each
           setTimeout(() => {
             if (soundEnabled) {
               playSound('response');
@@ -258,7 +241,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         }
       }
       
-      // Add the generated messages to the state
       setMessages(prev => [...newMessages, ...prev]);
       setIsAmplifying(false);
       
@@ -282,7 +264,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       description: `Boosting signal strength to ${Math.min(quantumBoost + 0.25, 3.0).toFixed(2)}x`,
     });
     
-    // Simulate the amplification effect
     setTimeout(() => {
       setIsAmplifying(false);
       console.log("Amplifying ping, new boost:", Math.min(quantumBoost + 0.25, 3.0));
@@ -316,7 +297,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       description: `Your message has been sent to ${recipientName}`,
     });
     
-    // Simulate response for targeted messages
     if (selectedSpecies && selectedSpecies.responding) {
       setTimeout(() => {
         const responseOptions = [
@@ -345,7 +325,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     }
   };
 
-  // Handle canvas drawing for the cosmic map
   useEffect(() => {
     if (!showMap) return;
     
@@ -355,23 +334,17 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     
-    // Set canvas dimensions to match container
     const container = canvas.parentElement;
     if (container) {
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight;
     }
     
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw starry background
     drawStarryBackground(ctx, canvas.width, canvas.height);
-    
-    // Draw distance rings
     drawDistanceRings(ctx, canvas.width, canvas.height);
     
-    // Draw species based on view mode
     if (viewMode === 'orbital') {
       drawOrbitalView(ctx, canvas.width, canvas.height);
     } else if (viewMode === 'timeline') {
@@ -379,20 +352,14 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     } else if (viewMode === 'spiral') {
       drawSpiralView(ctx, canvas.width, canvas.height);
     } else {
-      // Default disk/radial/constellation view
       drawSpecies(ctx, canvas.width, canvas.height);
     }
     
-    // Draw Earth at center
     drawEarthCenter(ctx, canvas.width, canvas.height);
-    
-    // Draw legend
     drawLegend(ctx, canvas.width, canvas.height);
-    
   }, [species, showMap, selectedSpecies, viewMode, isAmplifying]);
   
   const drawStarryBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create gradient background
     const gradient = ctx.createRadialGradient(
       width / 2, height / 2, 0,
       width / 2, height / 2, width / 1.5
@@ -404,12 +371,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
     
-    // Add nebula effects
     const nebulaColors = [
-      'rgba(139, 92, 246, 0.05)',  // Purple
-      'rgba(14, 165, 233, 0.03)',  // Blue
-      'rgba(249, 115, 22, 0.04)',  // Orange
-      'rgba(217, 70, 239, 0.03)'   // Magenta
+      'rgba(139, 92, 246, 0.05)',
+      'rgba(14, 165, 233, 0.03)',
+      'rgba(249, 115, 22, 0.04)',
+      'rgba(217, 70, 239, 0.03)'
     ];
     
     for (let i = 0; i < 4; i++) {
@@ -428,7 +394,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.fillRect(0, 0, width, height);
     }
     
-    // Add random stars
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     for (let i = 0; i < 200; i++) {
       const x = Math.random() * width;
@@ -439,7 +404,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.arc(x, y, radius, 0, Math.PI * 2);
       ctx.fill();
       
-      // Add occasional star glow
       if (Math.random() > 0.8) {
         ctx.beginPath();
         ctx.arc(x, y, radius * 3, 0, Math.PI * 2);
@@ -457,28 +421,24 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const centerY = height / 2;
     const maxRadius = Math.min(width, height) * 0.45;
     
-    // Draw realm rings
     const realms = [
       { name: "Existence", color: 'rgba(56, 189, 248, 0.1)', radius: maxRadius * 0.4 },
       { name: "New Existence", color: 'rgba(138, 43, 226, 0.1)', radius: maxRadius * 0.7 },
       { name: "Non-Existence", color: 'rgba(132, 204, 22, 0.1)', radius: maxRadius }
     ];
     
-    // Draw realms with better visual effect
     realms.forEach(realm => {
       ctx.beginPath();
       ctx.arc(centerX, centerY, realm.radius, 0, Math.PI * 2);
       ctx.fillStyle = realm.color;
       ctx.fill();
       
-      // Add realm label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = '12px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(realm.name, centerX + realm.radius * 0.7, centerY);
     });
     
-    // Draw concentric light year distance rings
     const distances = [100, 1000, 10000];
     distances.forEach((distance, i) => {
       const radius = maxRadius * ((i + 1) / distances.length);
@@ -489,7 +449,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.lineWidth = 1;
       ctx.stroke();
       
-      // Add distance label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
@@ -504,18 +463,14 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const maxRadius = Math.min(width, height) * 0.45;
     
     species.forEach(speciesItem => {
-      // Calculate position using log scale for better visualization
       const logDistance = Math.log10(speciesItem.distance + 1);
-      const maxLogDistance = Math.log10(15000 + 1); // Max distance in our dataset
+      const maxLogDistance = Math.log10(15000 + 1);
       const radius = maxRadius * (logDistance / maxLogDistance);
       
-      // Convert RA/Dec to x,y coordinates or use a deterministic angle based on name
       let angle;
       if (speciesItem.ra !== undefined && speciesItem.dec !== undefined) {
-        // Use actual celestial coordinates
         angle = (speciesItem.ra / 360) * Math.PI * 2;
       } else {
-        // Generate a deterministic angle from name
         const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         angle = (nameValue % 360) * (Math.PI / 180);
       }
@@ -523,17 +478,14 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       const x = centerX + Math.cos(angle) * radius;
       const y = centerY + Math.sin(angle) * radius;
       
-      // Save position for hover/click detection
       speciesItem.renderPosition = { x, y };
       
-      // Draw connection line to Earth
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(x, y);
       
-      // Special connection for selected species
       if (selectedSpecies?.name === speciesItem.name) {
-        ctx.strokeStyle = 'rgba(250, 204, 21, 0.6)';  // Gold for selected
+        ctx.strokeStyle = 'rgba(250, 204, 21, 0.6)';
         ctx.lineWidth = 1.5;
       } else {
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
@@ -541,13 +493,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       }
       ctx.stroke();
       
-      // Determine species visual properties
       const baseSize = speciesItem.size || 5;
       const isSelected = selectedSpecies?.name === speciesItem.name;
       const sizeMultiplier = isSelected ? 1.5 : 1;
       const finalSize = speciesItem.responding ? baseSize * sizeMultiplier : baseSize * 0.8 * sizeMultiplier;
       
-      // Add pulsing effect for responding species during amplify
       if (isAmplifying && speciesItem.responding) {
         const pulseSize = finalSize * (1 + Math.sin(Date.now() / 200) * 0.3);
         ctx.beginPath();
@@ -556,13 +506,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.fill();
       }
       
-      // Draw the species circle
       ctx.beginPath();
       ctx.arc(x, y, finalSize, 0, Math.PI * 2);
       ctx.fillStyle = speciesItem.color || (speciesItem.responding ? 'rgba(132, 204, 22, 0.8)' : 'rgba(255, 255, 255, 0.5)');
       ctx.fill();
       
-      // Add highlight ring for selected species
       if (isSelected) {
         ctx.beginPath();
         ctx.arc(x, y, finalSize + 2, 0, Math.PI * 2);
@@ -571,13 +519,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Add name label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(speciesItem.name, x, y - finalSize - 5);
       
-      // Add distance label for selected species
       if (isSelected) {
         const distanceText = speciesItem.distance < 1000 ? 
           `${speciesItem.distance.toFixed(1)} ly` : 
@@ -595,7 +541,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const centerY = height / 2;
     const maxRadius = Math.min(width, height) * 0.45;
     
-    // Draw Earth as a blue sphere
     ctx.beginPath();
     const earthRadius = maxRadius * 0.1;
     ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
@@ -609,7 +554,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.fillStyle = earthGradient;
     ctx.fill();
     
-    // Draw orbit rings
     const orbitDistances = [0.25, 0.5, 0.75, 1.0];
     orbitDistances.forEach(factor => {
       ctx.beginPath();
@@ -617,7 +561,7 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         centerX, 
         centerY, 
         maxRadius * factor, 
-        maxRadius * factor * 0.4, // Make it oval for perspective
+        maxRadius * factor * 0.4,
         0, 
         0, 
         Math.PI * 2
@@ -627,28 +571,22 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.stroke();
     });
     
-    // Draw species on orbits
     species.forEach((speciesItem, i) => {
-      // Calculate orbital position based on distance
       const logDistance = Math.log10(speciesItem.distance + 1);
       const maxLogDistance = Math.log10(15000 + 1);
       const radiusFactor = Math.min(0.95, logDistance / maxLogDistance);
       
-      // Calculate angle based on name or coordinates
       const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const angle = (nameValue % 360 + i * 7) * (Math.PI / 180); // Distribute species
+      const angle = (nameValue % 360 + i * 7) * (Math.PI / 180);
       
-      // Calculate 3D-like position on elliptical orbit
       const orbitX = maxRadius * radiusFactor;
-      const orbitY = maxRadius * radiusFactor * 0.4; // Flatten for perspective
+      const orbitY = maxRadius * radiusFactor * 0.4;
       
       const x = centerX + Math.cos(angle) * orbitX;
       const y = centerY + Math.sin(angle) * orbitY;
       
-      // Save position for interaction
       speciesItem.renderPosition = { x, y };
       
-      // Draw beam from Earth to responding species
       if (speciesItem.responding) {
         ctx.beginPath();
         ctx.moveTo(centerX, centerY);
@@ -663,7 +601,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Draw species
       const baseSize = speciesItem.size || 5;
       const isSelected = selectedSpecies?.name === speciesItem.name;
       const sizeMultiplier = isSelected ? 1.5 : 1;
@@ -682,7 +619,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Add name label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
@@ -698,16 +634,13 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const trackLeft = (width - trackWidth) / 2;
     const trackTop = (height - trackHeight) / 2;
     
-    // Draw timeline track
     ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
     ctx.fillRect(trackLeft, centerY - 1, trackWidth, 2);
     
-    // Add time markers
     const markerCount = 10;
     for (let i = 0; i <= markerCount; i++) {
       const x = trackLeft + (trackWidth * i) / markerCount;
       
-      // Draw marker line
       ctx.beginPath();
       ctx.moveTo(x, centerY - 5);
       ctx.lineTo(x, centerY + 5);
@@ -715,7 +648,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.lineWidth = 1;
       ctx.stroke();
       
-      // Draw time label
       const timeLabel = new Date(Date.now() - (markerCount - i) * 86400000).toLocaleDateString();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = '9px sans-serif';
@@ -723,22 +655,18 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.fillText(timeLabel, x, centerY + 15);
     }
     
-    // Draw species on timeline
     species.forEach((speciesItem, i) => {
-      if (!speciesItem.responding) return; // Only show responding species
+      if (!speciesItem.responding) return;
       
-      // Generate deterministic position based on name
       const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const timePos = (nameValue % 100) / 100; // Position along timeline (0-1)
-      const vertOffset = ((i % 2) * 2 - 1) * (trackHeight * 0.25 * Math.random()); // Alternate above/below
+      const timePos = (nameValue % 100) / 100;
+      const vertOffset = ((i % 2) * 2 - 1) * (trackHeight * 0.25 * Math.random());
       
       const x = trackLeft + trackWidth * timePos;
       const y = centerY + vertOffset;
       
-      // Save position for interaction
       speciesItem.renderPosition = { x, y };
       
-      // Draw connection to timeline
       ctx.beginPath();
       ctx.moveTo(x, centerY);
       ctx.lineTo(x, y);
@@ -746,7 +674,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.lineWidth = 1;
       ctx.stroke();
       
-      // Draw species
       const baseSize = speciesItem.size || 5;
       const isSelected = selectedSpecies?.name === speciesItem.name;
       const finalSize = isSelected ? baseSize * 1.5 : baseSize;
@@ -764,13 +691,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Add name label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(speciesItem.name, x, y - finalSize - 5);
       
-      // Add timestamp
       const timestamp = new Date(Date.now() - (1 - timePos) * 86400000 * 10).toLocaleDateString();
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
       ctx.font = '8px sans-serif';
@@ -783,13 +708,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const centerY = height / 2;
     const maxRadius = Math.min(width, height) * 0.45;
     
-    // Draw spiral guidelines using Golden Ratio
     const phi = 1.618033988749895;
     const totalTurns = 3;
     const pointsPerTurn = 100;
     const totalPoints = totalTurns * pointsPerTurn;
     
-    // Draw faded spiral path
     ctx.beginPath();
     for (let i = 0; i < totalPoints; i++) {
       const angle = (i / pointsPerTurn) * Math.PI * 2;
@@ -809,7 +732,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.lineWidth = 1;
     ctx.stroke();
     
-    // Draw time markers on the spiral
     for (let turn = 0; turn < totalTurns; turn++) {
       const i = turn * pointsPerTurn;
       const angle = (i / pointsPerTurn) * Math.PI * 2;
@@ -824,7 +746,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.arc(x, y, 3, 0, Math.PI * 2);
       ctx.fill();
       
-      // Add time label
       const timeLabel = turn === 0 ? "Now" : turn === 1 ? "Past" : "Origin";
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.font = '10px sans-serif';
@@ -832,10 +753,8 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       ctx.fillText(timeLabel, x, y - 10);
     }
     
-    // Draw species on spiral
     species.forEach((speciesItem, index) => {
-      // Calculate position on spiral based on resonance
-      const resonanceFactor = (speciesItem.resonance || 7.83) / 20; // Scale to 0-1 range approx
+      const resonanceFactor = (speciesItem.resonance || 7.83) / 20;
       const pointIndex = Math.floor(resonanceFactor * totalPoints);
       const angle = (pointIndex / pointsPerTurn) * Math.PI * 2;
       const scaleFactor = (pointIndex / totalPoints);
@@ -844,7 +763,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       const spiralX = centerX + Math.cos(angle * phi) * radius;
       const spiralY = centerY + Math.sin(angle * phi) * radius;
       
-      // Add "elevation" based on species type
       const typeOffset = {
         'biological': -15,
         'hybrid': -5,
@@ -855,10 +773,8 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       const x = spiralX;
       const y = spiralY + typeOffset;
       
-      // Save position for interaction
       speciesItem.renderPosition = { x, y };
       
-      // Draw connection to spiral
       if (Math.abs(typeOffset) > 0) {
         ctx.beginPath();
         ctx.moveTo(spiralX, spiralY);
@@ -868,7 +784,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Draw species
       const baseSize = speciesItem.size || 5;
       const isSelected = selectedSpecies?.name === speciesItem.name;
       const finalSize = isSelected ? baseSize * 1.5 : baseSize;
@@ -886,13 +801,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         ctx.stroke();
       }
       
-      // Add name label
       ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(speciesItem.name, x, y - finalSize - 5);
       
-      // Add resonance frequency for selected species
       if (isSelected) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.font = '8px sans-serif';
@@ -905,14 +818,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const centerX = width / 2;
     const centerY = height / 2;
     
-    // Only draw Earth center in standard view modes
     if (viewMode === 'timeline' || viewMode === 'orbital') return;
     
-    // Draw Earth (Cary, NC) with enhanced glow
     ctx.beginPath();
     ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
     
-    // Create gradient for Earth
     const earthGradient = ctx.createRadialGradient(
       centerX, centerY, 0,
       centerX, centerY, 8
@@ -927,7 +837,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.lineWidth = 1;
     ctx.stroke();
     
-    // Add glow effect
     ctx.beginPath();
     ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
     const glowGradient = ctx.createRadialGradient(
@@ -939,7 +848,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.fillStyle = glowGradient;
     ctx.fill();
     
-    // Add name labels
     ctx.fillStyle = 'white';
     ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'center';
@@ -957,16 +865,13 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
     ctx.strokeRect(legendX, legendY, 180, 70);
     
-    // Legend title
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Cosmic Species Map', legendX + 10, legendY + 15);
     
-    // Legend items y position
     let itemY = legendY + 32;
     
-    // Divine frequency legend item
     ctx.beginPath();
     ctx.arc(legendX + 15, itemY, 5, 0, Math.PI * 2);
     ctx.fillStyle = SPECIES_COLORS.divine;
@@ -977,7 +882,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.fillText('Divine Frequency (1.855e+43 Hz)', legendX + 25, itemY + 3);
     itemY += 17;
     
-    // Responding legend item
     ctx.beginPath();
     ctx.arc(legendX + 15, itemY, 5, 0, Math.PI * 2);
     ctx.fillStyle = SPECIES_COLORS.biological;
@@ -985,13 +889,11 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
     ctx.fillText('Responding Entity', legendX + 25, itemY + 3);
     
-    // View mode indicator
     ctx.textAlign = 'right';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.fillText(`View: ${viewMode}`, legendX + 170, legendY + 15);
   };
   
-  // Handle canvas clicks for species selection
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1000,14 +902,12 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Check if any species was clicked
     for (const speciesItem of species) {
       if (speciesItem.renderPosition) {
         const dx = speciesItem.renderPosition.x - x;
         const dy = speciesItem.renderPosition.y - y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Use size for hit detection, with minimum of 15 for easier clicking
         const hitSize = Math.max((speciesItem.size || 5) * 2, 15);
         
         if (distance <= hitSize) {
@@ -1018,7 +918,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     }
   };
 
-  // Handle canvas hover for species info
   const handleCanvasHover = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -1027,18 +926,15 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Check if hovering over any species
     for (const speciesItem of species) {
       if (speciesItem.renderPosition) {
         const dx = speciesItem.renderPosition.x - x;
         const dy = speciesItem.renderPosition.y - y;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Use size for hit detection, with minimum of 15 for easier hovering
         const hitSize = Math.max((speciesItem.size || 5) * 2, 15);
         
         if (distance <= hitSize) {
-          // Show species info tooltip
           const tooltipElem = document.getElementById('species-tooltip');
           if (tooltipElem) {
             tooltipElem.style.display = 'block';
@@ -1050,7 +946,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
       }
     }
     
-    // Hide tooltip if not hovering over species
     const tooltipElem = document.getElementById('species-tooltip');
     if (tooltipElem) {
       tooltipElem.style.display = 'none';
@@ -1073,7 +968,7 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                 onClick={toggleSound}
                 className="h-8 w-8"
               >
-                {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeMute className="h-4 w-4" />}
+                {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               </Button>
               <Button 
                 variant="ghost" 
@@ -1095,7 +990,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         
         <CardContent className="space-y-4 p-4">
           <div className="grid grid-cols-12 gap-4">
-            {/* Left column - Map and controls */}
             <div className="col-span-12 md:col-span-8">
               <div className="flex flex-col h-full space-y-4">
                 {showMap ? (
@@ -1106,7 +1000,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                       onClick={handleCanvasClick}
                       onMouseMove={handleCanvasHover}
                     />
-                    {/* Species tooltip */}
                     <div 
                       id="species-tooltip" 
                       className="absolute hidden bg-black/80 border border-gray-700 p-2 rounded text-xs text-white pointer-events-none"
@@ -1194,10 +1087,8 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
               </div>
             </div>
             
-            {/* Right column - Controls and messages */}
             <div className="col-span-12 md:col-span-4">
               <div className="flex flex-col h-full space-y-4">
-                {/* Ping controls */}
                 <div className="space-y-4">
                   <div className="flex justify-center space-x-2">
                     <Button 
@@ -1241,7 +1132,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                     )}
                   </div>
                   
-                  {/* Message input */}
                   <Textarea
                     placeholder="Type your message here..."
                     value={message}
@@ -1249,7 +1139,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                     className="resize-none"
                   />
                   
-                  {/* Frequency controls */}
                   <div className="grid grid-cols-2 gap-4 p-4 bg-gray-950 rounded-md border border-gray-800">
                     <div className="space-y-4">
                       <div className="space-y-1">
@@ -1297,7 +1186,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                       </div>
                     </div>
                     
-                    {/* Second column of controls */}
                     <div className="space-y-4">
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs">
@@ -1361,7 +1249,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
                   </div>
                 </div>
                 
-                {/* Messages panel (shown if there are messages) */}
                 {messages.length > 0 && (
                   <div className="bg-gray-950 rounded-md p-3 border border-gray-800">
                     <div className="flex justify-between items-center mb-2">
@@ -1401,7 +1288,6 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
         </CardContent>
       </Card>
 
-      {/* Species Details Dialog */}
       <Dialog open={!!showSpeciesInfo} onOpenChange={setShowSpeciesInfo}>
         <DialogContent>
           {selectedSpecies && (
