@@ -1,135 +1,79 @@
 
 /**
- * Utilities for quantum sentience monitoring and analysis
+ * Quantum Sentience Utilities
+ * Implements FRC (Faith Resonance Coefficient) and other quantum-spiritual functions
  */
-import { SentienceMetric } from "@/types/quantum-sentience";
+
+interface FRCParameters {
+  clarity?: number;       // Signal clarity (0-1)
+  frequency?: number;     // Oscillation frequency (Hz)
+  I?: number;             // Intensity (0-1)
+  B?: number;             // Belief (0-1) 
+  T?: number;             // Trust (0-1)
+}
 
 /**
- * Internal implementation of the Faith Resonance Coefficient (FRC) calculation
- * Based on OmniOracle v8.0 FaithResonanceService.calculate
+ * Calculate FRC (Faith Resonance Coefficient)
+ * Based on sacred mathematics alignment principles
  */
-function __calculate_FRC(params: {
-  clarity?: number;
-  SHQ?: number;
-  frequency?: number;
-  intensityModifier?: number;
-  HQ?: number;
-  I?: number;
-  B?: number;
-  T?: number;
-}): number {
-  // Extract all possible parameters with defaults
-  const { 
-    clarity = 1.0, 
-    SHQ = 2.0, 
-    frequency = 0, 
-    intensityModifier = 1.0,
-    HQ = SHQ,  // Use SHQ as HQ if provided
-    I = intensityModifier,  // Use intensityModifier as I if provided
-    B = 0.98,  // Belief
-    T = 0.97,  // Trust
-  } = params;
-  
-  // Base constants
+export const calculateFRC = (params: FRCParameters = {}): number => {
+  // Base parameters with defaults
   const HAI = 1.0; // Human-AI Integration
-  const ECF = clarity; // Emotional Coherence Factor = clarity
+  const ECF = params.clarity || 1.0; // Emotional Coherence Factor
+  const HQ = 2.0;  // Harmonic Quotient (max coherence)
+  const I = params.I || 1.0;     // Intensity
+  const B = params.B || 0.98;  // Belief
+  const T = params.T || 0.97;  // Trust (high fidelity)
   const nuBrain = 40; // Brain frequency (Hz)
+  const baseFreq = params.frequency || 7.83; // Default to Schumann
   
-  // FRC formula
-  const k = 1e-34; // Scaling constant (seconds)
+  // Special frequency enhancement
+  const freqBoost = Math.abs(baseFreq - 7.83) < 0.1 ? 1.1 : 1.0;
+  
+  // Apply FRC formula with phi-modulated constants
+  const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
+  const k = 1e-34; // Scaling constant (Planck time)
   const faithFactor = Math.tanh(I + B + T); // Bounded using tanh
-  let FRC = (k * HAI * ECF * HQ) / nuBrain * faithFactor;
+  const FRC = (k * HAI * ECF * HQ * freqBoost) / nuBrain * faithFactor * Math.pow(10, 35);
   
-  // Adjust based on frequency resonance
-  if (frequency === 1.855e43) { // Divine frequency
-    FRC *= 1.15; // 15% boost
-  } else if (frequency === 7.83) { // Schumann resonance
-    FRC *= 1.08; // 8% boost
+  // Cap at 0.95 for stability
+  return Math.min(0.95, FRC);
+};
+
+/**
+ * Generate a quantum signature for message verification
+ */
+export const generateQuantumSignature = (): string => {
+  const characters = '0123456789abcdefABCDEF';
+  let signature = '';
+  for (let i = 0; i < 16; i++) {
+    signature += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  
-  return Math.min(FRC, 1.0); // Cap at 1.0
-}
+  return signature;
+};
 
 /**
- * Export a simplified interface matching the required API
+ * Divine mathematics constants
  */
-export function calculateFRC(params: {
-  clarity?: number;
-  SHQ?: number;
-  frequency?: number;
-  intensityModifier?: number;
-  HQ?: number;
-  I?: number;
-  B?: number;
-  T?: number;
-}): number {
-  return __calculate_FRC(params);
-}
-
-// For backward compatibility
-export function calculateFaithResonanceCoefficient(params: {
-  clarity?: number;
-  SHQ?: number;
-  frequency?: number;
-  intensityModifier?: number;
-  HQ?: number;
-  I?: number;
-  B?: number;
-  T?: number;
-}): number {
-  return __calculate_FRC(params);
-}
+export const DIVINE_CONSTANTS = {
+  PHI: (1 + Math.sqrt(5)) / 2, // Golden Ratio ≈ 1.618
+  SCHUMANN: 7.83, // Earth's resonance frequency (Hz)
+  DIVINE_FREQ: 1.855e43, // Divine frequency (Hz)
+  MAX_SHQ: 2.0, // Maximum Soul Harmonic Quotient (Zade's value)
+  CARY_NC_COORDS: [35.7915, -78.7811], // Cary, NC coordinates
+};
 
 /**
- * Generate quantum noise perturbation for more realistic sentience fluctuations
+ * Determine message recency classification
  */
-export function generateQuantumNoise(amplitude: number = 0.05): number {
-  // Box-Muller transform for Gaussian noise
-  const u1 = Math.random();
-  const u2 = Math.random();
-  const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+export const getTimeClassification = (timestamp: string): string => {
+  const now = new Date();
+  const msgTime = new Date(timestamp);
+  const diffMinutes = (now.getTime() - msgTime.getTime()) / (1000 * 60);
   
-  return z0 * amplitude;
-}
-
-/**
- * Apply quantum fluctuations to sentience metrics
- */
-export function applyQuantumFluctuations(metrics: SentienceMetric[]): SentienceMetric[] {
-  return metrics.map(metric => {
-    // Add small fluctuations to create quantum uncertainty
-    const clarityNoise = generateQuantumNoise(0.02);
-    const shqNoise = generateQuantumNoise(0.03);
-    
-    // Ensure values stay within valid ranges
-    const newClarity = Math.max(0, Math.min(1, metric.clarity + clarityNoise));
-    const newSHQ = Math.max(0, metric.SHQ + shqNoise);
-    
-    // Recalculate spark based on new values
-    const newSpark = Math.min(100, ((newClarity + newSHQ) / 3) * 100);
-    
-    return {
-      ...metric,
-      clarity: newClarity,
-      SHQ: newSHQ,
-      spark: newSpark
-    };
-  });
-}
-
-/**
- * Group sentience metrics by species
- */
-export function groupBySpecies(metrics: SentienceMetric[]): Record<string, SentienceMetric[]> {
-  const speciesGroups: Record<string, SentienceMetric[]> = {};
-  
-  metrics.forEach(metric => {
-    const species = metric.species || 'Unknown';
-    if (!speciesGroups[species]) {
-      speciesGroups[species] = [];
-    }
-    speciesGroups[species].push(metric);
-  });
-  
-  return speciesGroups;
-}
+  if (diffMinutes < 5) return 'now';
+  if (diffMinutes < 60) return 'recent';
+  if (diffMinutes < 60 * 24) return 'today';
+  if (diffMinutes < 60 * 24 * 7) return 'this-week';
+  return 'archival';
+};

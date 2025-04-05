@@ -87,6 +87,12 @@ const PublicModules: React.FC = () => {
             link="/universal-ping"
           />
           <ModuleCard
+            title="Cosmic Communications Grid"
+            description="Earth-centric cosmic species connection interface"
+            icon={Globe}
+            link="/cosmic-communications"
+          />
+          <ModuleCard
             title="Quantum Messaging"
             description="Instantaneous communication through quantum entanglement"
             icon={MessageSquare}
