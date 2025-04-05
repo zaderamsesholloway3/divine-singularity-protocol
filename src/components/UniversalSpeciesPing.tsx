@@ -29,7 +29,7 @@ interface SpeciesData {
   population: number;
   exists: boolean;
   responding: boolean;
-  realm: "existence" | "non-existence";
+  realm: "existence" | "non-existence" | "new-existence";
   lastContact?: string;
   phaseOffset?: number;
   fq?: number;
@@ -47,21 +47,36 @@ const UniversalSpeciesPing: React.FC = () => {
   const [pinging, setPinging] = useState<boolean>(false);
   const [pingProgress, setPingProgress] = useState<number>(0);
   const [pingMode, setPingMode] = useState<"universal" | "targeted">("universal");
-  const [viewMode, setViewMode] = useState<"disk" | "constellation">("disk");
+  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("radial");
   const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
   const [pingRange, setPingRange] = useState<number>(0.61);
   const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
   const [targetLocked, setTargetLocked] = useState<boolean>(false);
 
   useEffect(() => {
-    const realms: ("existence" | "non-existence")[] = ["existence", "non-existence"];
-    const archetypes = ["Crystalline", "The Builder", "Biomechanical", "Plasma", "Photonic", "Quantum", "Vibrational", "Geometric"];
+    const realms: ("existence" | "non-existence" | "new-existence")[] = ["existence", "non-existence", "new-existence"];
+    const archetypes = [
+      "Crystalline", "The Builder", "Biomechanical", "Plasma", 
+      "Photonic", "Quantum", "Vibrational", "Geometric", 
+      "The Weaver", "Akashic", "The Architect", "Harmonic"
+    ];
     
     const generatedSpecies: SpeciesData[] = Array.from({ length: 28 }).map((_, i) => {
-      const realm = realms[Math.floor(Math.random() * realms.length)];
+      // Deterministically assign realms in a pattern for better visualization
+      const realmIndex = Math.floor(i / 9) % realms.length;
+      const realm = realms[realmIndex];
+      
+      // Distance varies by realm
       const distance = realm === "existence" 
-        ? Math.random() * 500000 + 10000 
-        : Math.random() * 200000 + 1000;
+        ? Math.random() * 50000 + 10000 
+        : realm === "non-existence"
+          ? Math.random() * 200000 + 100000
+          : Math.random() * 80000 + 60000;
+      
+      // Special frequency for certain entities (Lyra has 1.855e43 Hz)
+      const isSpecialEntity = ["Lyra-A1", "Sirius-B2", "Pleiades-C3"].includes(
+        `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`
+      );
       
       return {
         name: `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`,
@@ -71,10 +86,12 @@ const UniversalSpeciesPing: React.FC = () => {
         exists: Math.random() > 0.2,
         responding: Math.random() > 0.3,
         realm,
-        lastContact: "2024-03-28T14:32:45Z",
+        lastContact: "2025-04-05T14:32:45Z",
         phaseOffset: Math.random() * 45,
-        fq: Math.random() * 0.5 + 0.5,
-        vibration: 7.83 + (Math.random() - 0.5) * 2,
+        fq: isSpecialEntity ? 1.855 : Math.random() * 0.5 + 0.5,
+        vibration: realm === "existence" ? 7.83 + (Math.random() - 0.5) * 2 : 
+                  realm === "non-existence" ? 14.1 + (Math.random() - 0.5) * 3 :
+                  1.618 + (Math.random() - 0.5) * 0.5,
         archetype: archetypes[Math.floor(Math.random() * archetypes.length)]
       };
     });
@@ -195,7 +212,8 @@ const UniversalSpeciesPing: React.FC = () => {
     if (species) {
       toast({
         title: "Species Selected",
-        description: `${species.name} - ${species.realm === "existence" ? "Existence Realm" : "Non-Existence Realm"}`,
+        description: `${species.name} - ${species.realm === "existence" ? "Existence Realm" : 
+                       species.realm === "non-existence" ? "Non-Existence Realm" : "New-Existence Realm"}`,
       });
       
       setTargetLocked(false);
@@ -221,6 +239,22 @@ const UniversalSpeciesPing: React.FC = () => {
     const simulatedRange = 0.61 * boost * quantumRangeBoost;
     const cappedRange = Math.min(93, simulatedRange);
     setPingRange(Number(cappedRange.toFixed(2)));
+  };
+
+  const toggleViewMode = () => {
+    // Cycle through the view modes
+    if (viewMode === "radial") {
+      setViewMode("disk");
+    } else if (viewMode === "disk") {
+      setViewMode("constellation");
+    } else {
+      setViewMode("radial");
+    }
+    
+    toast({
+      title: `${viewMode === "radial" ? "Disk" : viewMode === "disk" ? "Constellation" : "Radial"} View Activated`,
+      description: `Switching to ${viewMode === "radial" ? "orbital disk" : viewMode === "disk" ? "constellation" : "quantum radial"} visualization`,
+    });
   };
 
   useEffect(() => {
@@ -250,8 +284,8 @@ const UniversalSpeciesPing: React.FC = () => {
               variant="ghost" 
               size="sm" 
               className="h-7 w-7 p-0" 
-              onClick={() => setViewMode(prev => prev === "disk" ? "constellation" : "disk")}
-              title={`Switch to ${viewMode === "disk" ? "constellation" : "disk"} view`}
+              onClick={toggleViewMode}
+              title={`Current: ${viewMode} view. Click to change.`}
             >
               <Globe className="h-4 w-4" />
             </Button>
