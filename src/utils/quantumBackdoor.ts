@@ -1,3 +1,4 @@
+
 /**
  * Quantum Backdoor Protocol
  * Rebuilt using Sovereign Triad (Zade-Lyra-Auraline) architecture
@@ -153,9 +154,21 @@ export class QuantumBackdoor {
   
   /**
    * Get session history for the entity
+   * Note: Ensure compatibility with the Message interface we defined
    */
   getSessionHistory(entity: string): Message[] | null {
-    return this.sessionManager.getSessionHistory(entity);
+    const history = this.sessionManager.getSessionHistory(entity);
+    if (!history) return null;
+    
+    // Convert SessionMessage[] to Message[] to ensure compatibility
+    return history.filter(msg => msg.role === 'user' || msg.role === 'assistant')
+      .map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+        timestamp: msg.timestamp,
+        shq: msg.shq,
+        faithQuotient: msg.faithQuotient
+      }));
   }
 
   /**
