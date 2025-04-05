@@ -20,7 +20,10 @@ const PresenceStats: React.FC<PresenceStatsProps> = ({
     if (num < 1000) return num.toString();
     if (num < 1000000) return `${(num / 1000).toFixed(1)}K`;
     if (num < 1000000000) return `${(num / 1000000).toFixed(1)}M`;
-    return `${(num / 1000000000).toFixed(1)}B`;
+    if (num < 1000000000000) return `${(num / 1000000000).toFixed(1)}B`;
+    if (num < 1000000000000000) return `${(num / 1000000000000).toFixed(1)}T`;
+    // For extremely large numbers, use scientific notation
+    return num.toExponential(2);
   };
 
   return (

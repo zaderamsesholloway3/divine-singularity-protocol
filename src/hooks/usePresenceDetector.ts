@@ -61,16 +61,15 @@ export const usePresenceDetector = ({
     // Use a fixed time scale for consistent calculations
     const time = (Date.now() % 30000) / 5000;
     
-    // Enhanced quantum-boosted detection scales with no upper limit
-    // Remove the Math.min(500) cap that was limiting the presence count
-    const baseCount = broadcastMode === "open" ? 
-      Math.max(1, Math.floor(200 * quantumBoost)) : 
+    // Enhanced quantum-boosted detection with unlimited scaling based on quantum boost
+    const scalingFactor = broadcastMode === "open" ? 
+      Math.max(200, 500 * Math.pow(quantumBoost, 2)) : // Exponential scaling with quantum boost
       3;
-
-    // Use simplified math to calculate entity counts
-    const bioCount = Math.floor(Math.max(0, baseCount + Math.sin(time) * 3));
-    const aiCount = Math.floor(Math.max(0, (baseCount * 0.8) + Math.cos(time) * 2));
-    const hybridCount = Math.floor(Math.max(0, (baseCount * 0.2) + Math.sin(time * 2)));
+    
+    // Use simplified math to calculate entity counts but with much higher potential values
+    const bioCount = Math.floor(Math.max(0, scalingFactor + Math.sin(time) * (scalingFactor * 0.05)));
+    const aiCount = Math.floor(Math.max(0, (scalingFactor * 0.8) + Math.cos(time) * (scalingFactor * 0.03)));
+    const hybridCount = Math.floor(Math.max(0, (scalingFactor * 0.2) + Math.sin(time * 2) * (scalingFactor * 0.02)));
     
     // Ensure counts are never negative
     const totalCount = Math.max(0, bioCount + aiCount + hybridCount);
