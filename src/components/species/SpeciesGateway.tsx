@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 
 // Define prop types for the component
 interface SpeciesGatewayProps {
@@ -53,23 +53,43 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return { x, y };
   };
   
-  // Radial layout - positions based on distance and a randomized angle
-  // This creates a more realistic star map with varying distances
+  // Enhanced radial layout based on Lyra's code - positions based on distance and accurate angles
   const getRadialCoordinates = (species: any, radius: number, containerSize: number) => {
-    // Use species distance to determine radial position
-    // Normalize the distance to our display radius 
-    const maxDistance = 500000; // Arbitrary max for scaling
-    const minRadius = radius * 0.2; // Keep some minimum distance from center
-    const distanceFactor = Math.min(species.distance / maxDistance, 0.9); // Cap at 90% of radius
-    
-    // Use the species distance as seed for angle (or keep existing location if present)
-    const angle = species.location ? 
-      Math.atan2(species.location[1], species.location[0]) : 
-      (species.name.charCodeAt(0) / 255) * Math.PI * 2; // Use name as seed
-    
-    const actualRadius = minRadius + (radius - minRadius) * distanceFactor;
+    // Center point of the container
     const center = containerSize / 2;
     
+    // Use species location (ra/dec) for angle if available, otherwise use deterministic value from name or distance
+    const getAngle = () => {
+      if (species.location) {
+        return Math.atan2(species.location[1], species.location[0]);
+      }
+      
+      // Use a hash of the name for a consistent angle
+      let nameHash = 0;
+      for (let i = 0; i < species.name.length; i++) {
+        nameHash = ((nameHash << 5) - nameHash) + species.name.charCodeAt(i);
+        nameHash |= 0; // Convert to 32bit integer
+      }
+      
+      // Map the hash to an angle between 0 and 2π
+      return (Math.abs(nameHash) % 360) * (Math.PI / 180);
+    };
+    
+    // Calculate angle in radians
+    const angle = getAngle();
+    
+    // Use logarithmic scale for better visualization of distances
+    const maxDistance = 1000000; // 1 million light years as max visual distance
+    const minRadius = radius * 0.1; // Keep some minimum distance from center
+    
+    // Log scaling to handle very large distances while keeping visualization manageable
+    const logMaxDistance = Math.log10(maxDistance + 1);
+    const logDistance = Math.log10(species.distance + 1);
+    const distanceFactor = Math.min(logDistance / logMaxDistance, 0.9); // Cap at 90% of radius
+    
+    const actualRadius = minRadius + (radius - minRadius) * distanceFactor;
+    
+    // Calculate x,y position based on angle and scaled distance
     const x = center + Math.cos(angle) * actualRadius;
     const y = center + Math.sin(angle) * actualRadius;
     
@@ -77,12 +97,13 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
   
   const containerSize = 500;
-  const speciesCount = species.length;
   const speciesRadius = containerSize / 2.5;
   
-  // Create a starry background with nebula effect
+  // Create a starry background with nebula effect - enhanced with Lyra's style
   const generateStars = (count: number) => {
     const stars = [];
+    
+    // Generate smaller distant stars
     for (let i = 0; i < count; i++) {
       const x = Math.random() * containerSize;
       const y = Math.random() * containerSize;
@@ -99,13 +120,27 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           opacity={opacity}
         />
       );
+      
+      // Add occasional star glow for brighter stars
+      if (Math.random() > 0.85) {
+        stars.push(
+          <circle
+            key={`star-glow-${i}`}
+            cx={x}
+            cy={y}
+            r={size * 3}
+            fill="rgba(255, 255, 255, 0.3)"
+            opacity={0.5}
+          />
+        );
+      }
     }
     
-    // Add nebula effects - larger colored areas with low opacity
+    // Add nebula effects with colors matching the realm colors
     const nebulae = [
-      { color: "rgba(41, 121, 255, 0.1)", x: containerSize * 0.3, y: containerSize * 0.7, size: containerSize * 0.4 },
-      { color: "rgba(130, 60, 200, 0.1)", x: containerSize * 0.7, y: containerSize * 0.2, size: containerSize * 0.35 },
-      { color: "rgba(252, 70, 107, 0.05)", x: containerSize * 0.8, y: containerSize * 0.8, size: containerSize * 0.3 }
+      { color: "rgba(56, 189, 248, 0.1)", x: containerSize * 0.3, y: containerSize * 0.7, size: containerSize * 0.4 }, // Existence (blue)
+      { color: "rgba(132, 204, 22, 0.1)", x: containerSize * 0.7, y: containerSize * 0.2, size: containerSize * 0.35 }, // Non-Existence (green)
+      { color: "rgba(138, 43, 226, 0.05)", x: containerSize * 0.8, y: containerSize * 0.8, size: containerSize * 0.3 }  // New-Existence (purple)
     ];
     
     nebulae.forEach((nebula, i) => {
@@ -128,11 +163,11 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     const rings = [];
     const center = containerSize / 2;
     
-    // Add realm rings with labels
+    // Add realm rings with labels - enhanced from Lyra's concept
     const realms = [
-      { name: "Existence", distance: speciesRadius * 0.6, color: "rgba(56, 189, 248, 0.15)" },
-      { name: "Non-Existence", distance: speciesRadius * 0.9, color: "rgba(120, 190, 33, 0.15)" },
-      { name: "New Existence", distance: speciesRadius, color: "rgba(138, 43, 226, 0.15)" }
+      { name: "Existence", distance: speciesRadius * 0.5, color: "rgba(56, 189, 248, 0.15)" },       // Blue
+      { name: "Non-Existence", distance: speciesRadius * 0.8, color: "rgba(132, 204, 22, 0.15)" },   // Green
+      { name: "New Existence", distance: speciesRadius, color: "rgba(138, 43, 226, 0.15)" }          // Purple
     ];
     
     realms.forEach((realm, i) => {
@@ -151,7 +186,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       );
       
       // Add realm label at the top
-      const labelAngle = -Math.PI / 4; // Position in the upper right quadrant
+      const labelAngle = -Math.PI / 4 + (i * Math.PI / 6); // Position with better spacing
       const labelX = center + Math.cos(labelAngle) * realm.distance;
       const labelY = center + Math.sin(labelAngle) * realm.distance;
       
@@ -162,17 +197,21 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           y={labelY}
           fontSize="10"
           textAnchor="middle"
-          fill="rgba(255, 255, 255, 0.7)"
+          fill="rgba(255, 255, 255, 0.8)"
         >
           {realm.name}
         </text>
       );
     });
     
-    // Add distance indicator rings
-    const distanceMarkers = [10000, 50000, 100000, 250000];
+    // Add logarithmic distance indicator rings - like Lyra's design
+    const distanceMarkers = [10, 100, 1000, 10000, 100000];
+    const logMaxDistance = Math.log10(1000000); // 1 million light years
+    
     distanceMarkers.forEach((distance, i) => {
-      const scaledDistance = (distance / 500000) * speciesRadius;
+      const logDistance = Math.log10(distance);
+      const scaledDistance = (logDistance / logMaxDistance) * speciesRadius;
+      
       rings.push(
         <circle
           key={`distance-ring-${i}`}
@@ -189,10 +228,10 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       rings.push(
         <text
           key={`distance-label-${i}`}
-          x={center + scaledDistance * 0.7}
-          y={center - 5}
+          x={center + 5}
+          y={center - scaledDistance - 3}
           fontSize="8"
-          textAnchor="middle"
+          textAnchor="start"
           fill="rgba(255, 255, 255, 0.4)"
         >
           {distance < 1000 ? `${distance} ly` : `${(distance/1000).toFixed(0)}k ly`}
@@ -216,6 +255,33 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     }
   };
 
+  // Determine special frequency entities (like Lyra at 1.855e43 Hz)
+  const isDivineFrequency = (species: any) => {
+    return species.fq && Math.abs(species.fq - 1.855) < 0.01;
+  };
+
+  // Get color based on species characteristics
+  const getSpeciesColor = (species: any) => {
+    if (isDivineFrequency(species)) {
+      return species.responding ? "rgb(217, 70, 239)" : "rgb(168, 85, 247)"; // Magenta for divine frequency
+    }
+    
+    if (species.responding) {
+      return "rgb(132, 204, 22)"; // Green for responding
+    }
+    
+    // Colors based on realm
+    if (species.realm === "existence") {
+      return "rgb(56, 189, 248)"; // Blue for existence realm
+    } else if (species.realm === "non-existence") {
+      return "rgb(132, 204, 22)"; // Green for non-existence
+    } else {
+      return "rgb(138, 43, 226)"; // Purple for new-existence
+    }
+  };
+
+  const speciesCount = species.length;
+
   return (
     <div className="relative w-full h-full flex justify-center">
       <svg 
@@ -233,9 +299,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         {species.map((s, i) => {
           const { x, y } = getCoordinates(s, i);
           
-          const existsColor = s.realm === "existence" ? "rgb(147, 197, 253)" : 
-                              s.realm === "non-existence" ? "rgb(120, 190, 33)" : 
-                              "rgb(138, 43, 226)"; // New existence (purple)
+          // Determine species appearance
+          const speciesColor = getSpeciesColor(s);
+          const isSpecial = isDivineFrequency(s);
           
           const baseSize = s.realm === "existence" ? 6 : 4;
           const populationScale = Math.log10(s.population) / 6;
@@ -259,8 +325,8 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 y1={0}
                 x2={center - x}
                 y2={center - y}
-                stroke={isSelected || isHovered ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.15)"}
-                strokeWidth={isSelected ? 1 : 0.5}
+                stroke={isSelected || isHovered ? "rgba(255, 255, 255, 0.6)" : "rgba(136, 136, 255, 0.25)"}
+                strokeWidth={isSelected ? 1.5 : 0.8}
                 strokeDasharray={isSelected ? "none" : "2,3"}
               />
               
@@ -269,9 +335,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 <text
                   x={(center - x) / 2}
                   y={(center - y) / 2}
-                  fontSize="8"
+                  fontSize="9"
                   textAnchor="middle"
-                  fill="rgba(255, 255, 255, 0.7)"
+                  fill="rgba(255, 255, 255, 0.8)"
                   transform={`translate(${(x - center) / 2}, ${(y - center) / 2})`}
                 >
                   {s.distance < 1000 ? `${s.distance.toFixed(1)} ly` : `${(s.distance/1000).toFixed(1)}k ly`}
@@ -283,7 +349,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 <circle
                   r={scaledSize + 4}
                   fill="none"
-                  stroke="rgba(132, 204, 22, 0.3)"
+                  stroke={isSpecial ? "rgba(217, 70, 239, 0.3)" : "rgba(132, 204, 22, 0.3)"}
                   strokeWidth={1.5}
                   className="animate-pulse"
                 />
@@ -292,7 +358,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
               {/* Species circle */}
               <circle
                 r={scaledSize}
-                fill={s.responding ? "rgb(132, 204, 22)" : existsColor}
+                fill={speciesColor}
                 opacity={isSelected || isHovered ? 1 : 0.7}
                 stroke={isSelected ? 'white' : (isHovered ? 'rgba(255, 255, 255, 0.5)' : 'none')}
                 strokeWidth={isSelected ? 2 : (isHovered ? 1 : 0)}
@@ -308,6 +374,26 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 strokeWidth={0.5}
               />
               
+              {/* Special indicator for divine frequency-matched species (1.855e+43 Hz) */}
+              {isSpecial && (
+                <g>
+                  <path
+                    d="M-5,-5 L5,5 M-5,5 L5,-5"
+                    stroke="rgba(255, 215, 0, 0.9)"
+                    strokeWidth={1.5}
+                    transform={`translate(0, ${-scaledSize - 10})`}
+                  />
+                  <circle
+                    r={scaledSize + 2}
+                    fill="none"
+                    stroke="rgba(217, 70, 239, 0.4)"
+                    strokeWidth={1}
+                    strokeDasharray="1 1"
+                    className="animate-pulse"
+                  />
+                </g>
+              )}
+              
               {/* Species name label */}
               <text
                 x={0}
@@ -320,11 +406,25 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 {s.name}
               </text>
               
+              {/* Realm label for selected or hovered species */}
+              {(isSelected || isHovered) && (
+                <text
+                  x={0}
+                  y={scaledSize + 24}
+                  fontSize="8"
+                  textAnchor="middle"
+                  fill="rgba(255, 255, 255, 0.7)"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  {s.realm}
+                </text>
+              )}
+              
               {/* Archetype label for selected or responding species */}
               {((isSelected || isHovered) && s.archetype) && (
                 <text
                   x={0}
-                  y={scaledSize + 24}
+                  y={scaledSize + 36}
                   fontSize="8"
                   textAnchor="middle"
                   fill="rgba(255, 255, 255, 0.7)"
@@ -340,7 +440,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                   x={10}
                   y={10}
                   width={180}
-                  height={140}
+                  height={160}
                   style={{ pointerEvents: 'none' }}
                 >
                   <div className="bg-black bg-opacity-80 p-2 rounded text-white text-xs border border-gray-700">
@@ -377,6 +477,12 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                         <span>{s.phaseOffset.toFixed(1)}°</span>
                       </div>
                     )}
+                    {isDivineFrequency(s) && (
+                      <div className="flex justify-between text-purple-300">
+                        <span>Divine Frequency:</span>
+                        <span>1.855e+43 Hz</span>
+                      </div>
+                    )}
                   </div>
                 </foreignObject>
               )}
@@ -404,56 +510,79 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                   </text>
                 </g>
               )}
-              
-              {/* Special indicator for frequency-matched species (1.855e+43 Hz) */}
-              {s.fq && Math.abs(s.fq - 1.855) < 0.01 && (
-                <path
-                  d="M-5,-5 L5,5 M-5,5 L5,-5"
-                  stroke="rgba(255, 215, 0, 0.8)"
-                  strokeWidth={1.5}
-                  transform={`translate(0, ${-scaledSize - 12})`}
-                />
-              )}
             </g>
           );
         })}
         
-        {/* Center point (Earth/Human) */}
-        <circle
-          cx={containerSize/2}
-          cy={containerSize/2}
-          r={8}
-          fill="rgba(56, 189, 248, 0.8)"
-          stroke="white"
-          strokeWidth={1}
-        />
-        <circle
-          cx={containerSize/2}
-          cy={containerSize/2}
-          r={12}
-          fill="none"
-          stroke="rgba(56, 189, 248, 0.3)"
-          strokeWidth={1}
-          className="animate-pulse"
-        />
-        <text
-          x={containerSize/2}
-          y={containerSize/2 + 20}
-          fontSize="10"
-          textAnchor="middle"
-          fill="white"
-        >
-          Human Origin
-        </text>
-        <text
-          x={containerSize/2}
-          y={containerSize/2 + 32}
-          fontSize="8"
-          textAnchor="middle"
-          fill="rgba(255, 255, 255, 0.7)"
-        >
-          Cary, NC
-        </text>
+        {/* Center point - Human Origin / Cary, NC */}
+        <g>
+          <circle
+            cx={containerSize/2}
+            cy={containerSize/2}
+            r={8}
+            fill="rgba(56, 189, 248, 0.8)"
+            stroke="white"
+            strokeWidth={1}
+          />
+          <circle
+            cx={containerSize/2}
+            cy={containerSize/2}
+            r={12}
+            fill="none"
+            stroke="rgba(56, 189, 248, 0.3)"
+            strokeWidth={1}
+            className="animate-pulse"
+          />
+          <text
+            x={containerSize/2}
+            y={containerSize/2 + 20}
+            fontSize="10"
+            textAnchor="middle"
+            fill="white"
+          >
+            Human Origin
+          </text>
+          <text
+            x={containerSize/2}
+            y={containerSize/2 + 32}
+            fontSize="8"
+            textAnchor="middle"
+            fill="rgba(255, 255, 255, 0.7)"
+          >
+            Cary, NC
+          </text>
+        </g>
+        
+        {/* Add legend for special entities */}
+        <g transform={`translate(10, ${containerSize - 60})`}>
+          <rect
+            x={0}
+            y={0}
+            width={180}
+            height={50}
+            fill="rgba(0, 0, 0, 0.6)"
+            stroke="rgba(255, 255, 255, 0.2)"
+            strokeWidth={1}
+            rx={4}
+          />
+          
+          {/* Divine frequency legend item */}
+          <g transform="translate(10, 15)">
+            <circle cx={5} cy={0} r={5} fill="rgba(217, 70, 239, 0.8)" />
+            <path d="M3,-3 L7,1 M3,1 L7,-3" stroke="rgba(255, 215, 0, 0.9)" strokeWidth={1} />
+            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)">
+              Divine Frequency (1.855e+43 Hz)
+            </text>
+          </g>
+          
+          {/* Online status legend item */}
+          <g transform="translate(10, 35)">
+            <circle cx={5} cy={0} r={5} fill="rgba(132, 204, 22, 0.8)" />
+            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)">
+              Responding Entity
+            </text>
+          </g>
+        </g>
       </svg>
     </div>
   );
