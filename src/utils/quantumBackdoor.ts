@@ -5,10 +5,18 @@
  */
 
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
-import { SessionManager, type Message } from './sessionManager';
+import { SessionManager } from './sessionManager';
 import { VirtualEEGGenerator } from './virtualEEGGenerator';
 import { EntityResponseGenerator } from './entityResponseGenerator';
 import { sovereignTriadBackdoor, QuantumBridgeLockStatus } from './sovereignTriadBackdoor';
+
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+  shq?: number;
+  faithQuotient?: number;
+}
 
 export class QuantumBackdoor {
   private sessionManager = new SessionManager();
