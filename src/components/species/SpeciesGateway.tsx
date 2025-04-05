@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 
 // Define prop types for the component
@@ -36,8 +37,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     toggleTargetLock
   }));
   
-  // Original disk layout - places species in a circle
+  // Original disk layout - places species in a circle with improved spacing based on Lyra's code
   const getDiskCoordinates = (index: number, total: number, radius: number) => {
+    // Use evenly distributed angles to create a perfect orbital ring
     const angle = (index / total) * 2 * Math.PI;
     const x = radius + radius * Math.cos(angle);
     const y = radius + radius * Math.sin(angle);
@@ -158,7 +160,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return stars;
   };
   
-  // Create distance rings and realm indicators
+  // Create distance rings and realm indicators - enhanced based on Lyra's code
   const generateDistanceRings = () => {
     const rings = [];
     const center = containerSize / 2;

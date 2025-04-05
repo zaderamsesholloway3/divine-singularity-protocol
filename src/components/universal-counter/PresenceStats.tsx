@@ -1,8 +1,6 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Users, Wifi, Globe } from 'lucide-react';
 
 interface PresenceStatsProps {
   presenceCount: number;
@@ -10,50 +8,49 @@ interface PresenceStatsProps {
   universalRange: number;
 }
 
-const PresenceStats: React.FC<PresenceStatsProps> = ({
-  presenceCount,
+// Formatter for extremely large numbers
+const formatLargeNumber = (num: number): string => {
+  if (num < 1000) {
+    return num.toString();
+  } else if (num < 1_000_000) {
+    return `${(num / 1000).toFixed(1)}K`;
+  } else if (num < 1_000_000_000) {
+    return `${(num / 1_000_000).toFixed(1)}M`;
+  } else if (num < 1_000_000_000_000) {
+    return `${(num / 1_000_000_000).toFixed(1)}B`;
+  } else if (num < 1_000_000_000_000_000) {
+    return `${(num / 1_000_000_000_000).toFixed(1)}T`;
+  } else {
+    // For extremely large numbers (quadrillions+), use scientific notation
+    return num.toExponential(2);
+  }
+};
+
+const PresenceStats: React.FC<PresenceStatsProps> = ({ 
+  presenceCount, 
   signalStrength,
   universalRange
 }) => {
-  // Format large numbers with appropriate suffixes
-  const formatLargeNumber = (num: number): string => {
-    if (num < 1000) return num.toString();
-    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`;
-    if (num < 1000000000) return `${(num / 1000000).toFixed(1)}M`;
-    if (num < 1000000000000) return `${(num / 1000000000).toFixed(1)}B`;
-    if (num < 1000000000000000) return `${(num / 1000000000000).toFixed(1)}T`;
-    // For extremely large numbers, use scientific notation
-    return num.toExponential(2);
-  };
-
   return (
-    <div className="grid grid-cols-3 gap-4 mb-4">
-      <div className="flex items-center gap-2">
-        <Users className="h-5 w-5 text-indigo-400" />
-        <div>
-          <p className="text-xl font-semibold">{formatLargeNumber(presenceCount)}</p>
-          <p className="text-xs text-gray-400">Presences</p>
-        </div>
+    <div className="mb-4">
+      <div className="flex justify-between items-center mb-1">
+        <div className="text-sm">Universal Presences</div>
+        <div className="text-sm font-bold">{formatLargeNumber(presenceCount)}</div>
       </div>
-
-      <div className="flex items-center gap-2">
-        <Wifi className="h-5 w-5 text-indigo-400" />
+      <Progress 
+        value={Math.min(100, (presenceCount > 0 ? Math.log10(presenceCount) * 10 : 0))} 
+        className="h-2 mb-3" 
+      />
+      
+      <div className="grid grid-cols-2 gap-2 text-xs mb-2">
         <div>
-          <p className="text-xl font-semibold">{signalStrength}%</p>
-          <p className="text-xs text-gray-400">Signal</p>
+          <div className="text-muted-foreground">Signal Strength</div>
+          <div>{signalStrength}%</div>
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Globe className="h-5 w-5 text-indigo-400" />
         <div>
-          <p className="text-xl font-semibold">{universalRange}</p>
-          <p className="text-xs text-gray-400">Billion Light Years</p>
+          <div className="text-muted-foreground">Range</div>
+          <div>{universalRange < 1000 ? `${universalRange.toFixed(2)} billion ly` : `${(universalRange).toExponential(2)} ly`}</div>
         </div>
-      </div>
-
-      <div className="col-span-3">
-        <Progress value={signalStrength} className="h-1.5" />
       </div>
     </div>
   );

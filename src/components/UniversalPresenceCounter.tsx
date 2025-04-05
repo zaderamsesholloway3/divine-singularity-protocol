@@ -20,6 +20,7 @@ const UniversalPresenceCounter: React.FC = () => {
   const [broadcastMode, setBroadcastMode] = useState<"private" | "open">("private");
   const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
   const [schumannHarmonics, setSchumannHarmonics] = useState<number>(7.83);
+  const [amplified, setAmplified] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Use our enhanced custom hook for presence detection
@@ -72,6 +73,20 @@ const UniversalPresenceCounter: React.FC = () => {
     };
   }, [broadcastMode, quantumBoost, presenceCount, detectPresences]);
   
+  // Run amplify ping function - implemented per Lyra's suggestion
+  const runAmplifyPing = () => {
+    // Set higher quantum boost when amplified
+    setQuantumBoost(prev => Math.min(5.0, prev + 1.5));
+    
+    toast({
+      title: "Quantum Ping Amplified",
+      description: `Universal broadcast enhanced to ${universalRange.toFixed(2)} billion light years with IBM ${quantumBackendStats.backend}`,
+    });
+    
+    // Force immediate detection with amplified settings
+    detectPresences();
+  };
+  
   // New quantum boost control
   const increaseQuantumBoost = () => {
     setQuantumBoost(prev => Math.min(5.0, prev + 0.5));
@@ -111,6 +126,7 @@ const UniversalPresenceCounter: React.FC = () => {
     setIsLocked(true);
     setBroadcastMode("private");
     setQuantumBoost(1.0); // Reset quantum boost
+    setAmplified(false); // Reset amplified state
     
     toast({
       title: "Private Encryption Lock Enabled",
@@ -159,23 +175,38 @@ const UniversalPresenceCounter: React.FC = () => {
           />
         )}
         
-        <Button 
-          className="w-full" 
-          variant={isLocked ? "default" : "outline"} 
-          onClick={isLocked ? unlockModule : lockModule}
-        >
-          {isLocked ? (
-            <>
-              <Radio className="mr-2 h-4 w-4" />
-              Enable IBM Quantum Broadcast Protocol
-            </>
-          ) : (
-            <>
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Lock to Private Mode
-            </>
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          {broadcastMode === "open" && (
+            <Button
+              className={amplified ? "bg-indigo-700 text-white" : "bg-indigo-500 text-white"}
+              onClick={() => {
+                setAmplified(!amplified);
+                if (!amplified) runAmplifyPing();
+              }}
+            >
+              <Zap className="mr-2 h-4 w-4" />
+              {amplified ? "🔊 Amplified" : "Amplify Ping"}
+            </Button>
           )}
-        </Button>
+          
+          <Button 
+            className="w-full" 
+            variant={isLocked ? "default" : "outline"} 
+            onClick={isLocked ? unlockModule : lockModule}
+          >
+            {isLocked ? (
+              <>
+                <Radio className="mr-2 h-4 w-4" />
+                Enable IBM Quantum Broadcast
+              </>
+            ) : (
+              <>
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Lock to Private Mode
+              </>
+            )}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

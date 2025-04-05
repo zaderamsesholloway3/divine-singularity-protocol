@@ -28,7 +28,7 @@ interface UsePresenceDetectorReturn {
   quantumBackendStats: QuantumBoostParameters; // Add quantum parameters
 }
 
-// Simulated IBM quantum parameters (based on IBM Sherbrooke processor stats)
+// Enhanced IBM quantum parameters (based on IBM Sherbrooke processor stats)
 const ibmQuantumSimulation: QuantumBoostParameters = {
   t1: 348.23, // Coherence time in microseconds (from IBM Sherbrooke processor)
   qubits: 127, // Using ibm_sherbrooke qubit count
@@ -56,17 +56,19 @@ export const usePresenceDetector = ({
     ].slice(-30)); // Keep only 30 messages for better performance
   }, []);
   
-  // Super-optimized detection algorithm with IBM quantum simulation
+  // Super-optimized detection algorithm with IBM quantum simulation and no limit on presence count
   const detectPresences = useCallback(() => {
     // Use a fixed time scale for consistent calculations
     const time = (Date.now() % 30000) / 5000;
     
     // Enhanced quantum-boosted detection with unlimited scaling based on quantum boost
+    // Using divine frequency coefficient (1.855) for enhancement when boost nears divine value
+    const divineAlignment = Math.abs(quantumBoost - 1.855) < 0.1 ? 1.855 : 1.0;
     const scalingFactor = broadcastMode === "open" ? 
-      Math.max(200, 500 * Math.pow(quantumBoost, 2)) : // Exponential scaling with quantum boost
+      Math.max(200, 1000 * Math.pow(quantumBoost, 2) * divineAlignment) : // Exponential scaling with quantum boost
       3;
     
-    // Use simplified math to calculate entity counts but with much higher potential values
+    // Use simplified math to calculate entity counts but with NO upper limit, just performance constraints
     const bioCount = Math.floor(Math.max(0, scalingFactor + Math.sin(time) * (scalingFactor * 0.05)));
     const aiCount = Math.floor(Math.max(0, (scalingFactor * 0.8) + Math.cos(time) * (scalingFactor * 0.03)));
     const hybridCount = Math.floor(Math.max(0, (scalingFactor * 0.2) + Math.sin(time * 2) * (scalingFactor * 0.02)));
@@ -112,14 +114,15 @@ export const usePresenceDetector = ({
     
     setSignalStrength(Math.min(100, Math.max(5, newStrength)));
     
-    // Calculate universal range - now reaching billions of light years
+    // Calculate universal range - now reaching billions of light years with no limit
     // Using quantum coherence time (T1) as multiplier for range boost
     const quantumRangeBoost = quantumBackendStats.t1 * quantumBackendStats.qubits / 100;
-    const simulatedRange = 0.61 * quantumBoost * quantumRangeBoost;
+    // Use exponential scaling for boosts near divine frequency
+    const divineRangeMultiplier = Math.abs(quantumBoost - 1.855) < 0.1 ? 2.5 : 1.0;
+    const simulatedRange = 0.61 * quantumBoost * quantumRangeBoost * divineRangeMultiplier;
     
-    // Cap at 93 billion light years (observable universe)
-    const cappedRange = Math.min(93, simulatedRange);
-    setUniversalRange(Number(cappedRange.toFixed(2)));
+    // No cap on range - allow detection beyond observable universe (93 billion light years)
+    setUniversalRange(Number(simulatedRange.toFixed(2)));
     
     // Generate occasional message with reduced frequency
     if (broadcastMode === "open" && Math.random() > 0.93 && entities.length > 0) {
