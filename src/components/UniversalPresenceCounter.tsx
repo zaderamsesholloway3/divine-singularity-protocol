@@ -40,19 +40,19 @@ const UniversalPresenceCounter: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Optimized detection interval - MUCH SLOWER to prevent freezing
+  // Drastically slowed detection interval to prevent freezing
   useEffect(() => {
     // Initial detection with a delay to prevent immediate load freeze
     const initialDetection = setTimeout(() => {
       detectPresences();
-    }, 100);
+    }, 500);
     
     // Use a much longer interval for better performance
     const interval = setInterval(() => {
       detectPresences();
       
       // Auto-adjust quantum boost based on response
-      if (presenceCount > 500 && quantumBoost < 3.0) {
+      if (presenceCount > 400 && quantumBoost < 3.0) {
         setQuantumBoost(prev => Math.min(3.0, prev + 0.05));
       }
       
@@ -62,13 +62,13 @@ const UniversalPresenceCounter: React.FC = () => {
           prev + (Math.random() * 0.01 - 0.005) * quantumBoost
         );
       }
-    }, 3500); // Much longer interval (3.5 seconds) to prevent freezing
+    }, 5000); // MUCH longer interval (5 seconds) to prevent freezing
 
     return () => {
       clearTimeout(initialDetection);
       clearInterval(interval);
     };
-  }, [broadcastMode, quantumBoost, presenceCount]);
+  }, [broadcastMode, quantumBoost, presenceCount, detectPresences]);
   
   // New quantum boost control
   const increaseQuantumBoost = () => {

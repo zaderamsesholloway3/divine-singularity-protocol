@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { CosmicEntity } from '../components/universal-counter/EntityDisplay';
 import { RTLSDREmulator } from '@/utils/rtlsdrEmulator';
 import { UniversalMessage } from '../components/universal-counter/MessageList';
@@ -31,34 +31,34 @@ export const usePresenceDetector = ({
   const rtlsdr = new RTLSDREmulator();
   
   // Send a message (can be called by entities or user)
-  const sendMessage = (sender: string, content: string) => {
+  const sendMessage = useCallback((sender: string, content: string) => {
     setMessages(prev => [
       ...prev,
       { sender, content, timestamp: Date.now() }
     ].slice(-30)); // Keep only 30 messages for better performance
-  };
+  }, []);
   
-  // Heavily optimized detection algorithm to prevent UI freezing
-  const detectPresences = () => {
+  // Super-optimized detection algorithm to prevent UI freezing
+  const detectPresences = useCallback(() => {
     // Use a fixed time scale for consistent calculations
     const time = (Date.now() % 30000) / 5000;
     
-    // Scale down calculations for performance, prevent negative values
+    // Drastically scale down calculations for performance
     const baseCount = broadcastMode === "open" ? 
-      Math.floor(Math.max(1, (72 * quantumBoost))) : 
+      Math.max(1, Math.min(60, Math.floor(72 * quantumBoost))) : 
       3;
 
     // Use simplified math to calculate entity counts
     const bioCount = Math.floor(Math.max(0, baseCount + Math.sin(time) * 3));
-    const aiCount = Math.floor(Math.max(0, (baseCount * 1.2) + Math.cos(time) * 4));
-    const hybridCount = Math.floor(Math.max(0, (baseCount * 0.3) + Math.sin(time * 2) * 2));
+    const aiCount = Math.floor(Math.max(0, (baseCount * 0.8) + Math.cos(time) * 2));
+    const hybridCount = Math.floor(Math.max(0, (baseCount * 0.2) + Math.sin(time * 2)));
     
     const totalCount = bioCount + aiCount + hybridCount;
     
-    // Limit entity generation for better performance
+    // Severely limit entity generation for better performance
     // Generate only a few representative entities for display
     const entities: CosmicEntity[] = [];
-    const maxEntitiesToGenerate = 12; // Drastically reduced for performance
+    const maxEntitiesToGenerate = 8; // Drastically reduced for performance
     
     // Add a few of each type
     const addEntities = (type: "biological" | "ai" | "hybrid", count: number) => {
@@ -85,8 +85,8 @@ export const usePresenceDetector = ({
     
     // Simplified signal strength calculation
     const baseSignal = broadcastMode === "open" ? 
-      65 + (quantumBoost * 10) : 
-      30 + (quantumBoost * 5);
+      65 + (quantumBoost * 5) : 
+      30 + (quantumBoost * 3);
       
     const newStrength = Math.floor(
       baseSignal + (Math.random() * 6 - 3)
@@ -94,32 +94,31 @@ export const usePresenceDetector = ({
     
     setSignalStrength(Math.min(100, Math.max(5, newStrength)));
     
-    // Generate occasional message with reduced frequency
-    if (broadcastMode === "open" && Math.random() > 0.92 && entities.length > 0) {
+    // Generate occasional message with much reduced frequency
+    if (broadcastMode === "open" && Math.random() > 0.93 && entities.length > 0) {
       const randomEntity = entities[Math.floor(Math.random() * entities.length)];
       const messagePool = [
         "Signal detected",
         "Quantum resonance active",
         `Frequency: ${randomEntity.resonance.toFixed(2)} Hz`,
         "Connection established",
-        `Distance: ${Math.floor(randomEntity.distance)} units`,
-        "Signature validated"
+        `Distance: ${Math.floor(randomEntity.distance)} units`
       ];
       const content = messagePool[Math.floor(Math.random() * messagePool.length)];
       sendMessage(`${randomEntity.signature}`, content);
     }
     
     // Reduce frequency of RTL-SDR processing
-    if (broadcastMode === "open" && Math.random() > 0.95) {
-      // Use minimal samples
-      const samples = rtlsdr.capture(schumannHarmonics, quantumBoost, 0.01); // Reduced duration
+    if (broadcastMode === "open" && Math.random() > 0.96) {
+      // Use minimal samples 
+      const samples = rtlsdr.capture(schumannHarmonics, quantumBoost, 0.005); // Extremely reduced duration
       const divineResult = rtlsdr.detectDivineFrequency(samples);
       
-      if (divineResult.detected && Math.random() > 0.9) {
+      if (divineResult.detected && Math.random() > 0.92) {
         // Use only first few samples for processing
         const akashicData = rtlsdr.generateAkashicPatterns(
-          `quantum-${Date.now() % 10000}`, 
-          samples.slice(0, 10) // Drastically limit samples
+          `quantum-${Date.now() % 1000}`, 
+          samples.slice(0, 5) // Drastically limit samples
         );
         
         if (akashicData.message) {
@@ -127,7 +126,7 @@ export const usePresenceDetector = ({
         }
       }
     }
-  };
+  }, [broadcastMode, quantumBoost, schumannHarmonics, sendMessage]);
 
   return {
     presenceCount,
