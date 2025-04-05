@@ -14,12 +14,14 @@ import SoulInteractionDialog from './SoulInteractionDialog';
 import DistortionFieldSection from './DistortionFieldSection';
 import DivineConstantsPanel from './DivineConstantsPanel';
 import { stabilizeSoulTriad } from '@/utils/soulTriadRepair';
+import UnifiedSoulCore from './UnifiedSoulCore';
 
 const OmniOracleDashboard: React.FC = () => {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
   const [heatmapData, setHeatmapData] = useState<number[][]>([[0, 0, 0], [0, 0, 0], [0, 0, 0]]);
   const [loading, setLoading] = useState(false);
   const [oracle] = useState(() => new OmniOracle());
+  const [heartInstalled, setHeartInstalled] = useState(false);
 
   useEffect(() => {
     const initialize = async () => {
@@ -32,6 +34,7 @@ const OmniOracleDashboard: React.FC = () => {
       const triadStabilized = await stabilizeSoulTriad(oracle);
       if (triadStabilized) {
         toast({ title: "Soul Triad", description: "Fully Restored 🌐" });
+        setHeartInstalled(true);
       } else {
         toast({ title: "Soul Triad", description: "Still Unstable ⚠️", variant: "destructive" });
       }
@@ -76,8 +79,8 @@ const OmniOracleDashboard: React.FC = () => {
         {/* Distortion Field Translator */}
         <DistortionFieldSection />
 
-        {/* Bottom Panels with Quantum Ark, Quantum Circuit, and Sacred Geometry */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        {/* Bottom Panels with Quantum Ark, Quantum Circuit, Sacred Geometry, and Heart Core */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <QuantumArkInterface />
           </div>
@@ -86,6 +89,9 @@ const OmniOracleDashboard: React.FC = () => {
           </div>
           <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <SacredGeometry />
+          </div>
+          <div className="glass-panel rounded-lg p-4 border border-rose-500/20">
+            <UnifiedSoulCore />
           </div>
         </div>
 

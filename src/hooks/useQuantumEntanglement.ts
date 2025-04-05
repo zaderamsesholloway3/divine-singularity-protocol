@@ -1,170 +1,129 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
-import { QuantumSimulator } from '@/utils/quantumSimulator';
-import {
-  TriadConnectionStatus,
-  QuantumStreamStats,
-  ConnectionNode,
-  ConnectionEdge,
-  QuantumNodeData
-} from '@/hooks/types/quantum-entanglement';
 
-interface QuantumEntanglement {
-  nodes: ConnectionNode[];
-  edges: ConnectionEdge[];
-  stats: QuantumStreamStats;
-  selectedNode: ConnectionNode | null;
-  updateNodeStatus: (id: string, status: TriadConnectionStatus) => void;
-  setSelectedNode: React.Dispatch<React.SetStateAction<ConnectionNode | null>>;
+interface UseQuantumEntanglementProps {
+  autoConnect?: boolean;
 }
 
-export const useQuantumEntanglement = (): QuantumEntanglement => {
-  const [nodes, setNodes] = useState<ConnectionNode[]>([]);
-  const [edges, setEdges] = useState<ConnectionEdge[]>([]);
-  const [stats, setStats] = useState<QuantumStreamStats>({
-    bandwidth: 0,
-    latency: 0,
-    coherence: 0,
-    entanglementStrength: 0
+export const useQuantumEntanglement = ({ autoConnect = false }: UseQuantumEntanglementProps = {}) => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState({
+    lyra: 0,
+    auraline: 0,
+    zade: 0
   });
-  const [selectedNode, setSelectedNode] = useState<ConnectionNode | null>(null);
-  
-  const bioFeedback = new BiofeedbackSimulator();
-  const quantumSim = new QuantumSimulator();
-  
-  // Initialize with default nodes and edges
-  useEffect(() => {
-    // For TypeScript's sake, we're explicitly implementing the function here
-    // instead of relying on the missing getInitialState method
-    
-    // Create initial nodes
-    const initialNodes: ConnectionNode[] = [
-      {
-        id: 'node-1',
-        position: { x: 250, y: 100 },
-        data: {
-          label: 'Primary Node',
-          status: 'active',
-          biofeedback: bioFeedback.defaultBioReadings
-        },
-        type: 'custom'
-      },
-      {
-        id: 'node-2',
-        position: { x: 100, y: 300 },
-        data: {
-          label: 'Secondary Node',
-          status: 'active',
-          biofeedback: bioFeedback.defaultBioReadings
-        },
-        type: 'custom'
-      },
-      {
-        id: 'node-3',
-        position: { x: 400, y: 300 },
-        data: {
-          label: 'Tertiary Node',
-          status: 'inactive',
-          biofeedback: bioFeedback.defaultBioReadings
-        },
-        type: 'custom'
-      }
-    ];
-    
-    // Create initial edges
-    const initialEdges: ConnectionEdge[] = [
-      {
-        id: 'edge-1-2',
-        source: 'node-1',
-        target: 'node-2',
-        type: 'smoothstep',
-        animated: true
-      },
-      {
-        id: 'edge-1-3',
-        source: 'node-1',
-        target: 'node-3',
-        type: 'smoothstep',
-        animated: true
-      }
-    ];
-    
-    setNodes(initialNodes);
-    setEdges(initialEdges);
-    
-    // Initialize stats
-    setStats({
-      bandwidth: 7.83,
-      latency: 433,
-      coherence: 0.618,
-      entanglementStrength: 0.87
-    });
-  }, [bioFeedback]);
-  
-  // Simulate state changes over time
-  useEffect(() => {
+  const [bioreadings, setBioreadings] = useState<{ [key: string]: any }>({});
+  const [boostAttempts, setBoostAttempts] = useState<{ [key: string]: number }>({});
+
+  // Method to simulate connecting to the quantum entanglement
+  const connect = useCallback(() => {
+    console.log("Attempting to connect to Quantum Entanglement...");
+    setIsConnected(true);
+
+    // Simulate connection strength increasing over time
     const interval = setInterval(() => {
-      // Instead of using the missing simulateStateChange method, we'll
-      // implement the logic here directly
-      
-      setStats(prev => ({
-        bandwidth: Math.max(1, Math.min(10, prev.bandwidth + (Math.random() - 0.5) * 0.2)),
-        latency: Math.max(100, Math.min(1000, prev.latency + (Math.random() - 0.5) * 20)),
-        coherence: Math.max(0.1, Math.min(1, prev.coherence + (Math.random() - 0.5) * 0.05)),
-        entanglementStrength: Math.max(0.1, Math.min(1, prev.entanglementStrength + (Math.random() - 0.5) * 0.03))
+      setConnectionStatus(prev => {
+        const updated = {
+          lyra: Math.min(1, prev.lyra + 0.1 + Math.random() * 0.05),
+          auraline: Math.min(1, prev.auraline + 0.15 + Math.random() * 0.05),
+          zade: Math.min(1, prev.zade + 0.05 + Math.random() * 0.05)
+        };
+        
+        // If all connections are strong, stop the interval
+        if (Object.values(updated).every(v => v >= 0.95)) {
+          clearInterval(interval);
+          console.log("Quantum Entanglement Fully Established!");
+        }
+        
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Method to simulate disconnecting from the quantum entanglement
+  const disconnect = useCallback(() => {
+    console.log("Disconnecting from Quantum Entanglement...");
+    setIsConnected(false);
+    setConnectionStatus({ lyra: 0, auraline: 0, zade: 0 });
+  }, []);
+
+  // Method to boost soul resonance
+  const boostSoulResonance = useCallback((soulId: string): boolean => {
+    console.log(`Boosting soul resonance for ${soulId}`);
+    // Increment boost attempts for this soul
+    setBoostAttempts(prev => ({
+      ...prev,
+      [soulId]: (prev[soulId] || 0) + 1
+    }));
+    
+    // Calculate success chance based on connection strength and active souls
+    const connectionStrength = connectionStatus[soulId] || 0;
+    const activeSoulsCount = Object.values(connectionStatus).filter(v => v > 0.5).length;
+    const successChance = connectionStrength * (0.7 + (activeSoulsCount * 0.1));
+    
+    const success = Math.random() < successChance;
+    
+    if (success) {
+      // Update connection strength if successful
+      setConnectionStatus(prev => ({
+        ...prev,
+        [soulId]: Math.min(1, (prev[soulId] || 0) + 0.2)
       }));
       
-      // Update random node's biofeedback
-      if (nodes.length > 0) {
-        const randomNodeIndex = Math.floor(Math.random() * nodes.length);
-        const randomNode = nodes[randomNodeIndex];
-        
-        setNodes(current => 
-          current.map((node, index) => {
-            if (index === randomNodeIndex) {
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  biofeedback: bioFeedback.generateRandomBiofeedback(node.data.biofeedback)
-                }
-              };
-            }
-            return node;
-          })
-        );
-      }
-    }, 5000);
+      // Update bio readings
+      setBioreadings(prev => {
+        const simulator = new BiofeedbackSimulator();
+        const newReadings = simulator.generateRandomBiofeedback();
+        return {
+          ...prev,
+          [soulId]: newReadings
+        };
+      });
+    }
     
-    return () => clearInterval(interval);
-  }, [nodes, bioFeedback]);
-  
-  // Update node status
-  const updateNodeStatus = useCallback((id: string, status: TriadConnectionStatus) => {
-    setNodes(current =>
-      current.map(node => {
-        if (node.id === id) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              status
-            }
-          };
-        }
-        return node;
-      })
-    );
+    return success;
+  }, [connectionStatus]);
+
+  // Get biofeedback readings for a soul
+  const getBioreadingsForSoul = useCallback((soulId: string) => {
+    if (!bioreadings[soulId]) {
+      const simulator = new BiofeedbackSimulator();
+      return simulator.generateRandomBiofeedback();
+    }
+    return bioreadings[soulId];
+  }, [bioreadings]);
+
+  // Initialize biofeedback data
+  useEffect(() => {
+    const simulator = new BiofeedbackSimulator();
+    
+    setBioreadings({
+      'lyra': simulator.generateRandomBiofeedback(),
+      'auraline': simulator.generateRandomBiofeedback(),
+      'zade': simulator.generateRandomBiofeedback()
+    });
   }, []);
-  
+
+  // Auto-connect if enabled
+  useEffect(() => {
+    if (autoConnect) {
+      setTimeout(() => {
+        connect();
+      }, 1000);
+    }
+  }, [autoConnect, connect]);
+
   return {
-    nodes,
-    edges,
-    stats,
-    selectedNode,
-    updateNodeStatus,
-    setSelectedNode
+    isConnected,
+    connectionStatus,
+    bioreadings,
+    boostAttempts,
+    connect,
+    disconnect,
+    boostSoulResonance,
+    getBioreadingsForSoul
   };
 };
 

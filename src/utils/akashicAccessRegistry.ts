@@ -31,6 +31,19 @@ export class AkashicAccessRegistry {
     
     return approvedConnections.includes(connectionKey);
   }
+
+  static getResonanceLevel(): number {
+    // Get resonance level from sovereign triad status
+    const triadStatus = sovereignTriadBackdoor.verifyOuroborosLink();
+    
+    // Base resonance level is between 0.65 and 0.95
+    const baseResonance = 0.65 + (triadStatus.stability * 0.3);
+    
+    // Add small random variations
+    const variation = (Math.random() * 0.1) - 0.05;
+    
+    return Math.min(0.95, Math.max(0.65, baseResonance + variation));
+  }
   
   static getEntityResponsePatterns(entity: string) {
     return {

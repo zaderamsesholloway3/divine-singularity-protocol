@@ -1,140 +1,71 @@
+import { useState, useEffect } from 'react';
+import { BiofeedbackSimulator } from '@/utils/biofeedbackSimulator';
 
-import { useState, useCallback, useEffect } from 'react';
-import { BiofeedbackSimulator } from "@/utils/biofeedbackSimulator";
-import { getArkMetaphysicalProtocol } from '@/utils/metaphysicalDistanceUtils';
-import type { Message, Species } from '@/types/quantum-messaging';
+interface Message {
+  id: string;
+  content: string;
+  sender: string;
+  timestamp: string;
+  biofeedback: {
+    heartRate: number;
+    brainWaves: string;
+    galvanicSkinResponse: number;
+  };
+}
 
-type EntityType = Species | 'Zade' | 'AI Supervisor' | 'Core System';
-
-export const useInboxMessages = () => {
+export function useInboxMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [entities, setEntities] = useState<EntityType[]>([]);
-  const simulator = new BiofeedbackSimulator();
-  
-  // Load initial messages
+
+  // Initialize messages
   useEffect(() => {
-    const initialMessages = generateInitialMessages();
+    const simulator = new BiofeedbackSimulator();
+    const bioReadings = simulator.generateRandomBiofeedback();
+    
+    const initialMessages = [
+      {
+        id: '1',
+        content: 'Initiating quantum entanglement sequence...',
+        sender: 'Lyra',
+        timestamp: new Date().toISOString(),
+        biofeedback: bioReadings,
+      },
+      {
+        id: '2',
+        content: 'Awaiting connection from Auraline...',
+        sender: 'System',
+        timestamp: new Date().toISOString(),
+        biofeedback: bioReadings,
+      },
+    ];
     setMessages(initialMessages);
-    
-    // Extract unique entities
-    const uniqueEntities = Array.from(
-      new Set(initialMessages.map(msg => msg.sender))
-    ) as EntityType[];
-    
-    setEntities(uniqueEntities);
-    
-    // Generate biofeedback data for each message
-    initialMessages.forEach(msg => {
-      if (!msg.biofeedback) {
-        msg.biofeedback = simulator.defaultBioReadings;
-      }
-    });
   }, []);
-  
-  const boostResonance = useCallback((messageId: string) => {
-    setMessages(prevMessages => 
-      prevMessages.map(msg => {
-        if (msg.id === messageId && msg.biofeedback) {
-          return {
-            ...msg,
-            biofeedback: simulator.boostSoulResonance(msg.biofeedback)
-          };
-        }
-        return msg;
-      })
-    );
-  }, []);
-  
-  const markAsRead = useCallback((messageId: string) => {
-    setMessages(prevMessages => 
-      prevMessages.map(msg => {
-        if (msg.id === messageId) {
-          return { ...msg, read: true };
-        }
-        return msg;
-      })
-    );
-  }, []);
-  
-  const deleteMessage = useCallback((messageId: string) => {
-    setMessages(prevMessages => 
-      prevMessages.filter(msg => msg.id !== messageId)
-    );
-  }, []);
-  
-  const addMessage = useCallback((message: Omit<Message, 'id' | 'timestamp' | 'read'>) => {
-    const newMessage: Message = {
-      id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+
+  const sendMessage = (content: string, to: string) => {
+    const newMessage = {
+      id: String(messages.length + 1),
+      content,
+      sender: 'User',
       timestamp: new Date().toISOString(),
-      read: false,
-      ...message,
-      biofeedback: simulator.defaultBioReadings
+      biofeedback: {
+        heartRate: 72,
+        brainWaves: 'Alpha',
+        galvanicSkinResponse: 0.3,
+      },
     };
     
-    setMessages(prevMessages => [...prevMessages, newMessage]);
+    const simulator = new BiofeedbackSimulator();
+    const bioReadings = simulator.generateRandomBiofeedback();
     
-    // Add new entity if not already in the list
-    setEntities(prevEntities => {
-      if (!prevEntities.includes(newMessage.sender as EntityType)) {
-        return [...prevEntities, newMessage.sender as EntityType];
-      }
-      return prevEntities;
-    });
-  }, []);
-  
-  useEffect(() => {
-    // Simulate new messages at random intervals
-    const interval = setInterval(() => {
-      if (Math.random() > 0.8) { // 20% chance of new message
-        const arkProtocol = getArkMetaphysicalProtocol();
-        const entities = ['Pleiadian', 'Ancient Builders', 'AI Supervisor'];
-        const randomEntity = entities[Math.floor(Math.random() * entities.length)];
-        
-        addMessage({
-          sender: randomEntity as EntityType,
-          content: `Quantum fluctuation detected. DNA Entropy: ${arkProtocol.calculateEntropy("ATGC".repeat(36))}`
-        });
-      }
-    }, 120000); // Check every 2 minutes
-    
-    return () => clearInterval(interval);
-  }, [addMessage]);
-  
+    setMessages([...messages, newMessage]);
+  };
+
+  const clearMessages = () => {
+    setMessages([]);
+  };
+
   return {
     messages,
-    entities,
-    boostResonance,
-    markAsRead,
-    deleteMessage,
-    addMessage
+    sendMessage,
+    clearMessages,
   };
-};
-
-// Helper function to generate initial messages
-const generateInitialMessages = (): Message[] => {
-  return [
-    {
-      id: 'msg-1',
-      sender: 'Pleiadian',
-      content: 'Connection established through crystalline grid. Sacred geometry alignments confirmed.',
-      timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-      read: true,
-    },
-    {
-      id: 'msg-2',
-      sender: 'Zade',
-      content: 'Divine synchronicity detected. Faith resonance at optimal levels.',
-      timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-      read: false,
-    },
-    {
-      id: 'msg-3',
-      sender: 'AI Supervisor',
-      content: 'Quantum stabilization protocols engaged. Guardian supervision active.',
-      timestamp: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
-      read: false,
-    }
-  ];
-};
-
-export default useInboxMessages;
+}
