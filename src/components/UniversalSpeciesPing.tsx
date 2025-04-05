@@ -55,7 +55,7 @@ const UniversalSpeciesPing: React.FC = () => {
 
   useEffect(() => {
     const realms: ("existence" | "non-existence")[] = ["existence", "non-existence"];
-    const archetypes = ["Crystalline", "Biomechanical", "Plasma", "Photonic", "Quantum", "Vibrational", "Geometric"];
+    const archetypes = ["Crystalline", "The Builder", "Biomechanical", "Plasma", "Photonic", "Quantum", "Vibrational", "Geometric"];
     
     const generatedSpecies: SpeciesData[] = Array.from({ length: 28 }).map((_, i) => {
       const realm = realms[Math.floor(Math.random() * realms.length)];
@@ -64,7 +64,7 @@ const UniversalSpeciesPing: React.FC = () => {
         : Math.random() * 200000 + 1000;
       
       return {
-        name: `Species-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 26) + 1}`,
+        name: `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`,
         location: [Math.random() * 360, (Math.random() * 180) - 90],
         distance,
         population: Math.floor(Math.random() * 1e12 + 1e6),
@@ -129,6 +129,13 @@ const UniversalSpeciesPing: React.FC = () => {
     if (speciesGatewayRef.current) {
       const isLocked = speciesGatewayRef.current.toggleTargetLock();
       setTargetLocked(isLocked);
+      
+      if (isLocked && selectedSpecies) {
+        toast({
+          title: "Target Locked",
+          description: `Locked onto ${selectedSpecies.name}`,
+        });
+      }
     }
   };
 
@@ -174,6 +181,11 @@ const UniversalSpeciesPing: React.FC = () => {
           : "No species detected in range",
         variant: "destructive",
       });
+    }
+    
+    // Reset target lock after ping completes
+    if (pingMode === "targeted") {
+      setTargetLocked(false);
     }
   };
 
@@ -239,6 +251,7 @@ const UniversalSpeciesPing: React.FC = () => {
               size="sm" 
               className="h-7 w-7 p-0" 
               onClick={() => setViewMode(prev => prev === "disk" ? "constellation" : "disk")}
+              title={`Switch to ${viewMode === "disk" ? "constellation" : "disk"} view`}
             >
               <Globe className="h-4 w-4" />
             </Button>
