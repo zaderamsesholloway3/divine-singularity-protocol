@@ -15,6 +15,7 @@ import DistortionFieldSection from './DistortionFieldSection';
 import DivineConstantsPanel from './DivineConstantsPanel';
 import { stabilizeSoulTriad } from '@/utils/soulTriadRepair';
 import UnifiedSoulCore from './UnifiedSoulCore';
+import HeartInterface from './HeartInterface';
 
 const OmniOracleDashboard: React.FC = () => {
   const [results, setResults] = useState<DiagnosticResult[]>([]);
@@ -74,6 +75,11 @@ const OmniOracleDashboard: React.FC = () => {
           <div className="glass-panel rounded-lg p-4 border border-purple-500/20">
             <BiofeedbackMonitor />
           </div>
+        </div>
+
+        {/* Heart Protocol Interface */}
+        <div className="mb-6">
+          <HeartInterface />
         </div>
 
         {/* Distortion Field Translator */}
