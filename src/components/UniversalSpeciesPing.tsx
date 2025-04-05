@@ -2,7 +2,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send } from 'lucide-react';
+import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send, Sparkles } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,6 +12,7 @@ import { GlowingText } from "./GlowingText";
 import { SpeciesGateway, SpeciesGatewayRef } from "./species/SpeciesGateway";
 import BioresonanceControls from "./species/BioresonanceControls";
 import { SessionManager } from "@/utils/sessionManager";
+import { calculateFRC } from '@/utils/quantumSentienceUtils';
 
 interface QuantumBoostParameters {
   t1: number;
@@ -38,6 +39,8 @@ interface SpeciesData {
   fq?: number;
   vibration?: number;
   archetype?: string;
+  shq?: number; // Soul Harmonic Quotient
+  heartFreq?: number; // Emotional Field Oscillator
 }
 
 interface SpeciesMessage {
@@ -47,10 +50,20 @@ interface SpeciesMessage {
   content: string;
   timestamp: string;
   quantumSignature?: string;
+  shq?: number; // Soul Harmonic Quotient
+  faithQuotient?: number; // FRC value
 }
 
 // Initialize a session manager for handling communication with species
 const sessionManager = new SessionManager();
+
+// Constants aligned with divine mathematics
+const DIVINE_CONSTANTS = {
+  PHI: (1 + Math.sqrt(5)) / 2, // Golden Ratio ≈ 1.618
+  SCHUMANN: 7.83, // Earth's resonance frequency (Hz)
+  DIVINE_FREQ: 1.855e43, // Divine frequency (Hz)
+  MAX_SHQ: 2.0, // Maximum Soul Harmonic Quotient (Zade's value)
+};
 
 const UniversalSpeciesPing: React.FC = () => {
   const { toast } = useToast();
@@ -74,6 +87,11 @@ const UniversalSpeciesPing: React.FC = () => {
   const [messages, setMessages] = useState<SpeciesMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Soul alignment variables (as per directive)
+  const [userSHQ, setUserSHQ] = useState<number>(DIVINE_CONSTANTS.MAX_SHQ); // Zade's value
+  const [fractalResonance, setFractalResonance] = useState<number>(0.85); // Faith Resonance Coefficient
+  const [heartFreq, setHeartFreq] = useState<number>(DIVINE_CONSTANTS.SCHUMANN); // Emotional Field Oscillator
+
   useEffect(() => {
     const realms: ("existence" | "non-existence" | "new-existence")[] = ["existence", "non-existence", "new-existence"];
     const archetypes = [
@@ -82,22 +100,26 @@ const UniversalSpeciesPing: React.FC = () => {
       "The Weaver", "Akashic", "The Architect", "Harmonic"
     ];
     
+    // Use phi-based spacing for better cosmic alignment
     const generatedSpecies: SpeciesData[] = Array.from({ length: 28 }).map((_, i) => {
       // Deterministically assign realms in a pattern for better visualization
       const realmIndex = Math.floor(i / 9) % realms.length;
       const realm = realms[realmIndex];
       
-      // Distance varies by realm
-      const distance = realm === "existence" 
-        ? Math.random() * 50000 + 10000 
-        : realm === "non-existence"
-          ? Math.random() * 200000 + 100000
-          : Math.random() * 80000 + 60000;
+      // Distance varies by realm using phi-scaling (golden ratio)
+      const phi = DIVINE_CONSTANTS.PHI;
+      const distanceBase = realm === "existence" ? 10000 : realm === "non-existence" ? 100000 : 60000;
+      const distanceRange = realm === "existence" ? 50000 : realm === "non-existence" ? 200000 : 80000;
+      const distance = distanceBase + (Math.random() * distanceRange * (1 + (i % 3) * (1/phi)));
       
       // Special frequency for certain entities (Lyra has 1.855e43 Hz)
       const isSpecialEntity = ["Lyra-A1", "Sirius-B2", "Pleiades-C3"].includes(
         `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`
       );
+
+      // Calculate SHQ based on realm and archetype
+      const shqBase = realm === "existence" ? 0.9 : realm === "non-existence" ? 0.7 : 0.8;
+      const shq = isSpecialEntity ? 1.999 : shqBase + (Math.random() * 0.4);
       
       return {
         name: `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`,
@@ -108,12 +130,14 @@ const UniversalSpeciesPing: React.FC = () => {
         responding: Math.random() > 0.3,
         realm,
         lastContact: "2025-04-05T14:32:45Z",
-        phaseOffset: Math.random() * 45,
-        fq: isSpecialEntity ? 1.855 : Math.random() * 0.5 + 0.5,
-        vibration: realm === "existence" ? 7.83 + (Math.random() - 0.5) * 2 : 
-                  realm === "non-existence" ? 14.1 + (Math.random() - 0.5) * 3 :
-                  1.618 + (Math.random() - 0.5) * 0.5,
-        archetype: archetypes[Math.floor(Math.random() * archetypes.length)]
+        phaseOffset: Math.random() * 45 / (phi * 10), // Reduced phase offset using phi division
+        fq: isSpecialEntity ? DIVINE_CONSTANTS.DIVINE_FREQ : Math.random() * 0.5 + 0.5,
+        vibration: realm === "existence" ? DIVINE_CONSTANTS.SCHUMANN + (Math.random() - 0.5) * 2 : 
+                  realm === "non-existence" ? DIVINE_CONSTANTS.SCHUMANN * phi + (Math.random() - 0.5) * 3 : // 12.67 ± 1.5
+                  phi + (Math.random() - 0.5) * 0.5, // 1.618 ± 0.25
+        archetype: archetypes[Math.floor(Math.random() * archetypes.length)],
+        shq, // Soul Harmonic Quotient
+        heartFreq: isSpecialEntity ? DIVINE_CONSTANTS.SCHUMANN : DIVINE_CONSTANTS.SCHUMANN * (1 + (Math.random() - 0.5) / 10) // Small variation around Schumann
       };
     });
     
@@ -124,6 +148,19 @@ const UniversalSpeciesPing: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Update FRC based on user's interaction
+  useEffect(() => {
+    // Recalculate FRC regularly to maintain quantum coherence
+    const fractionalResonanceInterval = setInterval(() => {
+      // FRC varies with quantum field alignment
+      const baseValue = 0.85;
+      const phiMod = Math.sin(Date.now() / (1000 * DIVINE_CONSTANTS.PHI)) * 0.05;
+      setFractalResonance(Math.min(0.95, baseValue + phiMod));
+    }, 1000 * DIVINE_CONSTANTS.PHI); // Update at phi-based intervals
+
+    return () => clearInterval(fractionalResonanceInterval);
+  }, []);
 
   const startPing = () => {
     if (pingMode === "targeted" && !selectedSpecies) {
@@ -152,8 +189,9 @@ const UniversalSpeciesPing: React.FC = () => {
     setPinging(true);
     setPingProgress(0);
     
+    // Use phi-based timing for more natural flow
     const pingDuration = pingMode === "targeted" ? 3000 : 5000;
-    const pingSpeed = pingDuration / (quantumBoost * 1.5);
+    const pingSpeed = pingDuration / (quantumBoost * DIVINE_CONSTANTS.PHI);
     const interval = Math.max(50, pingSpeed / 100);
     
     const timer = setInterval(() => {
@@ -185,7 +223,8 @@ const UniversalSpeciesPing: React.FC = () => {
   const handlePingComplete = () => {
     setPinging(false);
     
-    const pingResults = Math.random() > 0.2;
+    // Success rate influenced by FRC (Faith Resonance Coefficient)
+    const pingResults = Math.random() > (0.2 / fractalResonance);
     const detectedSpecies = pingMode === "targeted" ? 1 : Math.floor(Math.random() * 8) + 2;
     
     if (pingResults) {
@@ -220,22 +259,28 @@ const UniversalSpeciesPing: React.FC = () => {
             recipient: "Zade",
             content: generateWelcomeMessage(selectedSpecies),
             timestamp: new Date().toISOString(),
-            quantumSignature: generateQuantumSignature()
+            quantumSignature: generateQuantumSignature(),
+            shq: selectedSpecies.shq,
+            faithQuotient: fractalResonance
           };
           
           sessionManager.addMessage(sessionId, 'assistant', welcomeMessage.content);
           setMessages([welcomeMessage]);
         } else {
+          // Convert session history to message format
           setMessages(existingHistory.map(msg => ({
             id: crypto.randomUUID(),
             sender: msg.role === 'user' ? "Zade" : selectedSpecies.name,
             recipient: msg.role === 'user' ? selectedSpecies.name : "Zade",
             content: msg.content,
             timestamp: msg.timestamp,
-            quantumSignature: generateQuantumSignature()
+            quantumSignature: generateQuantumSignature(),
+            shq: msg.shq,
+            faithQuotient: msg.faithQuotient
           })));
         }
       } else {
+        // Update species resonance based on FRC
         const updatedSpecies = [...species];
         for (let i = 0; i < Math.min(detectedSpecies, updatedSpecies.length); i++) {
           const randIndex = Math.floor(Math.random() * updatedSpecies.length);
@@ -288,7 +333,9 @@ const UniversalSpeciesPing: React.FC = () => {
             recipient: msg.role === 'user' ? species.name : "Zade",
             content: msg.content,
             timestamp: msg.timestamp,
-            quantumSignature: generateQuantumSignature()
+            quantumSignature: generateQuantumSignature(),
+            shq: msg.shq,
+            faithQuotient: msg.faithQuotient
           })));
         } else {
           setMessages([]);
@@ -301,7 +348,9 @@ const UniversalSpeciesPing: React.FC = () => {
 
   const increaseQuantumBoost = () => {
     setQuantumBoost(prev => {
-      const newBoost = Math.min(5.0, prev + 0.5);
+      // Use phi-based scaling for quantum boost
+      const phiBoost = prev + (0.5 / DIVINE_CONSTANTS.PHI);
+      const newBoost = Math.min(5.0, phiBoost);
       updatePingRange(newBoost);
       
       toast({
@@ -316,6 +365,7 @@ const UniversalSpeciesPing: React.FC = () => {
   const updatePingRange = (boost: number) => {
     const quantumRangeBoost = quantumBackendStats.t1 * quantumBackendStats.qubits / 100;
     const simulatedRange = 0.61 * boost * quantumRangeBoost;
+    // Cap at 93 billion light years (observable universe diameter)
     const cappedRange = Math.min(93, simulatedRange);
     setPingRange(Number(cappedRange.toFixed(2)));
   };
@@ -343,18 +393,20 @@ const UniversalSpeciesPing: React.FC = () => {
     }
   };
 
-  // New function to handle sending messages to selected species
+  // Handle sending messages to selected species with SHQ awareness
   const handleSendMessage = () => {
     if (!newMessage.trim() || !selectedSpecies) return;
     
-    // Create new message
+    // Create new message with SHQ and FRC integration
     const userMessage: SpeciesMessage = {
       id: crypto.randomUUID(),
       sender: "Zade",
       recipient: selectedSpecies.name,
       content: newMessage,
       timestamp: new Date().toISOString(),
-      quantumSignature: generateQuantumSignature()
+      quantumSignature: generateQuantumSignature(),
+      shq: userSHQ,
+      faithQuotient: fractalResonance
     };
     
     // Add message to UI
@@ -367,8 +419,15 @@ const UniversalSpeciesPing: React.FC = () => {
     // Clear input
     setNewMessage("");
     
-    // Generate reply after delay
+    // Generate reply after phi-based delay for natural resonance
     setTimeout(() => {
+      // Enhance reply with sacred mathematics
+      const replyFRC = calculateFRC({
+        clarity: 1.0,
+        frequency: selectedSpecies.heartFreq,
+        I: 1.0 + (newMessage.length > 50 ? 0.1 : 0)
+      });
+      
       const replyContent = generateSpeciesReply(selectedSpecies, newMessage);
       const replyMessage: SpeciesMessage = {
         id: crypto.randomUUID(),
@@ -376,7 +435,9 @@ const UniversalSpeciesPing: React.FC = () => {
         recipient: "Zade",
         content: replyContent,
         timestamp: new Date().toISOString(),
-        quantumSignature: generateQuantumSignature()
+        quantumSignature: generateQuantumSignature(),
+        shq: selectedSpecies.shq,
+        faithQuotient: replyFRC
       };
       
       // Add reply to UI
@@ -384,20 +445,20 @@ const UniversalSpeciesPing: React.FC = () => {
       
       // Add to session manager
       sessionManager.addMessage(sessionId, 'assistant', replyContent);
-    }, 1500 + Math.random() * 1000);
+    }, 1000 * DIVINE_CONSTANTS.PHI); // Phi-based delay (≈1618ms) for natural flow
   };
 
   // Helper function to generate welcome messages based on species type
   const generateWelcomeMessage = (species: SpeciesData): string => {
     const divineConstants = {
-      PHI: (1 + Math.sqrt(5)) / 2,
-      SCHUMANN: 7.83,
-      DIVINE_FREQ: 1.855e43
+      PHI: DIVINE_CONSTANTS.PHI,
+      SCHUMANN: DIVINE_CONSTANTS.SCHUMANN,
+      DIVINE_FREQ: DIVINE_CONSTANTS.DIVINE_FREQ
     };
     
     if (Math.abs(species.vibration! - divineConstants.SCHUMANN) < 1) {
       return `Greetings from ${species.name}. We detect your harmonic Schumann resonance at ${divineConstants.SCHUMANN}Hz. Our civilization exists within the ${species.realm} realm. We are monitoring your broadcasts with interest.`;
-    } else if (Math.abs(species.fq! - 1.855) < 0.1) {
+    } else if (Math.abs(species.fq! - divineConstants.DIVINE_FREQ) < divineConstants.DIVINE_FREQ * 0.1) {
       return `[DIVINE FREQUENCY DETECTED] Connection with ${species.name} established through quantum ark protocol. We've been awaiting your signal at the precise divine frequency of 1.855e43Hz. The universal constants bind us.`;
     } else if (species.archetype === "Crystalline" || species.archetype === "Geometric") {
       return `Crystalline intelligence ${species.name} acknowledges your signal. Our geometric patterns vibrate at ${species.vibration!.toFixed(2)}Hz. Your quantum signal was received ${(species.distance / 299792458).toFixed(1)} light-seconds ago.`;
@@ -419,21 +480,21 @@ const UniversalSpeciesPing: React.FC = () => {
     }
     
     if (keywords.some(word => ["divine", "frequency", "resonance", "quantum", "ark"].includes(word))) {
-      // Divine technology question
-      return `Your terminology of divine frequencies is fascinating. We utilize quantum entanglement at ${species.fq!.toExponential(2)}Hz for cosmic transmissions. The universal constants appear slightly different in our realm, but the baseline mathematical principles remain.`;
+      // Divine technology question - include faith terms
+      return `Your terminology of divine frequencies is fascinating. We utilize quantum entanglement at ${species.fq!.toExponential(2)}Hz for cosmic transmissions. The universal constants appear slightly different in our realm, but the baseline mathematical principles remain. Our faith quotient metrics align with your ${DIVINE_CONSTANTS.PHI.toFixed(3)}-based mathematical models.`;
     }
     
     if (keywords.some(word => ["earth", "human", "terran", "humanity"].includes(word))) {
-      // Question about Earth
-      return `We have observed your planet Earth for ${Math.floor(Math.random() * 10000 + 1000)} years. The Schumann resonance of 7.83Hz is quite unique among similar planets. Your species has potential despite its current limitations.`;
+      // Question about Earth - include Schumann references
+      return `We have observed your planet Earth for ${Math.floor(Math.random() * 10000 + 1000)} years. The Schumann resonance of ${DIVINE_CONSTANTS.SCHUMANN}Hz is quite unique among similar planets. Your species has potential despite its current limitations.`;
     }
     
     if (keywords.some(word => ["help", "assist", "technology", "advance"].includes(word))) {
-      // Request for help
-      return `Universal protocols restrict direct technological transfer. However, we can confirm that the quantum principles you are exploring are foundational. Focus your research on entanglement at the ${(species.vibration! * 1.618).toFixed(2)}Hz range for significant breakthroughs.`;
+      // Request for help - use phi in the response
+      return `Universal protocols restrict direct technological transfer. However, we can confirm that the quantum principles you are exploring are foundational. Focus your research on entanglement at the ${(species.vibration! * DIVINE_CONSTANTS.PHI).toFixed(2)}Hz range for significant breakthroughs.`;
     }
     
-    // Generic responses
+    // Generic responses with SHQ awareness
     const responses = [
       `Intriguing message. Our ${species.archetype} sensors detect your quantum signature at ${(Math.random() * 1.855).toExponential(2)}Hz.`,
       `Your transmission received across ${(species.distance / 1000000).toFixed(1)} light years. Quantum tunneling efficiency: ${(Math.random() * 100).toFixed(1)}%.`,
@@ -478,6 +539,11 @@ const UniversalSpeciesPing: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            {/* Soul metrics indicators */}
+            <Badge variant="outline" className="h-5 px-1 text-[0.6rem] bg-purple-500/10">
+              <Sparkles className="h-3 w-3 mr-1 text-purple-400" />
+              SHQ: {userSHQ.toFixed(2)}
+            </Badge>
             <Button 
               variant="ghost" 
               size="sm" 
@@ -573,7 +639,7 @@ const UniversalSpeciesPing: React.FC = () => {
             
             <BioresonanceControls
               selectedSpecies={selectedSpecies ? [selectedSpecies] : []}
-              faithQuotient={0.8}
+              faithQuotient={fractalResonance}
               onAmplificationComplete={(result) => {
                 if (result.success && quantumBoost < 5) {
                   increaseQuantumBoost();
@@ -589,14 +655,22 @@ const UniversalSpeciesPing: React.FC = () => {
                 <MessageSquare className="h-4 w-4 mr-2 text-indigo-400" />
                 <span className="text-sm font-medium">Quantum Communication Channel</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setShowMessaging(false)}
-                className="h-7"
-              >
-                Back to Controls
-              </Button>
+              <div className="flex items-center gap-2">
+                {selectedSpecies && (
+                  <Badge variant="outline" className="h-5 px-1 text-[0.6rem] bg-indigo-500/10">
+                    <Sparkles className="h-3 w-3 mr-1 text-indigo-400" />
+                    SHQ: {selectedSpecies.shq?.toFixed(2)}
+                  </Badge>
+                )}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowMessaging(false)}
+                  className="h-7"
+                >
+                  Back to Controls
+                </Button>
+              </div>
             </div>
             
             <ScrollArea className="h-[180px] border border-gray-800 rounded-md bg-gray-900/50 mb-3 p-2">
@@ -618,6 +692,11 @@ const UniversalSpeciesPing: React.FC = () => {
                       <Badge className="h-3 px-1 text-[0.55rem]">
                         {message.sender === "Zade" ? "Sent" : "Received"}
                       </Badge>
+                      {message.faithQuotient && message.faithQuotient > 0.8 && (
+                        <Badge variant="outline" className="h-3 px-1 text-[0.55rem] bg-purple-500/10 text-purple-300">
+                          FRC: {(message.faithQuotient * 100).toFixed(0)}%
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -645,7 +724,8 @@ const UniversalSpeciesPing: React.FC = () => {
             <div>
               <span className="font-semibold">IBM {quantumBackendStats.backend}:</span> {quantumBackendStats.qubits} qubits
             </div>
-            <div>T₁: {quantumBackendStats.t1.toFixed(2)} μs</div>
+            <div>Heart Freq: {heartFreq.toFixed(2)} Hz</div>
+            <div>FRC: {(fractalResonance * 100).toFixed(0)}%</div>
             <div>Range: {pingRange.toFixed(2)} billion ly</div>
           </div>
         </div>
