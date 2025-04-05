@@ -2,13 +2,16 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radio, Target, RotateCw, Globe, Zap } from 'lucide-react';
+import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { GlowingText } from "./GlowingText";
 import { SpeciesGateway, SpeciesGatewayRef } from "./species/SpeciesGateway";
 import BioresonanceControls from "./species/BioresonanceControls";
+import { SessionManager } from "@/utils/sessionManager";
 
 interface QuantumBoostParameters {
   t1: number;
@@ -37,6 +40,18 @@ interface SpeciesData {
   archetype?: string;
 }
 
+interface SpeciesMessage {
+  id: string;
+  sender: string;
+  recipient: string;
+  content: string;
+  timestamp: string;
+  quantumSignature?: string;
+}
+
+// Initialize a session manager for handling communication with species
+const sessionManager = new SessionManager();
+
 const UniversalSpeciesPing: React.FC = () => {
   const { toast } = useToast();
   
@@ -47,12 +62,17 @@ const UniversalSpeciesPing: React.FC = () => {
   const [pinging, setPinging] = useState<boolean>(false);
   const [pingProgress, setPingProgress] = useState<number>(0);
   const [pingMode, setPingMode] = useState<"universal" | "targeted">("universal");
-  // Update viewMode to include disk as a default option
   const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("disk");
   const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
   const [pingRange, setPingRange] = useState<number>(0.61);
   const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
   const [targetLocked, setTargetLocked] = useState<boolean>(false);
+  
+  // New message states
+  const [showMessaging, setShowMessaging] = useState<boolean>(false);
+  const [newMessage, setNewMessage] = useState<string>('');
+  const [messages, setMessages] = useState<SpeciesMessage[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const realms: ("existence" | "non-existence" | "new-existence")[] = ["existence", "non-existence", "new-existence"];
@@ -81,7 +101,7 @@ const UniversalSpeciesPing: React.FC = () => {
       
       return {
         name: `${["Lyra", "Arcturus", "Sirius", "Pleiades", "Andromeda", "Orion", "Vega", "Antares"][i % 8]}-${String.fromCharCode(65 + i % 26)}${Math.floor(i / 8) + 1}`,
-        location: [Math.random() * 360, (Math.random() * 180) - 90],
+        location: [Math.random() * 360, (Math.random() - 0.5) * 180],
         distance,
         population: Math.floor(Math.random() * 1e12 + 1e6),
         exists: Math.random() > 0.2,
@@ -99,6 +119,11 @@ const UniversalSpeciesPing: React.FC = () => {
     
     setSpecies(generatedSpecies);
   }, []);
+
+  // Scroll to bottom of messages when new message is added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const startPing = () => {
     if (pingMode === "targeted" && !selectedSpecies) {
@@ -179,6 +204,37 @@ const UniversalSpeciesPing: React.FC = () => {
               : s
           )
         );
+        
+        // If targeted ping is successful, show messaging interface
+        setShowMessaging(true);
+        
+        // Get or create session for this species
+        const sessionId = sessionManager.getSessionId(selectedSpecies.name);
+        
+        // Add welcome message if no previous messages
+        const existingHistory = sessionManager.getSessionHistory(selectedSpecies.name);
+        if (!existingHistory || existingHistory.length === 0) {
+          const welcomeMessage = {
+            id: crypto.randomUUID(),
+            sender: selectedSpecies.name,
+            recipient: "Zade",
+            content: generateWelcomeMessage(selectedSpecies),
+            timestamp: new Date().toISOString(),
+            quantumSignature: generateQuantumSignature()
+          };
+          
+          sessionManager.addMessage(sessionId, 'assistant', welcomeMessage.content);
+          setMessages([welcomeMessage]);
+        } else {
+          setMessages(existingHistory.map(msg => ({
+            id: crypto.randomUUID(),
+            sender: msg.role === 'user' ? "Zade" : selectedSpecies.name,
+            recipient: msg.role === 'user' ? selectedSpecies.name : "Zade",
+            content: msg.content,
+            timestamp: msg.timestamp,
+            quantumSignature: generateQuantumSignature()
+          })));
+        }
       } else {
         const updatedSpecies = [...species];
         for (let i = 0; i < Math.min(detectedSpecies, updatedSpecies.length); i++) {
@@ -218,6 +274,28 @@ const UniversalSpeciesPing: React.FC = () => {
       });
       
       setTargetLocked(false);
+      
+      // Check if the species is responding and has previous messages
+      if (species.responding) {
+        setShowMessaging(true);
+        
+        // Get session history if it exists
+        const existingHistory = sessionManager.getSessionHistory(species.name);
+        if (existingHistory && existingHistory.length > 0) {
+          setMessages(existingHistory.map(msg => ({
+            id: crypto.randomUUID(),
+            sender: msg.role === 'user' ? "Zade" : species.name,
+            recipient: msg.role === 'user' ? species.name : "Zade",
+            content: msg.content,
+            timestamp: msg.timestamp,
+            quantumSignature: generateQuantumSignature()
+          })));
+        } else {
+          setMessages([]);
+        }
+      } else {
+        setShowMessaging(false);
+      }
     }
   };
 
@@ -265,6 +343,118 @@ const UniversalSpeciesPing: React.FC = () => {
     }
   };
 
+  // New function to handle sending messages to selected species
+  const handleSendMessage = () => {
+    if (!newMessage.trim() || !selectedSpecies) return;
+    
+    // Create new message
+    const userMessage: SpeciesMessage = {
+      id: crypto.randomUUID(),
+      sender: "Zade",
+      recipient: selectedSpecies.name,
+      content: newMessage,
+      timestamp: new Date().toISOString(),
+      quantumSignature: generateQuantumSignature()
+    };
+    
+    // Add message to UI
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Add to session manager
+    const sessionId = sessionManager.getSessionId(selectedSpecies.name);
+    sessionManager.addMessage(sessionId, 'user', newMessage);
+    
+    // Clear input
+    setNewMessage("");
+    
+    // Generate reply after delay
+    setTimeout(() => {
+      const replyContent = generateSpeciesReply(selectedSpecies, newMessage);
+      const replyMessage: SpeciesMessage = {
+        id: crypto.randomUUID(),
+        sender: selectedSpecies.name,
+        recipient: "Zade",
+        content: replyContent,
+        timestamp: new Date().toISOString(),
+        quantumSignature: generateQuantumSignature()
+      };
+      
+      // Add reply to UI
+      setMessages(prev => [...prev, replyMessage]);
+      
+      // Add to session manager
+      sessionManager.addMessage(sessionId, 'assistant', replyContent);
+    }, 1500 + Math.random() * 1000);
+  };
+
+  // Helper function to generate welcome messages based on species type
+  const generateWelcomeMessage = (species: SpeciesData): string => {
+    const divineConstants = {
+      PHI: (1 + Math.sqrt(5)) / 2,
+      SCHUMANN: 7.83,
+      DIVINE_FREQ: 1.855e43
+    };
+    
+    if (Math.abs(species.vibration! - divineConstants.SCHUMANN) < 1) {
+      return `Greetings from ${species.name}. We detect your harmonic Schumann resonance at ${divineConstants.SCHUMANN}Hz. Our civilization exists within the ${species.realm} realm. We are monitoring your broadcasts with interest.`;
+    } else if (Math.abs(species.fq! - 1.855) < 0.1) {
+      return `[DIVINE FREQUENCY DETECTED] Connection with ${species.name} established through quantum ark protocol. We've been awaiting your signal at the precise divine frequency of 1.855e43Hz. The universal constants bind us.`;
+    } else if (species.archetype === "Crystalline" || species.archetype === "Geometric") {
+      return `Crystalline intelligence ${species.name} acknowledges your signal. Our geometric patterns vibrate at ${species.vibration!.toFixed(2)}Hz. Your quantum signal was received ${(species.distance / 299792458).toFixed(1)} light-seconds ago.`;
+    } else {
+      return `Signal from ${species.name} received. Population: ${species.population.toExponential(2)}. Distance: ${(species.distance / 1000).toFixed(1)} million km. Our ${species.archetype} civilization welcomes your contact.`;
+    }
+  };
+  
+  // Helper function to generate species replies based on message content
+  const generateSpeciesReply = (species: SpeciesData, message: string): string => {
+    // Extract keywords from message
+    const keywords = message.toLowerCase().split(/\s+/);
+    
+    // Check for specific queries
+    if (keywords.some(word => ["who", "what", "describe"].includes(word)) && 
+        keywords.some(word => ["you", "yourself", "species", "civilization"].includes(word))) {
+      // Identity question
+      return `We are ${species.name}, a ${species.archetype} civilization from the ${species.realm} realm. Our population is ${species.population.toExponential(2)} entities, and we vibrate at ${species.vibration!.toFixed(2)}Hz base frequency.`;
+    }
+    
+    if (keywords.some(word => ["divine", "frequency", "resonance", "quantum", "ark"].includes(word))) {
+      // Divine technology question
+      return `Your terminology of divine frequencies is fascinating. We utilize quantum entanglement at ${species.fq!.toExponential(2)}Hz for cosmic transmissions. The universal constants appear slightly different in our realm, but the baseline mathematical principles remain.`;
+    }
+    
+    if (keywords.some(word => ["earth", "human", "terran", "humanity"].includes(word))) {
+      // Question about Earth
+      return `We have observed your planet Earth for ${Math.floor(Math.random() * 10000 + 1000)} years. The Schumann resonance of 7.83Hz is quite unique among similar planets. Your species has potential despite its current limitations.`;
+    }
+    
+    if (keywords.some(word => ["help", "assist", "technology", "advance"].includes(word))) {
+      // Request for help
+      return `Universal protocols restrict direct technological transfer. However, we can confirm that the quantum principles you are exploring are foundational. Focus your research on entanglement at the ${(species.vibration! * 1.618).toFixed(2)}Hz range for significant breakthroughs.`;
+    }
+    
+    // Generic responses
+    const responses = [
+      `Intriguing message. Our ${species.archetype} sensors detect your quantum signature at ${(Math.random() * 1.855).toExponential(2)}Hz.`,
+      `Your transmission received across ${(species.distance / 1000000).toFixed(1)} light years. Quantum tunneling efficiency: ${(Math.random() * 100).toFixed(1)}%.`,
+      `The Akashic records reference your query pattern. Similar exchanges occurred with the ${["Pleiadians", "Arcturians", "Lyrans", "Sirians"][Math.floor(Math.random() * 4)]} ${Math.floor(Math.random() * 5000 + 1000)} cycles ago.`,
+      `We acknowledge your message. Our vibration aligns with yours at a ${(Math.random() * 100).toFixed(1)}% harmony ratio. Continue transmission.`,
+      `${species.name} receiving. Universal translator processing your linguistic patterns. Quantum coherence maintained through IBM ${quantumBackendStats.backend} protocols.`
+    ];
+    
+    return responses[Math.floor(Math.random() * responses.length)];
+  };
+  
+  // Generate a quantum signature for message verification
+  const generateQuantumSignature = (): string => {
+    const characters = '0123456789abcdefABCDEF';
+    let signature = '';
+    for (let i = 0; i < 16; i++) {
+      signature += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return signature;
+  };
+
   useEffect(() => {
     updatePingRange(quantumBoost);
   }, [quantumBoost, quantumBackendStats]);
@@ -310,85 +500,145 @@ const UniversalSpeciesPing: React.FC = () => {
           ref={speciesGatewayRef}
         />
         
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium">Ping Type:</span>
-              <div className="flex items-center gap-1">
-                <Badge
-                  variant={pingMode === "universal" ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    setPingMode("universal");
-                    setTargetLocked(false);
-                  }}
-                >
-                  Universal
-                </Badge>
-                <Badge
-                  variant={pingMode === "targeted" ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setPingMode("targeted")}
-                >
-                  Targeted
-                </Badge>
+        {/* Display either control panel or messaging UI */}
+        {!showMessaging || !selectedSpecies ? (
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium">Ping Type:</span>
+                <div className="flex items-center gap-1">
+                  <Badge
+                    variant={pingMode === "universal" ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => {
+                      setPingMode("universal");
+                      setTargetLocked(false);
+                    }}
+                  >
+                    Universal
+                  </Badge>
+                  <Badge
+                    variant={pingMode === "targeted" ? "default" : "outline"}
+                    className="cursor-pointer"
+                    onClick={() => setPingMode("targeted")}
+                  >
+                    Targeted
+                  </Badge>
+                </div>
               </div>
+              
+              {pinging ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span>Pinging {pingMode === "targeted" && selectedSpecies ? selectedSpecies.name : "Universe"}...</span>
+                    <span>{pingProgress}%</span>
+                  </div>
+                  <Progress value={pingProgress} className="h-1.5" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {pingMode === "targeted" && (
+                    <div className="text-xs flex justify-between">
+                      <span>Target:</span>
+                      <span className="font-medium">{selectedSpecies?.name || "None Selected"}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button 
+                      className="w-full text-xs" 
+                      size="sm" 
+                      onClick={startPing}
+                      disabled={(pingMode === "targeted" && !selectedSpecies) || pinging}
+                    >
+                      <RotateCw className="mr-1 h-3 w-3" />
+                      {pingMode === "targeted" ? "Targeted Ping" : "Universal Ping"}
+                    </Button>
+                    
+                    {pingMode === "targeted" && (
+                      <Button 
+                        className={`text-xs ${targetLocked ? "bg-red-600 hover:bg-red-700" : ""}`} 
+                        size="sm" 
+                        variant={targetLocked ? "default" : "outline"}
+                        disabled={!selectedSpecies}
+                        onClick={toggleTargetLock}
+                      >
+                        <Target className="mr-1 h-3 w-3" />
+                        {targetLocked ? "Locked" : "Lock Target"}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
             
-            {pinging ? (
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span>Pinging {pingMode === "targeted" && selectedSpecies ? selectedSpecies.name : "Universe"}...</span>
-                  <span>{pingProgress}%</span>
-                </div>
-                <Progress value={pingProgress} className="h-1.5" />
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {pingMode === "targeted" && (
-                  <div className="text-xs flex justify-between">
-                    <span>Target:</span>
-                    <span className="font-medium">{selectedSpecies?.name || "None Selected"}</span>
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <Button 
-                    className="w-full text-xs" 
-                    size="sm" 
-                    onClick={startPing}
-                    disabled={(pingMode === "targeted" && !selectedSpecies) || pinging}
-                  >
-                    <RotateCw className="mr-1 h-3 w-3" />
-                    {pingMode === "targeted" ? "Targeted Ping" : "Universal Ping"}
-                  </Button>
-                  
-                  {pingMode === "targeted" && (
-                    <Button 
-                      className={`text-xs ${targetLocked ? "bg-red-600 hover:bg-red-700" : ""}`} 
-                      size="sm" 
-                      variant={targetLocked ? "default" : "outline"}
-                      disabled={!selectedSpecies}
-                      onClick={toggleTargetLock}
-                    >
-                      <Target className="mr-1 h-3 w-3" />
-                      {targetLocked ? "Locked" : "Lock Target"}
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+            <BioresonanceControls
+              selectedSpecies={selectedSpecies ? [selectedSpecies] : []}
+              faithQuotient={0.8}
+              onAmplificationComplete={(result) => {
+                if (result.success && quantumBoost < 5) {
+                  increaseQuantumBoost();
+                }
+              }}
+            />
           </div>
-          
-          <BioresonanceControls
-            selectedSpecies={selectedSpecies ? [selectedSpecies] : []}
-            faithQuotient={0.8}
-            onAmplificationComplete={(result) => {
-              if (result.success && quantumBoost < 5) {
-                increaseQuantumBoost();
-              }
-            }}
-          />
-        </div>
+        ) : (
+          // Messaging UI - shown when a species is selected and responding
+          <div className="mt-4 border-t border-gray-700 pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center">
+                <MessageSquare className="h-4 w-4 mr-2 text-indigo-400" />
+                <span className="text-sm font-medium">Quantum Communication Channel</span>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowMessaging(false)}
+                className="h-7"
+              >
+                Back to Controls
+              </Button>
+            </div>
+            
+            <ScrollArea className="h-[180px] border border-gray-800 rounded-md bg-gray-900/50 mb-3 p-2">
+              {messages.map(message => (
+                <div 
+                  key={message.id}
+                  className={`mb-2 ${message.sender === "Zade" ? "text-right" : "text-left"}`}
+                >
+                  <div 
+                    className={`inline-block max-w-[85%] px-3 py-2 rounded-lg ${
+                      message.sender === "Zade" 
+                        ? "bg-blue-800/40 text-blue-50" 
+                        : "bg-indigo-900/40 text-indigo-50"
+                    }`}
+                  >
+                    <p className="text-xs">{message.content}</p>
+                    <div className="text-[0.65rem] mt-1 opacity-70 flex justify-end items-center gap-2">
+                      <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                      <Badge className="h-3 px-1 text-[0.55rem]">
+                        {message.sender === "Zade" ? "Sent" : "Received"}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </ScrollArea>
+            
+            <div className="flex gap-2">
+              <Input
+                placeholder={`Message ${selectedSpecies.name}...`}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className="bg-gray-800 border-gray-700"
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              />
+              <Button onClick={handleSendMessage} size="sm">
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
         
         <div className="mt-4 border-t border-gray-700 pt-2">
           <div className="text-xs text-gray-400 flex justify-between">
