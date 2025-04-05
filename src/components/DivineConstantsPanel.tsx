@@ -14,8 +14,8 @@ const DivineConstantsPanel: React.FC = () => {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-300">Ultimate Faith Quotient</span>
-          {/* Fix: Replaced infinity symbol with "1.0" */}
-          <span className="text-divine-gold font-mono">1.0</span>
+          {/* Display the actual value from DIVINE_CONSTANTS */}
+          <span className="text-divine-gold font-mono">{DIVINE_CONSTANTS.ULTIMATE_FAITH_QUOTIENT.toFixed(1)}</span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-gray-300">Golden Ratio</span>

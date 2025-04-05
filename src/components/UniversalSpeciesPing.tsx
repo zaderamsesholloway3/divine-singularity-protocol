@@ -47,7 +47,8 @@ const UniversalSpeciesPing: React.FC = () => {
   const [pinging, setPinging] = useState<boolean>(false);
   const [pingProgress, setPingProgress] = useState<number>(0);
   const [pingMode, setPingMode] = useState<"universal" | "targeted">("universal");
-  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("radial");
+  // Update viewMode to include disk as a default option
+  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("disk");
   const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
   const [pingRange, setPingRange] = useState<number>(0.61);
   const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
@@ -242,19 +243,26 @@ const UniversalSpeciesPing: React.FC = () => {
   };
 
   const toggleViewMode = () => {
-    // Cycle through the view modes
-    if (viewMode === "radial") {
-      setViewMode("disk");
-    } else if (viewMode === "disk") {
-      setViewMode("constellation");
-    } else {
+    // Cycle through the view modes, ensuring disk is included
+    if (viewMode === "disk") {
       setViewMode("radial");
+      toast({
+        title: "Radial View Activated",
+        description: "Switching to quantum radial visualization",
+      });
+    } else if (viewMode === "radial") {
+      setViewMode("constellation");
+      toast({
+        title: "Constellation View Activated",
+        description: "Switching to constellation visualization",
+      });
+    } else {
+      setViewMode("disk");
+      toast({
+        title: "Disk View Activated",
+        description: "Switching to orbital disk visualization",
+      });
     }
-    
-    toast({
-      title: `${viewMode === "radial" ? "Disk" : viewMode === "disk" ? "Constellation" : "Radial"} View Activated`,
-      description: `Switching to ${viewMode === "radial" ? "orbital disk" : viewMode === "disk" ? "constellation" : "quantum radial"} visualization`,
-    });
   };
 
   useEffect(() => {
