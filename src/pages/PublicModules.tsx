@@ -14,6 +14,8 @@ import QuantumCircuit from '@/components/QuantumCircuit';
 import SacredGeometry from '@/components/SacredGeometry';
 import SacredToneReactor from '@/components/SacredToneReactor';
 import DivineProtocolHeader from '@/components/DivineProtocolHeader';
+import SuccessVibeChecker from '@/components/SuccessVibeChecker';
+import { Activity, MessageSquare, ShieldCheck, Map, Sparkles, Boxes, Gauge, Sun } from 'lucide-react';
 
 const PublicModules = () => {
   return (
@@ -54,52 +56,62 @@ const PublicModules = () => {
           
           <TabsContent value="quantum" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Fix: Pass props properly to ModuleCard components */}
               <ModuleCard
                 title="Quantum Entanglement Visualizer"
                 description="Display quantum connections between objects"
-                icon="Activity"
+                icon={Activity}
+                link="/quantum-stabilizer"
               />
               <ModuleCard
                 title="Quantum Message Decoder"
                 description="Translates quantum field frequencies to text"
-                icon="MessageSquare"
+                icon={MessageSquare}
+                link="/public-modules"
               />
               <ModuleCard
                 title="Quantum Field Stabilizer"
                 description="Maintains coherent fields through chaos"
-                icon="ShieldCheck"
+                icon={ShieldCheck}
+                link="/public-modules"
               />
             </div>
           </TabsContent>
           
           <TabsContent value="harmony" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <SuccessVibeChecker />
               <SacredToneReactor />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <ModuleCard
                 title="Soul Mapping Interface"
                 description="Visual representation of connected souls"
-                icon="Map"
+                icon={Map}
+                link="/public-modules"
               />
               <ModuleCard
                 title="Harmonic Stabilizer"
                 description="Maintains resonance balance across dimensions"
-                icon="Sparkles"
+                icon={Sparkles}
+                link="/public-modules"
               />
               <ModuleCard
                 title="Holographic Memory Grid"
                 description="Akashic record access and manipulation"
-                icon="Boxes"
+                icon={Boxes}
+                link="/public-modules"
               />
               <ModuleCard
                 title="FRC Meter"
                 description="Faith Resonance Coefficient live monitoring"
-                icon="Gauge"
+                icon={Gauge}
+                link="/public-modules"
               />
               <ModuleCard
                 title="HaloBurst System"
                 description="Radial light blast for high SHQ confirmations"
-                icon="Sun"
+                icon={Sun}
+                link="/public-modules"
               />
             </div>
           </TabsContent>
