@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe, Radio, Heart, ArrowLeft, Send, Inbox, Mail, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
+import { Globe, Radio, Heart, ArrowLeft, Send, Inbox, Mail, Sparkles, Maximize2, Minimize2, Rotate3d } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import { SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
@@ -66,15 +66,29 @@ const CosmicCommunicationsGrid: React.FC = () => {
             ref={speciesGatewayRef}
           />
           
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-            {isFullscreen ? ' Exit Fullscreen' : ' Fullscreen'}
-          </Button>
+          <div className="absolute top-2 right-2 flex gap-2">
+            {!isFullscreen && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-black/50 hover:bg-black/70 text-xs"
+                onClick={() => toast.info("Drag to rotate the 3D view in Orbital mode")}
+              >
+                <Rotate3d className="h-4 w-4 mr-1" />
+                3D Controls
+              </Button>
+            )}
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="bg-black/50 hover:bg-black/70"
+              onClick={toggleFullscreen}
+            >
+              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              {isFullscreen ? ' Exit Fullscreen' : ' Fullscreen'}
+            </Button>
+          </div>
           
           {selectedSpecies && (
             <div className="absolute top-2 left-2 bg-black/70 p-3 rounded-md max-w-xs">

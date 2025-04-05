@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Volume2, VolumeX, Radio, Waves, Sparkles, Send } from 'lucide-react';
+import { Volume2, VolumeX, Radio, Waves, Sparkles, Send, Rotate3d } from 'lucide-react';
 import { toast } from 'sonner';
 import { SpeciesGateway, SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 
@@ -52,6 +52,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [broadcastMode, setBroadcastMode] = useState<"universal" | "targeted">("universal");
   const [pingActive, setPingActive] = useState(false);
   const [message, setMessage] = useState("");
+  const [rotate3dHint, setRotate3dHint] = useState(true);
   
   // Reference to the SpeciesGateway component
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
@@ -128,6 +129,9 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   };
   
   const handleSpeciesSelect = (species: any) => {
+    // When a species is selected, hide the rotation hint
+    setRotate3dHint(false);
+    
     if (onSpeciesSelect) {
       onSpeciesSelect(species);
     }
@@ -202,16 +206,20 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 variant="outline"
                 size="sm"
                 className={`h-8 ${viewMode === "radial" ? "bg-primary/10" : ""}`}
-                onClick={() => setViewMode("radial")}
+                onClick={() => {
+                  setViewMode("radial");
+                  setRotate3dHint(true);
+                }}
               >
-                Orbital
+                <Rotate3d className="h-4 w-4 mr-1" />
+                3D Orbital
               </Button>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent className={`${fullPageMode ? 'h-[calc(100%-80px)]' : 'pt-4'}`}>
           <div className={`grid grid-cols-1 ${fullPageMode ? 'lg:grid-cols-5 h-full' : ''} gap-4`}>
-            <div className={`${fullPageMode ? 'lg:col-span-4' : ''}`}>
+            <div className={`${fullPageMode ? 'lg:col-span-4' : ''} relative`}>
               <div className={`rounded-lg overflow-hidden ${fullPageMode ? 'h-full' : 'min-h-[400px]'} flex items-center justify-center bg-gradient-to-b from-gray-950 to-blue-950`}>
                 <SpeciesGateway 
                   species={mockSpecies}
@@ -221,6 +229,15 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                   ref={speciesGatewayRef}
                 />
               </div>
+              
+              {/* 3D rotation hint overlay - only shown for radial mode when activated */}
+              {viewMode === "radial" && rotate3dHint && (
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
+                  <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />
+                  <p className="text-white font-medium">Drag to rotate the 3D view</p>
+                  <p className="text-xs text-gray-300 mt-1">Click on any species to select it</p>
+                </div>
+              )}
             </div>
             
             <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
