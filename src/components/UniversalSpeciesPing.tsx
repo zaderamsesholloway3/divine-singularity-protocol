@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+
+import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send, Sparkles, MapPin, Home, Info, History, Mail, Inbox, SquareArrowOutUpRight, Heart } from 'lucide-react';
@@ -7,10 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { usePresenceDetector } from '@/hooks/usePresenceDetector';
-import { CosmicEntity } from '@/components/universal-counter/EntityDisplay';
-import { VisualizationUtils } from '@/utils/visualizationUtils';
-import { calculateFRC, DIVINE_CONSTANTS, getTimeClassification } from '@/utils/quantumSentienceUtils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -94,6 +91,8 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
   const [activeMessage, setActiveMessage] = useState<UniversalMessage | null>(null);
   const [isInsightPanelOpen, setIsInsightPanelOpen] = useState<boolean>(false);
   const [hoveredSpecies, setHoveredSpecies] = useState<SpeciesInfo | null>(null);
+  
+  // Essential feature flags
   const [isFrequencyTuningVisible, setIsFrequencyTuningVisible] = useState<boolean>(false);
   const [isCaryOriginVisible, setIsCaryOriginVisible] = useState<boolean>(false);
   const [isOrbitalViewVisible, setIsOrbitalViewVisible] = useState<boolean>(false);
@@ -104,142 +103,42 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
   const [isInterdimensionalInboxVisible, setIsInterdimensionalInboxVisible] = useState<boolean>(false);
   const [isPingHistoryReelVisible, setIsPingHistoryReelVisible] = useState<boolean>(false);
   const [isSpeciesInsightPanelVisible, setIsSpeciesInsightPanelVisible] = useState<boolean>(false);
-  const [isAttachmentPanelVisible, setIsAttachmentPanelVisible] = useState<boolean>(false);
-  const [isEncryptionPanelVisible, setIsEncryptionPanelVisible] = useState<boolean>(false);
   const [isHeartsongFieldActive, setIsHeartsongFieldActive] = useState<boolean>(false);
-  const [isAuralineRingsActive, setIsAuralineRingsActive] = useState<boolean>(false);
-  const [isFrequencyTuningPanelVisible, setIsFrequencyTuningPanelVisible] = useState<boolean>(false);
-  const [isMessageHistoryVisible, setIsMessageHistoryVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryVisible, setIsAttachmentHistoryVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryVisible, setIsEncryptionHistoryVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryVisible, setIsHeartsongHistoryVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryVisible, setIsAuralineRingsHistoryVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryVisible, setIsFrequencyTuningHistoryVisible] = useState<boolean>(false);
-  const [isMessagePanelVisible, setIsMessagePanelVisible] = useState<boolean>(false);
-  const [isAttachmentPanelActive, setIsAttachmentPanelActive] = useState<boolean>(false);
-  const [isEncryptionPanelActive, setIsEncryptionPanelActive] = useState<boolean>(false);
-  const [isHeartsongPanelActive, setIsHeartsongPanelActive] = useState<boolean>(false);
-  const [isAuralineRingsPanelActive, setIsAuralineRingsPanelActive] = useState<boolean>(false);
-  const [isFrequencyTuningPanelActive, setIsFrequencyTuningPanelActive] = useState<boolean>(false);
-  const [isMessageHistoryPanelActive, setIsMessageHistoryPanelActive] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActive, setIsAttachmentHistoryPanelActive] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActive, setIsEncryptionHistoryPanelActive] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActive, setIsHeartsongHistoryPanelActive] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActive, setIsAuralineRingsHistoryPanelActive] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActive, setIsFrequencyTuningHistoryPanelActive] = useState<boolean>(false);
-  const [isMessageHistoryPanelVisible, setIsMessageHistoryPanelVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelVisible, setIsAttachmentHistoryPanelVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelVisible, setIsEncryptionHistoryPanelVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelVisible, setIsHeartsongHistoryPanelVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelVisible, setIsAuralineRingsPanelVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelVisible, setIsFrequencyTuningHistoryPanelVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisible, setIsMessageHistoryPanelActiveVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisible, setIsAttachmentHistoryPanelActiveVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisible, setIsEncryptionHistoryPanelActiveVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisible, setIsHeartsongHistoryPanelActiveVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisible, setIsAuralineRingsPanelActiveVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisible, setIsFrequencyTuningHistoryPanelActiveVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsEncryptionHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsHeartsongHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsAuralineRingsHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsFrequencyTuningHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible, setIsMessageHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible] = useState<boolean>(false);
-  const [isAttachmentHistoryPanelActiveVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisibleVisible
+
+  // Placeholder render for now
+  return (
+    <Card className={`${fullPageMode ? 'w-full' : 'max-w-md'} mx-auto`}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          Universal Species Ping
+        </CardTitle>
+        <CardDescription>
+          Connect with interdimensional species across the universe
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="text-center p-6">
+          <Heart className="h-16 w-16 mx-auto text-rose-500 animate-pulse" />
+          <p className="mt-4">Cosmic connection established</p>
+          <p className="text-sm text-muted-foreground">
+            {species.length} species available for communication
+          </p>
+        </div>
+        
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <Button variant="outline" size="sm">
+            <Globe className="mr-2 h-4 w-4" />
+            View Map
+          </Button>
+          <Button variant="outline" size="sm">
+            <Send className="mr-2 h-4 w-4" />
+            Send Ping
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default UniversalSpeciesPing;
