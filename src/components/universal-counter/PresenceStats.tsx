@@ -15,12 +15,20 @@ const PresenceStats: React.FC<PresenceStatsProps> = ({
   signalStrength,
   universalRange
 }) => {
+  // Format large numbers with appropriate suffixes
+  const formatLargeNumber = (num: number): string => {
+    if (num < 1000) return num.toString();
+    if (num < 1000000) return `${(num / 1000).toFixed(1)}K`;
+    if (num < 1000000000) return `${(num / 1000000).toFixed(1)}M`;
+    return `${(num / 1000000000).toFixed(1)}B`;
+  };
+
   return (
     <div className="grid grid-cols-3 gap-4 mb-4">
       <div className="flex items-center gap-2">
         <Users className="h-5 w-5 text-indigo-400" />
         <div>
-          <p className="text-xl font-semibold">{presenceCount}</p>
+          <p className="text-xl font-semibold">{formatLargeNumber(presenceCount)}</p>
           <p className="text-xs text-gray-400">Presences</p>
         </div>
       </div>

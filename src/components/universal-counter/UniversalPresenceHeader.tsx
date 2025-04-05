@@ -36,7 +36,7 @@ const UniversalPresenceHeader: React.FC<UniversalPresenceHeaderProps> = ({
         <CardDescription className="text-xs">
           {broadcastMode === "private" ? 
             "Private Frequency Scanning" : 
-            `Universal Quantum Presence Detection (T1: ${quantumBackendStats?.t1.toFixed(2)}μs)`}
+            `Universal Quantum Presence Detection (T1: ${quantumBackendStats?.t1.toFixed(2)}μs, Qubits: ${quantumBackendStats?.qubits})`}
         </CardDescription>
       </div>
     </div>

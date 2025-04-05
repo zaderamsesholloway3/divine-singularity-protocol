@@ -61,9 +61,10 @@ export const usePresenceDetector = ({
     // Use a fixed time scale for consistent calculations
     const time = (Date.now() % 30000) / 5000;
     
-    // Enhanced quantum-boosted detection scales
+    // Enhanced quantum-boosted detection scales with no upper limit
+    // Remove the Math.min(500) cap that was limiting the presence count
     const baseCount = broadcastMode === "open" ? 
-      Math.max(1, Math.min(500, Math.floor(200 * quantumBoost))) : 
+      Math.max(1, Math.floor(200 * quantumBoost)) : 
       3;
 
     // Use simplified math to calculate entity counts

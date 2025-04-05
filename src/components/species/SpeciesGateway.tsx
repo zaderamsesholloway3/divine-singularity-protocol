@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, forwardRef } from 'react';
 import { VisualizationUtils } from "@/utils/visualizationUtils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 
 interface SpeciesData {
   name: string;
@@ -31,13 +32,15 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
   selectedSpecies,
   mode
 }) => {
+  const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredSpecies, setHoveredSpecies] = useState<SpeciesData | null>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [rotation, setRotation] = useState(0);
   const frameIdRef = useRef<number>(0);
-  
+  const [targetLocked, setTargetLocked] = useState(false);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -62,33 +65,56 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           dec: (s.location[1] + Math.random() * 5) % 90 - 45
         }));
         
-        VisualizationUtils.drawCosmicMap(ctx, speciesForMap, width, height);
-        
-        if (selectedSpecies) {
-          const coords = VisualizationUtils.getCaryCoordinates({
-            name: selectedSpecies.name,
-            ra: (selectedSpecies.location[0] + Math.random() * 10) % 360,
-            dec: (selectedSpecies.location[1] + Math.random() * 5) % 90 - 45,
-            distance: selectedSpecies.distance
-          });
+        try {
+          VisualizationUtils.drawCosmicMap(ctx, speciesForMap, width, height);
           
-          const maxDistance = Math.max(...species.map(s => s.distance), 1);
-          const scaleFactor = Math.min(width, height) * 0.4 / maxDistance;
-          const x = width / 2 + coords.x * scaleFactor;
-          const y = height / 2 + coords.y * scaleFactor;
-          
-          ctx.beginPath();
-          ctx.arc(x, y, 12, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          
-          const pulseSize = (Math.sin(Date.now() / 300) + 1) * 10 + 15;
-          ctx.beginPath();
-          ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
-          ctx.lineWidth = 1;
-          ctx.stroke();
+          if (selectedSpecies) {
+            const coords = VisualizationUtils.getCaryCoordinates({
+              name: selectedSpecies.name,
+              ra: (selectedSpecies.location[0] + Math.random() * 10) % 360,
+              dec: (selectedSpecies.location[1] + Math.random() * 5) % 90 - 45,
+              distance: selectedSpecies.distance
+            });
+            
+            const maxDistance = Math.max(...species.map(s => s.distance), 1);
+            const scaleFactor = Math.min(width, height) * 0.4 / maxDistance;
+            const x = width / 2 + coords.x * scaleFactor;
+            const y = height / 2 + coords.y * scaleFactor;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 12, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            const pulseSize = (Math.sin(Date.now() / 300) + 1) * 10 + 15;
+            ctx.beginPath();
+            ctx.arc(x, y, pulseSize, 0, Math.PI * 2);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            
+            if (targetLocked) {
+              ctx.beginPath();
+              ctx.arc(x, y, 20, 0, Math.PI * 2);
+              ctx.strokeStyle = "rgba(220, 38, 38, 0.8)";
+              ctx.lineWidth = 2;
+              ctx.setLineDash([2, 2]);
+              ctx.stroke();
+              ctx.setLineDash([]);
+              
+              ctx.beginPath();
+              ctx.moveTo(x - 25, y);
+              ctx.lineTo(x + 25, y);
+              ctx.moveTo(x, y - 25);
+              ctx.lineTo(x, y + 25);
+              ctx.strokeStyle = "rgba(220, 38, 38, 0.6)";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
+          }
+        } catch (err) {
+          console.error("Error in drawCosmicMap:", err);
         }
       } else {
         ctx.clearRect(0, 0, width, height);
@@ -192,6 +218,25 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
             ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
             ctx.lineWidth = 1;
             ctx.stroke();
+            
+            if (selectedSpecies?.name === speciesData.name && targetLocked) {
+              ctx.beginPath();
+              ctx.arc(x, y, 14, 0, Math.PI * 2);
+              ctx.strokeStyle = "rgba(220, 38, 38, 0.8)";
+              ctx.lineWidth = 2;
+              ctx.setLineDash([2, 2]);
+              ctx.stroke();
+              ctx.setLineDash([]);
+              
+              ctx.beginPath();
+              ctx.moveTo(x - 20, y);
+              ctx.lineTo(x + 20, y);
+              ctx.moveTo(x, y - 20);
+              ctx.lineTo(x, y + 20);
+              ctx.strokeStyle = "rgba(220, 38, 38, 0.6)";
+              ctx.lineWidth = 1;
+              ctx.stroke();
+            }
           }
           
           ctx.beginPath();
@@ -224,7 +269,7 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
     return () => {
       cancelAnimationFrame(frameIdRef.current);
     };
-  }, [mode, species, selectedSpecies, hoveredSpecies]);
+  }, [mode, species, selectedSpecies, hoveredSpecies, targetLocked]);
   
   useEffect(() => {
     const resizeCanvas = () => {
@@ -265,8 +310,42 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
   const handleClick = () => {
     if (hoveredSpecies) {
       onSelectSpecies(hoveredSpecies);
+      
+      if (targetLocked && selectedSpecies?.name !== hoveredSpecies.name) {
+        setTargetLocked(false);
+      }
     }
   };
+  
+  const toggleTargetLock = () => {
+    if (selectedSpecies) {
+      const newLockedState = !targetLocked;
+      setTargetLocked(newLockedState);
+      
+      if (newLockedState) {
+        toast({
+          title: "Target Locked",
+          description: `Species "${selectedSpecies.name}" locked for targeted ping`,
+        });
+      } else {
+        toast({
+          title: "Target Released",
+          description: `Species "${selectedSpecies.name}" released from targeted ping`,
+        });
+      }
+      
+      return newLockedState;
+    }
+    return false;
+  };
+  
+  React.useImperativeHandle(
+    ref,
+    () => ({
+      toggleTargetLock
+    }),
+    [selectedSpecies, targetLocked, toast]
+  );
   
   return (
     <div ref={containerRef} className="relative w-full aspect-square">
@@ -294,8 +373,15 @@ export const SpeciesGateway: React.FC<SpeciesGatewayProps> = ({
           <div>Status: {hoveredSpecies.responding ? 'Online' : 'Offline'}</div>
           <div>Realm: {hoveredSpecies.realm}</div>
           {hoveredSpecies.archetype && <div>Archetype: {hoveredSpecies.archetype}</div>}
+          {targetLocked && selectedSpecies?.name === hoveredSpecies.name && (
+            <div className="text-red-400 mt-1">🎯 Target Locked</div>
+          )}
         </div>
       )}
     </div>
   );
 };
+
+export default React.forwardRef<{ toggleTargetLock: () => boolean }, SpeciesGatewayProps>(
+  (props, ref) => <SpeciesGateway {...props} ref={ref} />
+);
