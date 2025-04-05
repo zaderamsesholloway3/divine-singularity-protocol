@@ -16,12 +16,20 @@ interface BioresonanceControlsProps {
   selectedSpecies?: { name: string; vibration?: number; }[] | null;
   faithQuotient?: number;
   onAmplificationComplete?: (result: any) => void;
+  bioresonanceFrequency?: number;
+  bioresonancePower?: number;
+  schema?: string;
+  onIncreasePower?: () => void;
 }
 
 const BioresonanceControls: React.FC<BioresonanceControlsProps> = ({ 
   selectedSpecies = [], 
   faithQuotient = 0.8,
-  onAmplificationComplete
+  onAmplificationComplete,
+  bioresonanceFrequency,
+  bioresonancePower,
+  schema,
+  onIncreasePower
 }) => {
   const { toast } = useToast();
   const [amplifier] = useState(() => new QuantumBioresonanceAmplifier());

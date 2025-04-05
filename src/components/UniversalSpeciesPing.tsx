@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,16 +7,14 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { GlowingText } from "./GlowingText";
 import { SpeciesGateway } from "./species/SpeciesGateway";
-import { BioresonanceControls } from "./species/BioresonanceControls";
+import BioresonanceControls from "./species/BioresonanceControls";
 
-// Add IBM quantum parameters interface
 interface QuantumBoostParameters {
   t1: number;
   qubits: number;
   backend: string;
 }
 
-// Simulated IBM quantum parameters
 const ibmQuantumSimulation: QuantumBoostParameters = {
   t1: 348.23,
   qubits: 127,
@@ -42,7 +39,6 @@ interface SpeciesData {
 const UniversalSpeciesPing: React.FC = () => {
   const { toast } = useToast();
   
-  // Add ref to access the SpeciesGateway component's methods
   const speciesGatewayRef = useRef<{ toggleTargetLock: () => boolean }>(null);
   
   const [species, setSpecies] = useState<SpeciesData[]>([]);
@@ -51,12 +47,11 @@ const UniversalSpeciesPing: React.FC = () => {
   const [pingProgress, setPingProgress] = useState<number>(0);
   const [pingMode, setPingMode] = useState<"universal" | "targeted">("universal");
   const [viewMode, setViewMode] = useState<"disk" | "constellation">("disk");
-  const [quantumBoost, setQuantumBoost] = useState<number>(1.0); // Add quantum boost state
-  const [pingRange, setPingRange] = useState<number>(0.61); // Range in billion light years
+  const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
+  const [pingRange, setPingRange] = useState<number>(0.61);
   const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
-  const [targetLocked, setTargetLocked] = useState<boolean>(false); // Track target lock status
-  
-  // Generate some sample species
+  const [targetLocked, setTargetLocked] = useState<boolean>(false);
+
   useEffect(() => {
     const realms: ("existence" | "non-existence")[] = ["existence", "non-existence"];
     const archetypes = ["Crystalline", "Biomechanical", "Plasma", "Photonic", "Quantum", "Vibrational", "Geometric"];
@@ -85,8 +80,7 @@ const UniversalSpeciesPing: React.FC = () => {
     
     setSpecies(generatedSpecies);
   }, []);
-  
-  // Handle ping start
+
   const startPing = () => {
     if (pingMode === "targeted" && !selectedSpecies) {
       toast({
@@ -97,7 +91,6 @@ const UniversalSpeciesPing: React.FC = () => {
     }
     
     if (pingMode === "targeted" && !targetLocked) {
-      // Try to lock the target if not already locked
       if (speciesGatewayRef.current) {
         const locked = speciesGatewayRef.current.toggleTargetLock();
         setTargetLocked(locked);
@@ -115,10 +108,9 @@ const UniversalSpeciesPing: React.FC = () => {
     setPinging(true);
     setPingProgress(0);
     
-    // Simulate ping with quantum boost factor affecting speed
-    const pingDuration = pingMode === "targeted" ? 3000 : 5000; // Targeted is faster
-    const pingSpeed = pingDuration / (quantumBoost * 1.5); // Quantum boost reduces ping time
-    const interval = Math.max(50, pingSpeed / 100); // Min 50ms interval
+    const pingDuration = pingMode === "targeted" ? 3000 : 5000;
+    const pingSpeed = pingDuration / (quantumBoost * 1.5);
+    const interval = Math.max(50, pingSpeed / 100);
     
     const timer = setInterval(() => {
       setPingProgress(prev => {
@@ -131,16 +123,14 @@ const UniversalSpeciesPing: React.FC = () => {
       });
     }, interval);
   };
-  
-  // Handle toggling the target lock state
+
   const toggleTargetLock = () => {
     if (speciesGatewayRef.current) {
       const isLocked = speciesGatewayRef.current.toggleTargetLock();
       setTargetLocked(isLocked);
     }
   };
-  
-  // Handle ping completion
+
   const handlePingComplete = () => {
     setPinging(false);
     
@@ -155,7 +145,6 @@ const UniversalSpeciesPing: React.FC = () => {
           : `Detected ${detectedSpecies} species within ${pingRange.toFixed(1)} billion light years`,
       });
       
-      // Update sample species to show they're responding after successful ping
       if (pingMode === "targeted" && selectedSpecies) {
         setSpecies(prev => 
           prev.map(s => 
@@ -165,7 +154,6 @@ const UniversalSpeciesPing: React.FC = () => {
           )
         );
       } else {
-        // In universal mode, make some random species respond
         const updatedSpecies = [...species];
         for (let i = 0; i < Math.min(detectedSpecies, updatedSpecies.length); i++) {
           const randIndex = Math.floor(Math.random() * updatedSpecies.length);
@@ -187,8 +175,7 @@ const UniversalSpeciesPing: React.FC = () => {
       });
     }
   };
-  
-  // Handle selection of a species
+
   const handleSelectSpecies = (species: SpeciesData) => {
     setSelectedSpecies(species);
     
@@ -198,12 +185,10 @@ const UniversalSpeciesPing: React.FC = () => {
         description: `${species.name} - ${species.realm === "existence" ? "Existence Realm" : "Non-Existence Realm"}`,
       });
       
-      // Reset target lock when changing species
       setTargetLocked(false);
     }
   };
-  
-  // Increase quantum boost
+
   const increaseQuantumBoost = () => {
     setQuantumBoost(prev => {
       const newBoost = Math.min(5.0, prev + 0.5);
@@ -217,20 +202,18 @@ const UniversalSpeciesPing: React.FC = () => {
       return newBoost;
     });
   };
-  
-  // Update ping range based on quantum boost
+
   const updatePingRange = (boost: number) => {
     const quantumRangeBoost = quantumBackendStats.t1 * quantumBackendStats.qubits / 100;
     const simulatedRange = 0.61 * boost * quantumRangeBoost;
     const cappedRange = Math.min(93, simulatedRange);
     setPingRange(Number(cappedRange.toFixed(2)));
   };
-  
-  // Update ping range whenever quantum boost changes
+
   useEffect(() => {
     updatePingRange(quantumBoost);
   }, [quantumBoost, quantumBackendStats]);
-  
+
   return (
     <Card className="glass-panel bg-gradient-to-br from-gray-900 to-black text-white">
       <CardHeader className="p-4 pb-2">
@@ -264,11 +247,11 @@ const UniversalSpeciesPing: React.FC = () => {
       
       <CardContent className="p-4">
         <SpeciesGateway 
-          ref={speciesGatewayRef}
           species={species} 
           onSelectSpecies={handleSelectSpecies}
           selectedSpecies={selectedSpecies}
           mode={viewMode}
+          ref={speciesGatewayRef}
         />
         
         <div className="grid grid-cols-2 gap-4 mt-4">
@@ -329,7 +312,7 @@ const UniversalSpeciesPing: React.FC = () => {
                       size="sm" 
                       variant={targetLocked ? "default" : "outline"}
                       disabled={!selectedSpecies}
-                      onClick={toggleTargetLock} // Use the new method to properly toggle the target lock
+                      onClick={toggleTargetLock}
                     >
                       <Target className="mr-1 h-3 w-3" />
                       {targetLocked ? "Locked" : "Lock Target"}
@@ -341,14 +324,16 @@ const UniversalSpeciesPing: React.FC = () => {
           </div>
           
           <BioresonanceControls
-            bioresonanceFrequency={7.83 + (Math.random() - 0.5) * 0.1}
-            bioresonancePower={quantumBoost * 20}
-            schema="universal"
-            onIncreasePower={increaseQuantumBoost}
+            selectedSpecies={selectedSpecies ? [selectedSpecies] : []}
+            faithQuotient={0.8}
+            onAmplificationComplete={(result) => {
+              if (result.success && quantumBoost < 5) {
+                increaseQuantumBoost();
+              }
+            }}
           />
         </div>
         
-        {/* Display IBM quantum information */}
         <div className="mt-4 border-t border-gray-700 pt-2">
           <div className="text-xs text-gray-400 flex justify-between">
             <div>
