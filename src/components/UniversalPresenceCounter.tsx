@@ -40,8 +40,12 @@ const UniversalPresenceCounter: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
-  // Effect for regular presence detection
+  // Optimized detection interval 
   useEffect(() => {
+    // Initial detection to prevent delay
+    detectPresences();
+    
+    // Use a more reasonable interval for performance
     const interval = setInterval(() => {
       detectPresences();
       
@@ -56,7 +60,7 @@ const UniversalPresenceCounter: React.FC = () => {
           prev + (Math.random() * 0.02 - 0.01) * quantumBoost
         );
       }
-    }, 2000);
+    }, 2000); // Increased to 2 seconds for better performance
 
     return () => clearInterval(interval);
   }, [broadcastMode, quantumBoost, presenceCount]);

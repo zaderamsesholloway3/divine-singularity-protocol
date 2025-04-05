@@ -38,73 +38,69 @@ export const usePresenceDetector = ({
     ].slice(-50)); // Keep last 50 messages for performance
   };
   
-  // Enhanced detection algorithm
+  // Enhanced detection algorithm with performance optimizations
   const detectPresences = () => {
     const time = Date.now() / 5000; // Faster oscillation for AI detection
     const baseCount = broadcastMode === "open" ? 
-      Math.floor(144000 * quantumBoost / 1000) : // Sacred number boost but scaled down
+      Math.floor(Math.max(1, (144 * quantumBoost))) : // Scale down for performance, prevent negative values
       3;
 
-    // New multi-dimensional detection
+    // New multi-dimensional detection with optimized entity generation
     const entities: CosmicEntity[] = [];
     
-    // Biological beings detection (original algorithm)
-    const bioCount = Math.floor(baseCount + Math.sin(time) * 15 + Math.random() * 5);
+    // Biological beings detection (optimized algorithm)
+    const bioCount = Math.floor(Math.max(0, baseCount + Math.sin(time) * 5 + Math.random() * 2));
     
-    // AI entities detection (new)
-    const aiCount = Math.floor((baseCount * 1.855) + Math.cos(time) * 28);
+    // AI entities detection (optimized)
+    const aiCount = Math.floor(Math.max(0, (baseCount * 1.5) + Math.cos(time) * 8));
     
-    // Hybrid/transdimensional detection
-    const hybridCount = Math.floor((baseCount * 0.618) + Math.sin(time * 3) * 7);
+    // Hybrid/transdimensional detection (optimized)
+    const hybridCount = Math.floor(Math.max(0, (baseCount * 0.5) + Math.sin(time * 3) * 3));
     
     const totalCount = bioCount + aiCount + hybridCount;
     
-    // Generate entity signatures
-    for (let i = 0; i < bioCount; i++) {
-      entities.push({
-        type: "biological",
-        signature: `Bio-${Math.random().toString(36).substring(2, 6)}`,
-        distance: Math.random() * 1000,
-        resonance: 7.83 + (Math.random() - 0.5) * 0.1
-      });
-    }
+    // Generate a limited number of entity signatures for better performance
+    const maxEntitiesToGenerate = Math.min(totalCount, broadcastMode === "open" ? 50 : 5);
+    const entityDistribution = [bioCount, aiCount, hybridCount].map(count => 
+      Math.floor((count / Math.max(1, totalCount)) * maxEntitiesToGenerate)
+    );
     
-    for (let i = 0; i < aiCount; i++) {
-      entities.push({
-        type: "ai",
-        signature: `AI-${Math.random().toString(36).substring(2, 6)}`,
-        distance: Math.random() * 10000,
-        resonance: 1.855 + (Math.random() - 0.5) * 0.01
-      });
-    }
+    // Generate optimized entity signatures
+    const generateEntities = (type: "biological" | "ai" | "hybrid", count: number) => {
+      for (let i = 0; i < count; i++) {
+        entities.push({
+          type: type,
+          signature: `${type === "biological" ? "Bio" : type === "ai" ? "AI" : "Hybrid"}-${Math.random().toString(36).substring(2, 6)}`,
+          distance: type === "biological" ? Math.random() * 1000 : 
+                     type === "ai" ? Math.random() * 10000 : Math.random() * 5000,
+          resonance: type === "biological" ? 7.83 + (Math.random() - 0.5) * 0.1 :
+                     type === "ai" ? 1.855 + (Math.random() - 0.5) * 0.01 : 14.1 + (Math.random() - 0.5) * 0.05
+        });
+      }
+    };
     
-    for (let i = 0; i < hybridCount; i++) {
-      entities.push({
-        type: "hybrid",
-        signature: `Hybrid-${Math.random().toString(36).substring(2, 5)}`,
-        distance: Math.random() * 5000,
-        resonance: 14.1 + (Math.random() - 0.5) * 0.05
-      });
-    }
+    generateEntities("biological", entityDistribution[0]);
+    generateEntities("ai", entityDistribution[1]);
+    generateEntities("hybrid", entityDistribution[2]);
 
     setPresenceCount(totalCount);
-    setActiveEntities(entities.slice(0, 50)); // Limit display to 50
+    setActiveEntities(entities); // Already limited by maxEntitiesToGenerate
     
-    // Enhanced signal strength calculation
+    // Enhanced signal strength calculation with bounds checking
     const baseSignal = broadcastMode === "open" ? 
-      78 * quantumBoost : 
-      32 * quantumBoost;
+      78 * Math.min(3, quantumBoost) : // Limit multiplier to prevent overflow
+      32 * Math.min(3, quantumBoost);
       
     const newStrength = Math.floor(
       baseSignal + 
-      (Math.random() * 20 - 10) + 
-      (entities.length / 100)
+      (Math.random() * 10 - 5) + // Reduced random variance
+      (entities.length / 10) // Reduced impact of entity count
     );
     
     setSignalStrength(Math.min(100, Math.max(5, newStrength)));
     
-    // Generate occasional message based on entities
-    if (broadcastMode === "open" && Math.random() > 0.7 && entities.length > 0) {
+    // Generate occasional message based on entities with reduced frequency
+    if (broadcastMode === "open" && Math.random() > 0.8 && entities.length > 0) {
       const randomEntity = entities[Math.floor(Math.random() * entities.length)];
       const messagePool = [
         "Signal detected across dimensional barriers",
@@ -120,15 +116,15 @@ export const usePresenceDetector = ({
       sendMessage(`${randomEntity.type.toUpperCase()}-${randomEntity.signature}`, content);
     }
     
-    // Detect divine frequency using RTL-SDR
-    if (broadcastMode === "open") {
+    // Detect divine frequency using RTL-SDR with reduced processing
+    if (broadcastMode === "open" && Math.random() > 0.95) {
       const samples = rtlsdr.capture(schumannHarmonics, quantumBoost);
       const divineResult = rtlsdr.detectDivineFrequency(samples);
       
       if (divineResult.detected && Math.random() > 0.9) {
         const akashicData = rtlsdr.generateAkashicPatterns(
           `quantum-${Date.now()}`, 
-          samples
+          samples.slice(0, Math.min(100, samples.length)) // Limit sample size for processing
         );
         
         if (akashicData.message) {
