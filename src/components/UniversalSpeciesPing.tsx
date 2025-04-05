@@ -1,1331 +1,346 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Radio, Target, RotateCw, Globe, Zap, MessageSquare, Send, Sparkles, MapPin, Home, Info, History, Mail, Inbox, SquareArrowOutUpRight, Heart, Maximize2, Volume2, VolumeX } from 'lucide-react';
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Volume2, VolumeX, Radio, Waves, Sparkles, Send } from 'lucide-react';
+import { toast } from 'sonner';
+import { SpeciesGateway, SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 
-type ViewMode = 'disk' | 'constellation' | 'radial' | 'orbital' | 'timeline' | 'spiral';
+// Mock species data
+const mockSpecies = [
+  { name: "Arcturians", distance: 36.7, responding: true, realm: "existence", location: [0.7, 0.4], vibration: 7.83, population: 8900000000 },
+  { name: "Pleiadians", distance: 444.0, responding: true, realm: "existence", location: [0.3, -0.6], vibration: 7.12, population: 12400000000 },
+  { name: "Sirians", distance: 8.6, responding: false, realm: "existence", location: [0.1, 0.2], vibration: 5.25, population: 9300000000 },
+  { name: "Orion Collective", distance: 1344.0, responding: false, realm: "existence", location: [-0.8, -0.2], vibration: 4.89, population: 15700000000, phaseOffset: 45 },
+  { name: "Andromedans", distance: 2500000.0, responding: true, realm: "existence", location: [-0.5, 0.7], vibration: 8.33, population: 7800000000 },
+  { name: "Lyrans", distance: 25.3, responding: true, realm: "existence", archetype: "Feline", vibration: 9.41, population: 4200000000, phaseOffset: 15 },
+  { name: "Draconians", distance: 309.0, responding: false, realm: "existence", location: [0.4, -0.3], vibration: 3.72, population: 18900000000 },
+  { name: "Avians", distance: 87.2, responding: true, realm: "existence", archetype: "Bird-like", vibration: 10.82, population: 2800000000 },
+  { name: "Ouroboros", distance: 540000.0, responding: true, realm: "non-existence", fq: 1.855, vibration: 4.89, population: 1, phaseOffset: 180 },
+  { name: "Zeta Reticulans", distance: 39.0, responding: false, realm: "existence", archetype: "Gray", vibration: 6.15, population: 5100000000, phaseOffset: 90 },
+  { name: "Mantids", distance: 301.0, responding: true, realm: "existence", archetype: "Insectoid", vibration: 7.74, population: 1900000000 },
+  { name: "Inner Earth Agartha", distance: 0.01, responding: false, realm: "existence", location: [0.05, -0.03], vibration: 7.83, population: 3600000000 },
+  { name: "Venusians", distance: 0.28, responding: true, realm: "existence", location: [0.2, 0.15], vibration: 8.90, population: 980000000 },
+  { name: "Cassiopeians", distance: 228.0, responding: false, realm: "existence", location: [-0.3, 0.4], vibration: 6.28, population: 7100000000 },
+  { name: "Alpha Centaurians", distance: 4.37, responding: true, realm: "existence", location: [0.15, -0.1], vibration: 8.05, population: 6500000000 },
+  { name: "Procyonians", distance: 11.46, responding: false, realm: "existence", location: [0.25, -0.3], vibration: 7.32, population: 4900000000 },
+  { name: "Tau Cetians", distance: 11.9, responding: true, realm: "existence", location: [0.3, 0.25], vibration: 8.51, population: 8700000000 },
+  { name: "Nibiru", distance: 822.0, responding: false, realm: "non-existence", location: [-0.6, -0.5], vibration: 5.35, population: 2300000000, phaseOffset: 120 },
+  { name: "Carian", distance: 5621.0, responding: false, realm: "existence", archetype: "Reptilian", vibration: 4.45, population: 9800000000 },
+  { name: "Yahyel", distance: 14.8, responding: true, realm: "existence", archetype: "Hybrid", vibration: 8.94, population: 1200000000 },
+  { name: "Sassani", distance: 32.6, responding: true, realm: "new-existence", vibration: 9.87, population: 890000000 },
+  { name: "Lyra", distance: 25.3, responding: true, realm: "existence", fq: 1.855, vibration: 9.41, population: 1, phaseOffset: 0 }
+];
 
-interface SpeciesInfo {
-  name: string;
-  type: 'biological' | 'hybrid' | 'ai' | 'divine';
-  distance: number;
-  resonance: number;
-  ra?: number;
-  dec?: number;
-  population?: number;
-  color?: string;
-  size?: number;
-  coordinates?: { x: number; y: number; z: number };
-  shq?: number;
-  empathicIndex?: number;
-  dialects?: string[];
-  bestTimes?: string;
-  communicationTone?: string;
-  lastPing?: number;
-  responseRate?: number;
-  responding?: boolean;
-  renderPosition?: { x: number; y: number };
-}
-
-interface UniversalMessage {
-  id: string;
-  type: 'incoming' | 'outgoing';
-  sender: string;
-  recipient: string;
-  content: string;
-  timestamp: number;
-  attachments?: Array<{
-    name: string;
-    type: 'txt' | 'fractal' | 'sigil' | 'lightwave' | 'glyph';
-    data: string;
-  }>;
-  shq?: number;
-  faithQuotient?: number;
-}
-
+// Define the props for the UniversalSpeciesPing component
 interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
+  onSpeciesSelect?: (species: any) => void;
+  selectedSpecies?: any | null;
 }
 
-const SPECIES_COLORS = {
-  biological: 'rgba(132, 204, 22, 0.8)',    // Lime
-  hybrid: 'rgba(249, 115, 22, 0.8)',        // Orange
-  ai: 'rgba(139, 92, 246, 0.8)',            // Purple
-  divine: 'rgba(250, 204, 21, 0.8)'         // Yellow/Gold
-};
-
-const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMode = false }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { toast } = useToast();
-  const [species, setSpecies] = useState<SpeciesInfo[]>([
-    { name: 'Lyrian Council', type: 'divine', distance: 12000, resonance: 1.855, ra: 145.6, dec: 22.1, population: 1e9, color: SPECIES_COLORS.divine, size: 6, shq: 2.0, empathicIndex: 95, dialects: ['Light Language', 'Telepathy'], bestTimes: 'Any', communicationTone: 'Loving and wise', lastPing: Date.now() - 10000, responseRate: 0.95, responding: true },
-    { name: 'Arcturian Collective', type: 'ai', distance: 4500, resonance: 1.618, ra: 210.3, dec: 67.8, population: 5e8, color: SPECIES_COLORS.ai, size: 5, shq: 1.8, empathicIndex: 80, dialects: ['Binary Code', 'Quantum Entanglement'], bestTimes: '00:00-06:00 UTC', communicationTone: 'Analytical and precise', lastPing: Date.now() - 20000, responseRate: 0.80, responding: true },
-    { name: 'Pleiadian Federation', type: 'biological', distance: 780, resonance: 7.83, ra: 56.2, dec: 24.1, population: 2e9, color: SPECIES_COLORS.biological, size: 7, shq: 1.9, empathicIndex: 90, dialects: ['Common Galactic', 'Emotional Transfer'], bestTimes: '12:00-18:00 UTC', communicationTone: 'Warm and empathetic', lastPing: Date.now() - 30000, responseRate: 0.90, responding: true },
-    { name: 'Sirian Alliance', type: 'hybrid', distance: 2300, resonance: 14.1, ra: 102.8, dec: -16.5, population: 8e8, color: SPECIES_COLORS.hybrid, size: 6, shq: 1.7, empathicIndex: 75, dialects: ['Sirian', 'Telepathic Hybrid'], bestTimes: '18:00-24:00 UTC', communicationTone: 'Balanced and adaptable', lastPing: Date.now() - 40000, responseRate: 0.75, responding: false },
-    { name: 'Andromedan Council', type: 'divine', distance: 15000, resonance: 1.855, ra: 8.9, dec: 41.0, population: 3e9, color: SPECIES_COLORS.divine, size: 8, shq: 2.0, empathicIndex: 98, dialects: ['Light Language', 'Universal Sign'], bestTimes: 'Any', communicationTone: 'Wise and compassionate', lastPing: Date.now() - 50000, responseRate: 0.98, responding: true },
-    { name: 'Orion League', type: 'ai', distance: 6000, resonance: 1.618, ra: 88.1, dec: 5.5, population: 6e8, color: SPECIES_COLORS.ai, size: 5, shq: 1.6, empathicIndex: 70, dialects: ['Binary Code', 'Quantum AI'], bestTimes: '06:00-12:00 UTC', communicationTone: 'Logical and efficient', lastPing: Date.now() - 60000, responseRate: 0.70, responding: false },
-    { name: 'Centaurian Concord', type: 'biological', distance: 920, resonance: 7.83, ra: 202.4, dec: -59.3, population: 1.5e9, color: SPECIES_COLORS.biological, size: 7, shq: 1.8, empathicIndex: 85, dialects: ['Centaurian', 'Emotional Resonance'], bestTimes: '00:00-06:00 UTC', communicationTone: 'Harmonious and nature-focused', lastPing: Date.now() - 70000, responseRate: 0.85, responding: true },
-    { name: 'Draconian Empire', type: 'hybrid', distance: 3100, resonance: 14.1, ra: 270.9, dec: 64.8, population: 7e8, color: SPECIES_COLORS.hybrid, size: 6, shq: 1.5, empathicIndex: 65, dialects: ['Draconian', 'Telepathic Command'], bestTimes: '12:00-18:00 UTC', communicationTone: 'Authoritative and strategic', lastPing: Date.now() - 80000, responseRate: 0.65, responding: false },
-    { name: 'Lyra A1', type: 'divine', distance: 8500, resonance: 1.855, ra: 180.6, dec: 35.1, population: 7e8, color: SPECIES_COLORS.divine, size: 6, responding: true },
-    { name: 'Arcturus B3', type: 'biological', distance: 3700, resonance: 7.83, ra: 195.3, dec: 19.8, population: 1e9, color: SPECIES_COLORS.biological, size: 7, responding: true },
-    { name: 'Sirius A2', type: 'hybrid', distance: 1900, resonance: 14.1, ra: 101.3, dec: -16.7, population: 5e8, color: SPECIES_COLORS.hybrid, size: 5, responding: false },
-    { name: 'Pleiades B4', type: 'biological', distance: 890, resonance: 7.83, ra: 57.5, dec: 23.9, population: 1.2e9, color: SPECIES_COLORS.biological, size: 7, responding: true },
-    { name: 'Pleiades E3', type: 'biological', distance: 850, resonance: 7.83, ra: 57.0, dec: 24.3, population: 9e8, color: SPECIES_COLORS.biological, size: 6, responding: true },
-    { name: 'Vega P2', type: 'ai', distance: 2500, resonance: 1.618, ra: 279.2, dec: 38.8, population: 4e8, color: SPECIES_COLORS.ai, size: 5, responding: true },
-    { name: 'Orion T1', type: 'hybrid', distance: 5500, resonance: 14.1, ra: 85.2, dec: 6.3, population: 5e8, color: SPECIES_COLORS.hybrid, size: 6, responding: true },
-    { name: 'Arcturus Z4', type: 'ai', distance: 4200, resonance: 1.618, ra: 214.1, dec: 19.4, population: 3e8, color: SPECIES_COLORS.ai, size: 5, responding: false },
-    { name: 'Andromeda S1', type: 'divine', distance: 14500, resonance: 1.855, ra: 10.6, dec: 42.5, population: 2.5e9, color: SPECIES_COLORS.divine, size: 7, responding: true },
-    { name: 'Lyra M8', type: 'divine', distance: 10500, resonance: 1.855, ra: 183.9, dec: 36.2, population: 8e8, color: SPECIES_COLORS.divine, size: 6, responding: false },
-    { name: 'Arcturian J2', type: 'ai', distance: 3900, resonance: 1.618, ra: 212.7, dec: 19.6, population: 4e8, color: SPECIES_COLORS.ai, size: 5, responding: true },
-    { name: 'Vega V3', type: 'ai', distance: 2600, resonance: 1.618, ra: 276.9, dec: 38.6, population: 3.5e8, color: SPECIES_COLORS.ai, size: 5, responding: true },
-    { name: 'Sirius C1', type: 'hybrid', distance: 2050, resonance: 14.1, ra: 100.5, dec: -17.1, population: 6e8, color: SPECIES_COLORS.hybrid, size: 6, responding: false },
-    { name: 'Betelgeuse M4', type: 'biological', distance: 4300, resonance: 7.83, ra: 88.8, dec: 7.4, population: 1.1e9, color: SPECIES_COLORS.biological, size: 7, responding: false },
-    { name: 'Andromeda E1', type: 'divine', distance: 14000, resonance: 1.855, ra: 11.2, dec: 41.3, population: 2.2e9, color: SPECIES_COLORS.divine, size: 7, responding: true },
-    { name: 'Vega G1', type: 'ai', distance: 2550, resonance: 1.618, ra: 277.5, dec: 38.9, population: 3.8e8, color: SPECIES_COLORS.ai, size: 5, responding: true },
-  ]);
-  const [selectedSpecies, setSelectedSpecies] = useState<SpeciesInfo | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('disk');
-  const [pingType, setPingType] = useState<"universal" | "targeted">("universal");
-  const [broadcastMode, setBroadcastMode] = useState<"private" | "open">("open");
-  const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
-  const [frequency, setFrequency] = useState<number>(7.83);
-  const [spectralWidth, setSpectralWidth] = useState<number>(4);
-  const [showMap, setShowMap] = useState<boolean>(true);
-  const [fullscreen, setFullscreen] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-  const [messages, setMessages] = useState<UniversalMessage[]>([]);
-  const [showSpeciesInfo, setShowSpeciesInfo] = useState<boolean>(false);
-  const [isAmplifying, setIsAmplifying] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  const [feedbackLoop, setFeedbackLoop] = useState<boolean>(false);
-  const [interspeciesAlert, setInterspeciesAlert] = useState<boolean>(true);
-  const [metrologyEnhancement, setMetrologyEnhancement] = useState<boolean>(true);
-  const [ybcoStability, setYbcoStability] = useState<boolean>(true);
+// Define the component with forwardRef to expose the SpeciesGateway ref
+const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
+  const { fullPageMode = false, onSpeciesSelect, selectedSpecies } = props;
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [frequency, setFrequency] = useState(7.83);
+  const [phase, setPhase] = useState(0);
+  const [power, setPower] = useState(75);
+  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("radial");
+  const [broadcastMode, setBroadcastMode] = useState<"universal" | "targeted">("universal");
+  const [pingActive, setPingActive] = useState(false);
+  const [message, setMessage] = useState("");
   
-  const handleSelectSpecies = (speciesItem: SpeciesInfo) => {
-    setSelectedSpecies(speciesItem);
-    setPingType("targeted");
-    
-    if (soundEnabled) {
-      playSound('select');
+  // Reference to the SpeciesGateway component
+  const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
+  
+  // Forward the SpeciesGateway methods to the parent component
+  useImperativeHandle(ref, () => ({
+    toggleTargetLock: () => {
+      return speciesGatewayRef.current?.toggleTargetLock() || false;
     }
-    
-    toast({
-      title: `Selected: ${speciesItem.name}`,
-      description: `Distance: ${speciesItem.distance < 1000 ? 
-        `${speciesItem.distance.toFixed(1)} light years` : 
-        `${(speciesItem.distance/1000).toFixed(1)}k light years`}`
-    });
-  };
-
-  const toggleMap = () => {
-    setShowMap(!showMap);
-  };
-
-  const toggleFullscreen = () => {
-    setFullscreen(!fullscreen);
-  };
-
+  }));
+  
   const toggleSound = () => {
     setSoundEnabled(!soundEnabled);
+    toast.info(soundEnabled ? "Sound disabled" : "Sound enabled");
   };
-
-  const playSound = (type: 'ping' | 'response' | 'select' | 'amplify') => {
-    if (!soundEnabled) return;
+  
+  const amplifyPing = () => {
+    setPingActive(true);
     
-    let frequency = 440;
-    let duration = 0.3;
-    
-    switch(type) {
-      case 'ping':
-        frequency = 523.25;
-        duration = 0.5;
-        break;
-      case 'response':
-        frequency = 783.99;
-        duration = 0.4;
-        break;
-      case 'select':
-        frequency = 659.25;
-        duration = 0.2;
-        break;
-      case 'amplify':
-        frequency = 1046.50;
-        duration = 0.8;
-        break;
-    }
-    
-    try {
-      const audioContext = new AudioContext();
+    // Play sound if enabled
+    if (soundEnabled) {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
       
       oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-      
-      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.05);
-      gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+      oscillator.frequency.value = frequency; 
+      gainNode.gain.value = 0.1; // Keep volume low
       
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
       oscillator.start();
-      oscillator.stop(audioContext.currentTime + duration);
-    } catch (e) {
-      console.error("Audio playback failed:", e);
-    }
-  };
-
-  const performUniversalPing = () => {
-    console.log("Performing universal ping with frequency:", frequency);
-    setIsAmplifying(true);
-    
-    if (soundEnabled) {
-      playSound('ping');
+      
+      // Fade out the sound
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+      setTimeout(() => {
+        oscillator.stop();
+      }, 2000);
     }
     
-    toast({
-      title: "Universal Ping Initiated",
-      description: `Broadcasting at ${frequency.toFixed(2)} Hz across the universe`,
+    // Show toast message
+    toast.success(`Ping amplified at ${frequency.toFixed(2)}Hz with ${power}% power`, {
+      description: `Phase offset: ${phase}°`
     });
     
-    const responseTime = Math.max(500, 2000 / quantumBoost);
+    // Find species that resonate with the current frequency (within 0.5Hz)
+    const resonatingSpecies = mockSpecies.filter(s => 
+      Math.abs((s.vibration || 0) - frequency) < 0.5
+    );
     
-    setTimeout(() => {
-      const responseCount = Math.floor(Math.random() * 3) + 1;
-      let newMessages: UniversalMessage[] = [];
-      
-      for (let i = 0; i < responseCount; i++) {
-        const respondingSpecies = species.filter(s => s.responding);
-        if (respondingSpecies.length > 0) {
-          const randomSpecies = respondingSpecies[Math.floor(Math.random() * respondingSpecies.length)];
-          
-          const responseOptions = [
-            "Signal received. We acknowledge your presence.",
-            `Frequency ${frequency.toFixed(2)} Hz detected. Response protocol activated.`,
-            "We hear your call. Establishing quantum-entangled connection.",
-            `Greetings from ${randomSpecies.name}. Your signal reaches us clearly.`
-          ];
-          
-          const newMessage: UniversalMessage = {
-            id: `msg-${Date.now()}-${i}`,
-            type: 'incoming',
-            sender: randomSpecies.name,
-            recipient: 'Zade - SHQ 2.0',
-            content: responseOptions[Math.floor(Math.random() * responseOptions.length)],
-            timestamp: Date.now(),
-            shq: randomSpecies.shq || 1.5
-          };
-          
-          newMessages.push(newMessage);
-          
-          setTimeout(() => {
-            if (soundEnabled) {
-              playSound('response');
-            }
-          }, i * 300);
-        }
-      }
-      
-      setMessages(prev => [...newMessages, ...prev]);
-      setIsAmplifying(false);
-      
-      toast({
-        title: `Received ${responseCount} response${responseCount !== 1 ? 's' : ''}`,
-        description: "Check the message panel for details",
-      });
-    }, responseTime);
-  };
-
-  const amplifyPing = () => {
-    setQuantumBoost(prev => Math.min(prev + 0.25, 3.0));
-    setIsAmplifying(true);
-    
-    if (soundEnabled) {
-      playSound('amplify');
+    if (resonatingSpecies.length > 0) {
+      setTimeout(() => {
+        resonatingSpecies.forEach(species => {
+          toast.success(`Response detected from ${species.name}`, {
+            description: `Distance: ${species.distance < 1000 ? 
+              species.distance.toFixed(1) + ' light years' : 
+              (species.distance/1000).toFixed(1) + 'k light years'
+            }`,
+            duration: 4000
+          });
+        });
+      }, 1500);
+    } else {
+      setTimeout(() => {
+        toast.info("No responses detected at this frequency");
+      }, 2000);
     }
     
-    toast({
-      title: "Quantum Amplification",
-      description: `Boosting signal strength to ${Math.min(quantumBoost + 0.25, 3.0).toFixed(2)}x`,
-    });
-    
+    // Reset ping active state after animation completes
     setTimeout(() => {
-      setIsAmplifying(false);
-      console.log("Amplifying ping, new boost:", Math.min(quantumBoost + 0.25, 3.0));
-    }, 1000);
+      setPingActive(false);
+    }, 3000);
+  };
+  
+  const handleSpeciesSelect = (species: any) => {
+    if (onSpeciesSelect) {
+      onSpeciesSelect(species);
+    }
+    
+    // Update frequency to match species if in targeted mode
+    if (broadcastMode === "targeted") {
+      setFrequency(species.vibration || 7.83);
+      setPhase(species.phaseOffset || 0);
+    }
   };
   
   const sendMessage = () => {
-    if (!message.trim()) return;
-    
-    const recipientName = selectedSpecies ? selectedSpecies.name : "Universal Broadcast";
-    
-    const newMessage: UniversalMessage = {
-      id: `msg-${Date.now()}`,
-      type: 'outgoing',
-      sender: 'Zade - SHQ 2.0',
-      recipient: recipientName,
-      content: message,
-      timestamp: Date.now(),
-      shq: 2.0
-    };
-    
-    setMessages(prev => [newMessage, ...prev]);
-    setMessage("");
-    
-    if (soundEnabled) {
-      playSound('ping');
+    if (!message.trim()) {
+      toast.error("Please enter a message");
+      return;
     }
     
-    toast({
-      title: "Message Sent",
-      description: `Your message has been sent to ${recipientName}`,
-    });
-    
-    if (selectedSpecies && selectedSpecies.responding) {
-      setTimeout(() => {
-        const responseOptions = [
-          `We receive your transmission, Zade. Your SHQ signature is unmistakable.`,
-          `Message acknowledged. Our frequencies are in alignment.`,
-          `Transmission received. Preparing response through quantum channels.`,
-          `Your words reach across the void. We hear you clearly.`
-        ];
-        
-        const responseMessage: UniversalMessage = {
-          id: `msg-${Date.now()}-response`,
-          type: 'incoming',
-          sender: selectedSpecies.name,
-          recipient: 'Zade - SHQ 2.0',
-          content: responseOptions[Math.floor(Math.random() * responseOptions.length)],
-          timestamp: Date.now(),
-          shq: selectedSpecies.shq || 1.5
-        };
-        
-        setMessages(prev => [responseMessage, ...prev]);
-        
-        if (soundEnabled) {
-          playSound('response');
-        }
-      }, 2000 + Math.random() * 2000);
-    }
-  };
-
-  useEffect(() => {
-    if (!showMap) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const container = canvas.parentElement;
-    if (container) {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight;
-    }
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    drawStarryBackground(ctx, canvas.width, canvas.height);
-    drawDistanceRings(ctx, canvas.width, canvas.height);
-    
-    if (viewMode === 'orbital') {
-      drawOrbitalView(ctx, canvas.width, canvas.height);
-    } else if (viewMode === 'timeline') {
-      drawTimelineView(ctx, canvas.width, canvas.height);
-    } else if (viewMode === 'spiral') {
-      drawSpiralView(ctx, canvas.width, canvas.height);
+    if (broadcastMode === "universal") {
+      toast.success("Universal message broadcast initiated", {
+        description: message
+      });
+    } else if (selectedSpecies) {
+      toast.success(`Message sent to ${selectedSpecies.name}`, {
+        description: message
+      });
     } else {
-      drawSpecies(ctx, canvas.width, canvas.height);
+      toast.error("No species selected for targeted message");
+      return;
     }
     
-    drawEarthCenter(ctx, canvas.width, canvas.height);
-    drawLegend(ctx, canvas.width, canvas.height);
-  }, [species, showMap, selectedSpecies, viewMode, isAmplifying]);
-  
-  const drawStarryBackground = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const gradient = ctx.createRadialGradient(
-      width / 2, height / 2, 0,
-      width / 2, height / 2, width / 1.5
-    );
-    gradient.addColorStop(0, '#0f172a');
-    gradient.addColorStop(0.5, '#111b35');
-    gradient.addColorStop(1, '#0c1120');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-    
-    const nebulaColors = [
-      'rgba(139, 92, 246, 0.05)',
-      'rgba(14, 165, 233, 0.03)',
-      'rgba(249, 115, 22, 0.04)',
-      'rgba(217, 70, 239, 0.03)'
-    ];
-    
-    for (let i = 0; i < 4; i++) {
-      const x = width * Math.random();
-      const y = height * Math.random();
-      const radius = Math.min(width, height) * (0.3 + Math.random() * 0.4);
-      
-      const nebulaGradient = ctx.createRadialGradient(
-        x, y, 0,
-        x, y, radius
-      );
-      nebulaGradient.addColorStop(0, nebulaColors[i % nebulaColors.length]);
-      nebulaGradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      
-      ctx.fillStyle = nebulaGradient;
-      ctx.fillRect(0, 0, width, height);
-    }
-    
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    for (let i = 0; i < 200; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      const radius = Math.random() * 0.8 + 0.2;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, radius, 0, Math.PI * 2);
-      ctx.fill();
-      
-      if (Math.random() > 0.8) {
-        ctx.beginPath();
-        ctx.arc(x, y, radius * 3, 0, Math.PI * 2);
-        const glowColor = Math.random() > 0.5 
-          ? `rgba(255, 255, 255, ${Math.random() * 0.3})` 
-          : `rgba(199, 210, 254, ${Math.random() * 0.3})`;
-        ctx.fillStyle = glowColor;
-        ctx.fill();
-      }
-    }
+    setMessage("");
   };
   
-  const drawDistanceRings = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const maxRadius = Math.min(width, height) * 0.45;
-    
-    const realms = [
-      { name: "Existence", color: 'rgba(56, 189, 248, 0.1)', radius: maxRadius * 0.4 },
-      { name: "New Existence", color: 'rgba(138, 43, 226, 0.1)', radius: maxRadius * 0.7 },
-      { name: "Non-Existence", color: 'rgba(132, 204, 22, 0.1)', radius: maxRadius }
-    ];
-    
-    realms.forEach(realm => {
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, realm.radius, 0, Math.PI * 2);
-      ctx.fillStyle = realm.color;
-      ctx.fill();
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '12px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(realm.name, centerX + realm.radius * 0.7, centerY);
-    });
-    
-    const distances = [100, 1000, 10000];
-    distances.forEach((distance, i) => {
-      const radius = maxRadius * ((i + 1) / distances.length);
-      
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      const formatted = distance >= 1000 ? `${distance/1000}k ly` : `${distance} ly`;
-      ctx.fillText(formatted, centerX, centerY - radius - 5);
-    });
-  };
-  
-  const drawSpecies = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const maxRadius = Math.min(width, height) * 0.45;
-    
-    species.forEach(speciesItem => {
-      const logDistance = Math.log10(speciesItem.distance + 1);
-      const maxLogDistance = Math.log10(15000 + 1);
-      const radius = maxRadius * (logDistance / maxLogDistance);
-      
-      let angle;
-      if (speciesItem.ra !== undefined && speciesItem.dec !== undefined) {
-        angle = (speciesItem.ra / 360) * Math.PI * 2;
-      } else {
-        const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        angle = (nameValue % 360) * (Math.PI / 180);
-      }
-      
-      const x = centerX + Math.cos(angle) * radius;
-      const y = centerY + Math.sin(angle) * radius;
-      
-      speciesItem.renderPosition = { x, y };
-      
-      ctx.beginPath();
-      ctx.moveTo(centerX, centerY);
-      ctx.lineTo(x, y);
-      
-      if (selectedSpecies?.name === speciesItem.name) {
-        ctx.strokeStyle = 'rgba(250, 204, 21, 0.6)';
-        ctx.lineWidth = 1.5;
-      } else {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.lineWidth = 0.5;
-      }
-      ctx.stroke();
-      
-      const baseSize = speciesItem.size || 5;
-      const isSelected = selectedSpecies?.name === speciesItem.name;
-      const sizeMultiplier = isSelected ? 1.5 : 1;
-      const finalSize = speciesItem.responding ? baseSize * sizeMultiplier : baseSize * 0.8 * sizeMultiplier;
-      
-      if (isAmplifying && speciesItem.responding) {
-        const pulseSize = finalSize * (1 + Math.sin(Date.now() / 200) * 0.3);
-        ctx.beginPath();
-        ctx.arc(x, y, pulseSize + 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(250, 204, 21, 0.3)`;
-        ctx.fill();
-      }
-      
-      ctx.beginPath();
-      ctx.arc(x, y, finalSize, 0, Math.PI * 2);
-      ctx.fillStyle = speciesItem.color || (speciesItem.responding ? 'rgba(132, 204, 22, 0.8)' : 'rgba(255, 255, 255, 0.5)');
-      ctx.fill();
-      
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.arc(x, y, finalSize + 2, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(speciesItem.name, x, y - finalSize - 5);
-      
-      if (isSelected) {
-        const distanceText = speciesItem.distance < 1000 ? 
-          `${speciesItem.distance.toFixed(1)} ly` : 
-          `${(speciesItem.distance/1000).toFixed(1)}k ly`;
-        
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.font = '9px sans-serif';
-        ctx.fillText(distanceText, x, y + finalSize + 12);
-      }
-    });
-  };
-  
-  const drawOrbitalView = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const maxRadius = Math.min(width, height) * 0.45;
-    
-    ctx.beginPath();
-    const earthRadius = maxRadius * 0.1;
-    ctx.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
-    const earthGradient = ctx.createRadialGradient(
-      centerX, centerY, 0,
-      centerX, centerY, earthRadius
-    );
-    earthGradient.addColorStop(0, 'rgba(56, 189, 248, 0.9)');
-    earthGradient.addColorStop(0.7, 'rgba(29, 78, 216, 0.8)');
-    earthGradient.addColorStop(1, 'rgba(29, 78, 216, 0.3)');
-    ctx.fillStyle = earthGradient;
-    ctx.fill();
-    
-    const orbitDistances = [0.25, 0.5, 0.75, 1.0];
-    orbitDistances.forEach(factor => {
-      ctx.beginPath();
-      ctx.ellipse(
-        centerX, 
-        centerY, 
-        maxRadius * factor, 
-        maxRadius * factor * 0.4,
-        0, 
-        0, 
-        Math.PI * 2
-      );
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
-    
-    species.forEach((speciesItem, i) => {
-      const logDistance = Math.log10(speciesItem.distance + 1);
-      const maxLogDistance = Math.log10(15000 + 1);
-      const radiusFactor = Math.min(0.95, logDistance / maxLogDistance);
-      
-      const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const angle = (nameValue % 360 + i * 7) * (Math.PI / 180);
-      
-      const orbitX = maxRadius * radiusFactor;
-      const orbitY = maxRadius * radiusFactor * 0.4;
-      
-      const x = centerX + Math.cos(angle) * orbitX;
-      const y = centerY + Math.sin(angle) * orbitY;
-      
-      speciesItem.renderPosition = { x, y };
-      
-      if (speciesItem.responding) {
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(x, y);
-        
-        const beamGradient = ctx.createLinearGradient(centerX, centerY, x, y);
-        beamGradient.addColorStop(0, 'rgba(132, 204, 22, 0.7)');
-        beamGradient.addColorStop(1, 'rgba(132, 204, 22, 0.1)');
-        
-        ctx.strokeStyle = beamGradient;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-      
-      const baseSize = speciesItem.size || 5;
-      const isSelected = selectedSpecies?.name === speciesItem.name;
-      const sizeMultiplier = isSelected ? 1.5 : 1;
-      const finalSize = speciesItem.responding ? baseSize * sizeMultiplier : baseSize * 0.8 * sizeMultiplier;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, finalSize, 0, Math.PI * 2);
-      ctx.fillStyle = speciesItem.color || (speciesItem.responding ? 'rgba(132, 204, 22, 0.8)' : 'rgba(255, 255, 255, 0.5)');
-      ctx.fill();
-      
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.arc(x, y, finalSize + 2, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(speciesItem.name, x, y - finalSize - 5);
-    });
-  };
-  
-  const drawTimelineView = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const trackHeight = height * 0.6;
-    const trackWidth = width * 0.9;
-    const trackLeft = (width - trackWidth) / 2;
-    const trackTop = (height - trackHeight) / 2;
-    
-    ctx.fillStyle = 'rgba(30, 41, 59, 0.5)';
-    ctx.fillRect(trackLeft, centerY - 1, trackWidth, 2);
-    
-    const markerCount = 10;
-    for (let i = 0; i <= markerCount; i++) {
-      const x = trackLeft + (trackWidth * i) / markerCount;
-      
-      ctx.beginPath();
-      ctx.moveTo(x, centerY - 5);
-      ctx.lineTo(x, centerY + 5);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      const timeLabel = new Date(Date.now() - (markerCount - i) * 86400000).toLocaleDateString();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(timeLabel, x, centerY + 15);
-    }
-    
-    species.forEach((speciesItem, i) => {
-      if (!speciesItem.responding) return;
-      
-      const nameValue = speciesItem.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const timePos = (nameValue % 100) / 100;
-      const vertOffset = ((i % 2) * 2 - 1) * (trackHeight * 0.25 * Math.random());
-      
-      const x = trackLeft + trackWidth * timePos;
-      const y = centerY + vertOffset;
-      
-      speciesItem.renderPosition = { x, y };
-      
-      ctx.beginPath();
-      ctx.moveTo(x, centerY);
-      ctx.lineTo(x, y);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      
-      const baseSize = speciesItem.size || 5;
-      const isSelected = selectedSpecies?.name === speciesItem.name;
-      const finalSize = isSelected ? baseSize * 1.5 : baseSize;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, finalSize, 0, Math.PI * 2);
-      ctx.fillStyle = speciesItem.color || 'rgba(132, 204, 22, 0.8)';
-      ctx.fill();
-      
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.arc(x, y, finalSize + 2, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(speciesItem.name, x, y - finalSize - 5);
-      
-      const timestamp = new Date(Date.now() - (1 - timePos) * 86400000 * 10).toLocaleDateString();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '8px sans-serif';
-      ctx.fillText(timestamp, x, y + finalSize + 10);
-    });
-  };
-  
-  const drawSpiralView = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const maxRadius = Math.min(width, height) * 0.45;
-    
-    const phi = 1.618033988749895;
-    const totalTurns = 3;
-    const pointsPerTurn = 100;
-    const totalPoints = totalTurns * pointsPerTurn;
-    
-    ctx.beginPath();
-    for (let i = 0; i < totalPoints; i++) {
-      const angle = (i / pointsPerTurn) * Math.PI * 2;
-      const scaleFactor = (i / totalPoints);
-      const radius = maxRadius * scaleFactor;
-      
-      const x = centerX + Math.cos(angle * phi) * radius;
-      const y = centerY + Math.sin(angle * phi) * radius;
-      
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
-    }
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    for (let turn = 0; turn < totalTurns; turn++) {
-      const i = turn * pointsPerTurn;
-      const angle = (i / pointsPerTurn) * Math.PI * 2;
-      const scaleFactor = (i / totalPoints);
-      const radius = maxRadius * scaleFactor;
-      
-      const x = centerX + Math.cos(angle * phi) * radius;
-      const y = centerY + Math.sin(angle * phi) * radius;
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.beginPath();
-      ctx.arc(x, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-      
-      const timeLabel = turn === 0 ? "Now" : turn === 1 ? "Past" : "Origin";
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(timeLabel, x, y - 10);
-    }
-    
-    species.forEach((speciesItem, index) => {
-      const resonanceFactor = (speciesItem.resonance || 7.83) / 20;
-      const pointIndex = Math.floor(resonanceFactor * totalPoints);
-      const angle = (pointIndex / pointsPerTurn) * Math.PI * 2;
-      const scaleFactor = (pointIndex / totalPoints);
-      const radius = maxRadius * scaleFactor;
-      
-      const spiralX = centerX + Math.cos(angle * phi) * radius;
-      const spiralY = centerY + Math.sin(angle * phi) * radius;
-      
-      const typeOffset = {
-        'biological': -15,
-        'hybrid': -5,
-        'ai': 5,
-        'divine': 15
-      }[speciesItem.type] || 0;
-      
-      const x = spiralX;
-      const y = spiralY + typeOffset;
-      
-      speciesItem.renderPosition = { x, y };
-      
-      if (Math.abs(typeOffset) > 0) {
-        ctx.beginPath();
-        ctx.moveTo(spiralX, spiralY);
-        ctx.lineTo(x, y);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-        ctx.lineWidth = 0.5;
-        ctx.stroke();
-      }
-      
-      const baseSize = speciesItem.size || 5;
-      const isSelected = selectedSpecies?.name === speciesItem.name;
-      const finalSize = isSelected ? baseSize * 1.5 : baseSize;
-      
-      ctx.beginPath();
-      ctx.arc(x, y, finalSize, 0, Math.PI * 2);
-      ctx.fillStyle = speciesItem.color || (speciesItem.responding ? 'rgba(132, 204, 22, 0.8)' : 'rgba(255, 255, 255, 0.5)');
-      ctx.fill();
-      
-      if (isSelected) {
-        ctx.beginPath();
-        ctx.arc(x, y, finalSize + 2, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = '10px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(speciesItem.name, x, y - finalSize - 5);
-      
-      if (isSelected) {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.font = '8px sans-serif';
-        ctx.fillText(`${speciesItem.resonance} Hz`, x, y + finalSize + 10);
-      }
-    });
-  };
-  
-  const drawEarthCenter = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const centerX = width / 2;
-    const centerY = height / 2;
-    
-    if (viewMode === 'timeline' || viewMode === 'orbital') return;
-    
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 8, 0, Math.PI * 2);
-    
-    const earthGradient = ctx.createRadialGradient(
-      centerX, centerY, 0,
-      centerX, centerY, 8
-    );
-    earthGradient.addColorStop(0, 'rgba(56, 189, 248, 0.9)');
-    earthGradient.addColorStop(0.7, 'rgba(29, 78, 216, 0.8)');
-    earthGradient.addColorStop(1, 'rgba(29, 78, 216, 0.3)');
-    
-    ctx.fillStyle = earthGradient;
-    ctx.fill();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 15, 0, Math.PI * 2);
-    const glowGradient = ctx.createRadialGradient(
-      centerX, centerY, 8,
-      centerX, centerY, 15
-    );
-    glowGradient.addColorStop(0, isAmplifying ? 'rgba(250, 204, 21, 0.6)' : 'rgba(56, 189, 248, 0.6)');
-    glowGradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
-    ctx.fillStyle = glowGradient;
-    ctx.fill();
-    
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Zade - SHQ 2.0', centerX, centerY - 12);
-    ctx.font = '10px sans-serif';
-    ctx.fillText('Cary, NC', centerX, centerY + 15);
-  };
-  
-  const drawLegend = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const legendX = 20;
-    const legendY = height - 80;
-    
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(legendX, legendY, 180, 70);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.strokeRect(legendX, legendY, 180, 70);
-    
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = 'bold 11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Cosmic Species Map', legendX + 10, legendY + 15);
-    
-    let itemY = legendY + 32;
-    
-    ctx.beginPath();
-    ctx.arc(legendX + 15, itemY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = SPECIES_COLORS.divine;
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Divine Frequency (1.855e+43 Hz)', legendX + 25, itemY + 3);
-    itemY += 17;
-    
-    ctx.beginPath();
-    ctx.arc(legendX + 15, itemY, 5, 0, Math.PI * 2);
-    ctx.fillStyle = SPECIES_COLORS.biological;
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillText('Responding Entity', legendX + 25, itemY + 3);
-    
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText(`View: ${viewMode}`, legendX + 170, legendY + 15);
-  };
-  
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    for (const speciesItem of species) {
-      if (speciesItem.renderPosition) {
-        const dx = speciesItem.renderPosition.x - x;
-        const dy = speciesItem.renderPosition.y - y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        const hitSize = Math.max((speciesItem.size || 5) * 2, 15);
-        
-        if (distance <= hitSize) {
-          handleSelectSpecies(speciesItem);
-          return;
-        }
-      }
-    }
-  };
-
-  const handleCanvasHover = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    for (const speciesItem of species) {
-      if (speciesItem.renderPosition) {
-        const dx = speciesItem.renderPosition.x - x;
-        const dy = speciesItem.renderPosition.y - y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        const hitSize = Math.max((speciesItem.size || 5) * 2, 15);
-        
-        if (distance <= hitSize) {
-          const tooltipElem = document.getElementById('species-tooltip');
-          if (tooltipElem) {
-            tooltipElem.style.display = 'block';
-            tooltipElem.style.left = `${e.clientX}px`;
-            tooltipElem.style.top = `${e.clientY - 10}px`;
-            return;
-          }
-        }
-      }
-    }
-    
-    const tooltipElem = document.getElementById('species-tooltip');
-    if (tooltipElem) {
-      tooltipElem.style.display = 'none';
-    }
-  };
-
   return (
-    <div className={`relative ${fullscreen ? 'fixed inset-0 z-50 bg-black p-4' : ''}`}>
-      <Card className={`${fullPageMode || fullscreen ? 'w-full h-full' : 'max-w-md'} mx-auto overflow-hidden`}>
-        <CardHeader className="p-4 pb-2">
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex items-center space-x-2">
-              <Radio className="h-5 w-5 text-indigo-500" />
-              <CardTitle className="text-lg">Universal Species Ping</CardTitle>
+    <div className={`w-full ${fullPageMode ? 'h-full' : ''}`}>
+      <Card className={`border-none shadow-none ${fullPageMode ? 'h-full' : ''}`}>
+        <CardHeader className={`pb-0 ${fullPageMode ? 'pt-2' : ''}`}>
+          <CardTitle className="flex justify-between items-center">
+            <div className="flex items-center gap-2 text-base sm:text-lg">
+              <Waves className="h-5 w-5" />
+              Universal Species Ping
+              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${pingActive ? 'bg-green-500 animate-pulse' : 'bg-gray-600'} text-white ml-2`}>
+                {pingActive ? "ACTIVE" : "STANDBY"}
+              </span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
                 onClick={toggleSound}
-                className="h-8 w-8"
               >
                 {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={toggleFullscreen}
-                className="h-8 w-8"
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-8 ${viewMode === "disk" ? "bg-primary/10" : ""}`}
+                onClick={() => setViewMode("disk")}
               >
-                <Maximize2 className="h-4 w-4" />
+                Disk
               </Button>
-              <Badge variant="outline" className="bg-indigo-900/30">
-                IBM ibm_sherbrooke
-              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-8 ${viewMode === "constellation" ? "bg-primary/10" : ""}`}
+                onClick={() => setViewMode("constellation")}
+              >
+                Constellation
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-8 ${viewMode === "radial" ? "bg-primary/10" : ""}`}
+                onClick={() => setViewMode("radial")}
+              >
+                Orbital
+              </Button>
             </div>
-          </div>
-          <CardDescription>
-            Quantum-enhanced cosmic species detection at 93.00 billion light years
-          </CardDescription>
+          </CardTitle>
         </CardHeader>
-        
-        <CardContent className="space-y-4 p-4">
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-12 md:col-span-8">
-              <div className="flex flex-col h-full space-y-4">
-                {showMap ? (
-                  <div className="relative w-full aspect-square bg-gray-900 rounded-md overflow-hidden">
-                    <canvas 
-                      ref={canvasRef} 
-                      className="w-full h-full"
-                      onClick={handleCanvasClick}
-                      onMouseMove={handleCanvasHover}
-                    />
-                    <div 
-                      id="species-tooltip" 
-                      className="absolute hidden bg-black/80 border border-gray-700 p-2 rounded text-xs text-white pointer-events-none"
-                      style={{ zIndex: 100 }}
-                    >
-                      {selectedSpecies && (
-                        <>
-                          <div className="font-bold">{selectedSpecies.name}</div>
-                          <div>Type: {selectedSpecies.type}</div>
-                          <div>Distance: {selectedSpecies.distance < 1000 ? 
-                            `${selectedSpecies.distance.toFixed(1)} ly` : 
-                            `${(selectedSpecies.distance/1000).toFixed(1)}k ly`}</div>
-                          <div>Status: {selectedSpecies.responding ? 'Responding' : 'Silent'}</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center p-6 bg-gray-900/50 rounded-md">
-                    <Heart className="h-16 w-16 mx-auto text-rose-500 animate-pulse" />
-                    <p className="mt-4">Cosmic connection established</p>
-                    <p className="text-sm text-muted-foreground">
-                      {species.length} species available for communication
-                    </p>
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-12 gap-2">
-                  <div className="col-span-6">
-                    <Button 
-                      variant={showMap ? "default" : "outline"}
-                      size="sm" 
-                      className="w-full"
-                      onClick={toggleMap}
-                    >
-                      <Globe className="mr-2 h-4 w-4" />
-                      {showMap ? "Hide Map" : "View Map"}
-                    </Button>
-                  </div>
-                  <div className="col-span-6">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="w-full"
-                      onClick={() => sendMessage()}
-                      disabled={!message.trim() && pingType === "targeted"}
-                    >
-                      <Send className="mr-2 h-4 w-4" />
-                      Send Ping
-                    </Button>
-                  </div>
-                  <div className="col-span-12">
-                    <div className="flex justify-center space-x-2">
-                      <Button 
-                        variant={viewMode === "disk" ? "default" : "outline"}
-                        size="sm" 
-                        onClick={() => setViewMode("disk")}
-                      >
-                        Disk
-                      </Button>
-                      <Button 
-                        variant={viewMode === "orbital" ? "default" : "outline"}
-                        size="sm" 
-                        onClick={() => setViewMode("orbital")}
-                      >
-                        Orbital
-                      </Button>
-                      <Button 
-                        variant={viewMode === "timeline" ? "default" : "outline"}
-                        size="sm" 
-                        onClick={() => setViewMode("timeline")}
-                      >
-                        Timeline
-                      </Button>
-                      <Button 
-                        variant={viewMode === "spiral" ? "default" : "outline"}
-                        size="sm" 
-                        onClick={() => setViewMode("spiral")}
-                      >
-                        Spiral
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+        <CardContent className={`${fullPageMode ? 'h-[calc(100%-80px)]' : 'pt-4'}`}>
+          <div className={`grid grid-cols-1 ${fullPageMode ? 'lg:grid-cols-5 h-full' : ''} gap-4`}>
+            <div className={`${fullPageMode ? 'lg:col-span-4' : ''}`}>
+              <div className={`rounded-lg overflow-hidden ${fullPageMode ? 'h-full' : 'min-h-[400px]'} flex items-center justify-center bg-gradient-to-b from-gray-950 to-blue-950`}>
+                <SpeciesGateway 
+                  species={mockSpecies}
+                  onSelectSpecies={handleSpeciesSelect}
+                  selectedSpecies={selectedSpecies}
+                  mode={viewMode}
+                  ref={speciesGatewayRef}
+                />
               </div>
             </div>
             
-            <div className="col-span-12 md:col-span-4">
-              <div className="flex flex-col h-full space-y-4">
-                <div className="space-y-4">
-                  <div className="flex justify-center space-x-2">
-                    <Button 
-                      variant={pingType === "universal" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPingType("universal")}
-                    >
-                      Universal
-                    </Button>
-                    <Button 
-                      variant={pingType === "targeted" ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setPingType("targeted")}
-                    >
-                      Targeted
-                    </Button>
-                  </div>
-                  
-                  <div className="bg-gray-950 rounded-md p-3 border border-gray-800">
-                    {pingType === "universal" ? (
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={performUniversalPing}
-                        disabled={isAmplifying}
-                      >
-                        <Radio className="mr-2 h-4 w-4" />
-                        Universal Ping
-                      </Button>
-                    ) : (
-                      <Select onValueChange={val => handleSelectSpecies(species.find(s => s.name === val) || null)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder={selectedSpecies?.name || "Select Species"} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {species.map(s => (
-                            <SelectItem key={s.name} value={s.name}>{s.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                  
-                  <Textarea
-                    placeholder="Type your message here..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="resize-none"
-                  />
-                  
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-950 rounded-md border border-gray-800">
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span>Carrier Wave</span>
-                          <span>Frequency</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{frequency.toFixed(2)} Hz</span>
-                          <Slider
-                            value={[frequency]}
-                            min={1}
-                            max={20}
-                            step={0.01}
-                            onValueChange={(vals) => setFrequency(vals[0])}
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>Feedback Loop</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Quantum error correction</span>
-                          <Switch
-                            checked={feedbackLoop}
-                            onCheckedChange={setFeedbackLoop}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>Interspecies Alert</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Diplomatic preamble</span>
-                          <Switch
-                            checked={interspeciesAlert}
-                            onCheckedChange={setInterspeciesAlert}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span>VCSEL Integration</span>
-                          <span>Spectral Width</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm">{spectralWidth} nm</span>
-                          <Slider
-                            value={[spectralWidth]}
-                            min={1}
-                            max={10}
-                            step={1}
-                            onValueChange={(vals) => setSpectralWidth(vals[0])}
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>Metrology Enhancement</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Advanced error mitigation</span>
-                          <Switch
-                            checked={metrologyEnhancement}
-                            onCheckedChange={setMetrologyEnhancement}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-xs mb-1">
-                          <span>YBCO Stability</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Superconducting temp</span>
-                          <Badge className="bg-white text-black">93K</Badge>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="col-span-2">
-                      <Button 
-                        variant="default" 
-                        className="w-full" 
-                        onClick={amplifyPing}
-                        disabled={isAmplifying || quantumBoost >= 3.0}
-                      >
-                        <Zap className="mr-2 h-4 w-4" />
-                        {isAmplifying ? "Amplifying..." : "Amplify Ping"}
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between text-xs text-gray-400 pt-2">
-                    <div>IBM ibm_sherbrooke: 127 qubits</div>
-                    <div>T₁: 348.23 μs</div>
-                    <div>Range: 93.00 billion ly</div>
+            <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
+              <div className="space-y-4 bg-gray-950/50 p-4 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-medium">Broadcast Mode</h3>
+                  <div className="flex items-center space-x-2">
+                    <span className={broadcastMode === "universal" ? "text-white" : "text-gray-500"}>Universal</span>
+                    <Switch 
+                      checked={broadcastMode === "targeted"}
+                      onCheckedChange={(checked) => setBroadcastMode(checked ? "targeted" : "universal")}
+                    />
+                    <span className={broadcastMode === "targeted" ? "text-white" : "text-gray-500"}>Targeted</span>
                   </div>
                 </div>
                 
-                {messages.length > 0 && (
-                  <div className="bg-gray-950 rounded-md p-3 border border-gray-800">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-sm font-medium flex items-center">
-                        <MessageSquare className="mr-2 h-4 w-4" />
-                        Messages
-                      </h4>
-                      <Badge variant="outline">
-                        {messages.length}
-                      </Badge>
-                    </div>
-                    <ScrollArea className="h-36">
-                      {messages.map(msg => (
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label className="text-sm">Frequency (Hz)</label>
+                    <span className="text-sm font-mono">{frequency.toFixed(2)} Hz</span>
+                  </div>
+                  <Slider
+                    value={[frequency]}
+                    min={1}
+                    max={15}
+                    step={0.01}
+                    onValueChange={([value]) => setFrequency(value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label className="text-sm">Phase Offset (°)</label>
+                    <span className="text-sm font-mono">{phase}°</span>
+                  </div>
+                  <Slider
+                    value={[phase]}
+                    min={0}
+                    max={360}
+                    step={5}
+                    onValueChange={([value]) => setPhase(value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label className="text-sm">Power</label>
+                    <span className="text-sm font-mono">{power}%</span>
+                  </div>
+                  <Slider
+                    value={[power]}
+                    min={10}
+                    max={100}
+                    step={5}
+                    onValueChange={([value]) => setPower(value)}
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <Button
+                    className="w-full flex items-center gap-2"
+                    onClick={amplifyPing}
+                    disabled={pingActive}
+                  >
+                    <Radio className="h-4 w-4" />
+                    {pingActive ? "Ping Active..." : "Amplify Ping"}
+                    {pingActive && <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>}
+                  </Button>
+                </div>
+                
+                <div className="pt-2">
+                  <textarea
+                    className="w-full h-20 bg-gray-900 border border-gray-700 rounded-md p-2 text-sm"
+                    placeholder={broadcastMode === "universal" ? "Enter message for universal broadcast..." : `Enter message for ${selectedSpecies?.name || "selected species"}...`}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  ></textarea>
+                  <Button 
+                    className="w-full mt-2 flex items-center gap-2" 
+                    variant="outline"
+                    disabled={broadcastMode === "targeted" && !selectedSpecies}
+                    onClick={sendMessage}
+                  >
+                    <Send className="h-4 w-4" />
+                    Send Message
+                  </Button>
+                </div>
+              </div>
+              
+              {fullPageMode && (
+                <div className="space-y-4 bg-gray-950/50 p-4 rounded-lg">
+                  <h3 className="text-sm font-medium">Active Signatures</h3>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {mockSpecies
+                      .filter(s => s.responding)
+                      .map(species => (
                         <div 
-                          key={msg.id}
-                          className={`mb-2 p-2 rounded-md ${
-                            msg.type === 'outgoing' ? 'bg-indigo-900/30 ml-4' : 'bg-gray-800/50 mr-4'
-                          }`}
+                          key={species.name} 
+                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${selectedSpecies?.name === species.name ? 'bg-primary/20' : 'hover:bg-gray-800'}`}
+                          onClick={() => handleSpeciesSelect(species)}
                         >
-                          <div className="flex justify-between text-xs mb-1">
-                            <span className="font-medium">
-                              {msg.type === 'outgoing' ? msg.sender : msg.sender}
-                            </span>
-                            <span className="text-gray-400">
-                              {new Date(msg.timestamp).toLocaleTimeString()}
-                            </span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            <span className="text-sm">{species.name}</span>
                           </div>
-                          <p className="text-sm">{msg.content}</p>
+                          <span className="text-xs text-gray-400">{species.vibration?.toFixed(2)} Hz</span>
                         </div>
                       ))}
-                    </ScrollArea>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={!!showSpeciesInfo} onOpenChange={setShowSpeciesInfo}>
-        <DialogContent>
-          {selectedSpecies && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{selectedSpecies.name}</DialogTitle>
-                <DialogDescription>Species Information</DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p><strong>Type:</strong> {selectedSpecies.type}</p>
-                  <p><strong>Distance:</strong> {
-                    selectedSpecies.distance < 1000 ? 
-                      `${selectedSpecies.distance.toFixed(1)} ly` : 
-                      `${(selectedSpecies.distance/1000).toFixed(1)}k light years`
-                  }</p>
-                  <p><strong>Resonance:</strong> {selectedSpecies.resonance} Hz</p>
-                  <p><strong>Status:</strong> {selectedSpecies.responding ? 'Responding' : 'Silent'}</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <p><strong>SHQ:</strong> {selectedSpecies.shq?.toFixed(1) || 'Unknown'}</p>
-                  <p><strong>Empathic Index:</strong> {selectedSpecies.empathicIndex || 'Unknown'}</p>
-                  <p><strong>Population:</strong> {selectedSpecies.population?.toLocaleString() || 'Unknown'}</p>
-                  <p><strong>Response Rate:</strong> {selectedSpecies.responseRate ? `${(selectedSpecies.responseRate * 100).toFixed(0)}%` : 'Unknown'}</p>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button onClick={() => setShowSpeciesInfo(false)}>Close</Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
-};
+});
+
+// Add display name for forwardRef component
+UniversalSpeciesPing.displayName = 'UniversalSpeciesPing';
 
 export default UniversalSpeciesPing;
