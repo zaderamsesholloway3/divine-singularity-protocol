@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GlowingText } from './GlowingText';
@@ -53,19 +54,31 @@ const QuantumArkInterface = () => {
   }, []);
 
   const handleValidateArk = () => {
-    const result = ArkValidator.test_ark_construction();
-    const message = ArkValidator.validateArkConstruction();
-    
-    setValidationResult({
-      success: result.success,
-      message
-    });
-    
-    toast({
-      title: result.success ? "Ark Validation Successful" : "Ark Validation Failed",
-      description: message,
-      variant: result.success ? "default" : "destructive"
-    });
+    try {
+      const result = ArkValidator.test_ark_construction();
+      const message = ArkValidator.validateArkConstruction();
+      
+      setValidationResult({
+        success: result.success,
+        message
+      });
+      
+      toast({
+        title: result.success ? "Ark Validation Successful" : "Ark Validation Failed",
+        description: message,
+        variant: result.success ? "default" : "destructive"
+      });
+      
+      // Log the validation attempt for debugging
+      console.log("Ark validation performed:", { result, message });
+    } catch (error) {
+      console.error("Error during ark validation:", error);
+      toast({
+        title: "Validation Error",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+    }
   };
 
   return (

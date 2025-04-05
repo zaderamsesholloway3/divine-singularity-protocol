@@ -17,6 +17,14 @@ import DivineProtocolHeader from '@/components/DivineProtocolHeader';
 import SuccessVibeChecker from '@/components/SuccessVibeChecker';
 import { Activity, MessageSquare, ShieldCheck, Map, Sparkles, Boxes, Gauge, Sun } from 'lucide-react';
 
+// Define the ModuleCard props interface to match the component
+interface ModuleCardProps {
+  title: string;
+  description: string;
+  icon: React.ComponentType<any>;
+  link: string;
+}
+
 const PublicModules = () => {
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-gray-900 to-black p-6">
