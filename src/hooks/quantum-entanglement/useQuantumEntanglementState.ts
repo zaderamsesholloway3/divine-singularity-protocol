@@ -1,38 +1,34 @@
 
-import { useState, useEffect } from 'react';
-import { EntanglementState, UserProfile } from '../types/quantum-entanglement';
+import { useState } from 'react';
+import { EntanglementState, UserProfile } from '@/hooks/types/quantum-entanglement';
 
-export function useQuantumEntanglementState(userId: string) {
-  // Initialize entanglement state
+export const useQuantumEntanglementState = () => {
+  // Initialize state with default values
   const [entanglementState, setEntanglementState] = useState<EntanglementState>({
-    active: false,
-    entangledWith: null,
-    strength: 0,
-    emotion: 'neutral'
+    nodes: [],
+    edges: [],
+    selectedNode: null,
+    stats: {
+      bandwidth: 85,
+      latency: 12,
+      coherence: 0.95,
+      entanglementStrength: 0.87
+    }
   });
-  
-  // Initialize user profile with default values
+
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    id: userId,
-    name: userId,
-    coherenceLevel: 0.7, // Default coherence level
-    emotionalState: 'neutral',
-    lastContact: new Date().toISOString()
+    id: 'user-1',
+    name: 'Zade',
+    resonanceLevel: 0.92,
+    entanglementQuotient: 0.85
   });
-  
-  // Update profile when userId changes
-  useEffect(() => {
-    setUserProfile(prev => ({
-      ...prev,
-      id: userId,
-      name: userId
-    }));
-  }, [userId]);
-  
+
   return {
     entanglementState,
     setEntanglementState,
     userProfile,
     setUserProfile
   };
-}
+};
+
+export default useQuantumEntanglementState;

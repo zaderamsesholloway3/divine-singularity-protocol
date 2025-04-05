@@ -1,47 +1,68 @@
 
 import { useState } from 'react';
-import { UserProfile, ResonanceResult } from '../types/quantum-entanglement';
+import { UserProfile, ResonanceResult } from "@/hooks/types/quantum-entanglement";
+import { useToast } from "@/hooks/use-toast";
+import { AkashicAccessRegistry } from '@/utils/akashicAccessRegistry';
 
-export function useQuantumResonance(
-  userId: string, 
-  userProfile: UserProfile,
-  setUserProfile: React.Dispatch<React.SetStateAction<UserProfile>>
-) {
-  const [resonanceBoostActive, setResonanceBoostActive] = useState(false);
-  const [resonanceLevel, setResonanceLevel] = useState(0.7); // Default resonance level
+interface UseQuantumResonanceProps {
+  userProfile: UserProfile;
+  threshold?: number;
+}
+
+export const useQuantumResonance = ({ 
+  userProfile, 
+  threshold = 0.8 
+}: UseQuantumResonanceProps) => {
+  const { toast } = useToast();
+  const [resonating, setResonating] = useState(false);
+  const [resonanceScore, setResonanceScore] = useState(0);
   
-  // Function to boost soul resonance
-  const boostSoulResonance = (): ResonanceResult => {
-    // Calculate new resonance level
-    let newResonanceLevel = Math.min(0.98, resonanceLevel + 0.2);
-    const success = Math.random() > 0.1; // 90% success rate
+  const calculateResonance = () => {
+    // Get current resonance level from AkashicAccessRegistry
+    const currentResonance = AkashicAccessRegistry.getResonanceLevel();
     
-    if (success) {
-      setResonanceBoostActive(true);
-      setResonanceLevel(newResonanceLevel);
-      
-      // Also boost coherence level in user profile
-      setUserProfile(prev => ({
-        ...prev,
-        coherenceLevel: Math.min(0.98, prev.coherenceLevel + 0.15)
-      }));
-      
-      return {
-        success: true,
-        resonanceLevel: newResonanceLevel,
-        message: `Resonance boost activated at ${(newResonanceLevel * 100).toFixed(1)}%`
-      };
+    // Calculate overall score based on user profile and current resonance
+    const score = currentResonance * userProfile.resonanceLevel * userProfile.entanglementQuotient;
+    
+    // Update state
+    setResonanceScore(score);
+    setResonating(score >= threshold);
+    
+    // Return result
+    const result: ResonanceResult = {
+      score,
+      threshold,
+      isResonant: score >= threshold,
+    };
+    
+    return result;
+  };
+  
+  const attemptResonance = () => {
+    const result = calculateResonance();
+    
+    if (result.isResonant) {
+      toast({
+        title: "Quantum Resonance Achieved",
+        description: `Resonance score: ${(result.score * 100).toFixed(1)}%`,
+      });
     } else {
-      return {
-        success: false,
-        message: "Unable to establish resonance boost. Try again later."
-      };
+      toast({
+        title: "Resonance Insufficient",
+        description: `Score: ${(result.score * 100).toFixed(1)}% (Threshold: ${(result.threshold * 100).toFixed(1)}%)`,
+        variant: "destructive",
+      });
     }
+    
+    return result;
   };
   
   return {
-    resonanceBoostActive,
-    resonanceLevel,
-    boostSoulResonance
+    resonating,
+    resonanceScore,
+    calculateResonance,
+    attemptResonance
   };
-}
+};
+
+export default useQuantumResonance;

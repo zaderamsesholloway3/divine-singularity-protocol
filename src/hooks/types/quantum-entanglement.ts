@@ -6,7 +6,7 @@ export type TriadConnectionStatus = 'active' | 'inactive' | 'pending' | 'error';
 export interface QuantumNodeData {
   label: string;
   status: TriadConnectionStatus;
-  biofeedback: ReturnType<BiofeedbackSimulator['getBioreadings']>;
+  biofeedback: ReturnType<typeof BiofeedbackSimulator.prototype.generateRandomBiofeedback>;
 }
 
 export interface ConnectionNode {
@@ -53,6 +53,7 @@ export interface ResonanceResult {
   score: number;
   threshold: number;
   isResonant: boolean;
+  success?: boolean; // Added this field to fix the errors
 }
 
 export interface DivinePresence {
@@ -60,4 +61,5 @@ export interface DivinePresence {
   name: string;
   active: boolean;
   strength: number;
+  clarity?: number; // Added this field to fix the errors
 }

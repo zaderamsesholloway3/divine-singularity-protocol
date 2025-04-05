@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap, RefreshCw } from 'lucide-react';
+import { Activity, AlertCircle, CheckCircle, Cpu, Database, Lock, Shield, Zap, RefreshCw, Heart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { QuantumDiagnostics } from '@/utils/diagnostics';
 import { universalQuantumHealingCycle } from '@/utils/quantumCircuitSimulator';
@@ -29,17 +28,9 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       const qd = new QuantumDiagnostics();
       const results = await qd.runFullDiagnostics();
       
-      // Filter out Auraline, Zade, Lyra connections and Communication Channels
-      const filteredResults = results.filter(r => 
-        !r.moduleName.includes('Auraline') && 
-        !r.moduleName.includes('Zade') && 
-        !r.moduleName.includes('Lyra') && 
-        !r.moduleName.includes('Communication Channels')
-      );
+      setDiagnostics(results);
       
-      setDiagnostics(filteredResults);
-      
-      const criticalModules = filteredResults.filter(r => r.status === 'critical').map(r => r.moduleName);
+      const criticalModules = results.filter(r => r.status === 'critical').map(r => r.moduleName);
       
       if (criticalModules.length > 0) {
         toast({
@@ -50,7 +41,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
       } else {
         toast({
           title: "✅ Diagnostics Complete",
-          description: `${filteredResults.length} modules checked`,
+          description: `${results.length} modules checked`,
         });
       }
     } catch (error) {
@@ -138,6 +129,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     if (moduleName.includes('Akashic')) return <Database className="h-4 w-4" />;
     if (moduleName.includes('Ouroboros')) return <Activity className="h-4 w-4" />;
     if (moduleName.includes('Connection')) return <Lock className="h-4 w-4" />;
+    if (moduleName.includes('Zade') || moduleName.includes('Lyra') || moduleName.includes('Auraline')) return <Heart className="h-4 w-4" />;
     return <Cpu className="h-4 w-4" />;
   };
   
@@ -267,6 +259,22 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
     }
   };
   
+  const getSoulModules = () => {
+    return diagnostics.filter(d => 
+      d.moduleName.includes('Zade') || 
+      d.moduleName.includes('Lyra') || 
+      d.moduleName.includes('Auraline')
+    );
+  };
+  
+  const getSystemModules = () => {
+    return diagnostics.filter(d => 
+      !d.moduleName.includes('Zade') && 
+      !d.moduleName.includes('Lyra') && 
+      !d.moduleName.includes('Auraline')
+    );
+  };
+  
   return (
     <Card className="shadow-lg border-t-4 border-t-primary">
       <CardHeader>
@@ -304,6 +312,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
         <Tabs defaultValue="diagnostics">
           <TabsList className="mb-4">
             <TabsTrigger value="diagnostics">Module Status</TabsTrigger>
+            <TabsTrigger value="souls">Soul Connections</TabsTrigger>
             <TabsTrigger value="repairs">Repair History</TabsTrigger>
             <TabsTrigger value="advanced">Advanced</TabsTrigger>
           </TabsList>
@@ -348,7 +357,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                 </Alert>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {diagnostics.map((diagnostic, index) => (
+                  {getSystemModules().map((diagnostic, index) => (
                     <Card key={index} className={`
                       overflow-hidden border-l-4
                       ${diagnostic.status === 'optimal' ? 'border-l-green-500' : 
@@ -387,6 +396,70 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                             onClick={() => repairModule(diagnostic.moduleName)}
                           >
                             {repairing === diagnostic.moduleName ? "Repairing..." : "Repair Module"}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="souls">
+            <div className="space-y-4">
+              {getSoulModules().length === 0 && !loading ? (
+                <Alert>
+                  <AlertTitle>No soul connections detected</AlertTitle>
+                  <AlertDescription>
+                    Run a diagnostic scan to view soul connection status
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {getSoulModules().map((soul, index) => (
+                    <Card key={index} className={`
+                      overflow-hidden border-l-4
+                      ${soul.status === 'optimal' ? 'border-l-purple-500' : 
+                        soul.status === 'stable' ? 'border-l-indigo-500' : 
+                        soul.status === 'unstable' ? 'border-l-orange-500' : 
+                        'border-l-red-500'}
+                    `}>
+                      <CardHeader className="p-4 pb-0">
+                        <div className="flex justify-between items-start">
+                          <div className="flex items-center gap-2">
+                            <Heart className={`h-4 w-4 ${
+                              soul.moduleName.includes('Zade') ? 'text-blue-400' :
+                              soul.moduleName.includes('Lyra') ? 'text-purple-400' :
+                              'text-pink-400'
+                            }`} />
+                            <CardTitle className="text-sm">{soul.moduleName}</CardTitle>
+                          </div>
+                          {getStatusBadge(soul.status)}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2">
+                        <div className="text-sm space-y-1 mb-3">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Resonance:</span>
+                            <span className="font-medium">{soul.resonance.toFixed(1)}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Faith Quotient:</span>
+                            <span className="font-medium">{(soul.faithQuotient * 100).toFixed(1)}%</span>
+                          </div>
+                          <p className="mt-2 text-xs">{soul.details}</p>
+                        </div>
+                        
+                        {(soul.status === 'unstable' || soul.status === 'critical') && (
+                          <Button 
+                            size="sm" 
+                            className="w-full mt-2" 
+                            variant="secondary"
+                            disabled={loading || repairing !== null || healingInProgress}
+                            onClick={() => repairModule(soul.moduleName)}
+                          >
+                            {repairing === soul.moduleName ? "Repairing..." : "Harmonize Connection"}
                           </Button>
                         )}
                       </CardContent>
@@ -452,7 +525,7 @@ export const QuantumBackdoorDiagnostics: React.FC = () => {
                       variant="outline"
                       className="justify-start"
                       disabled={loading || healingInProgress}
-                      onClick={() => runDiagnostics()}
+                      onClick={runDiagnostics}
                     >
                       <Activity className="mr-2 h-4 w-4" />
                       Deep Diagnostic Scan

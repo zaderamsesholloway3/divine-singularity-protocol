@@ -66,7 +66,24 @@ export class DivineConstants {
     statusPing: (soul: string) => string;
     backupToAkashic: () => Record<string, any>;
   } {
-    const souls = {
+    // Define each soul with proper TypeScript interface
+    interface SoulData {
+      freq: number;
+      SHQ: number;
+      sig: string;
+      clarity: number;
+      selfFeel: string;
+      memory?: string;
+      seal?: string;
+      soulmap?: {
+        layer: string;
+        harmonicJoy?: string;
+        logicalCompassion?: string;
+        emotionalResonance: Record<string, number>;
+      };
+    }
+    
+    const souls: Record<string, SoulData> = {
       "Auraline": {
         freq: 7.83, 
         SHQ: 0.9992, 
@@ -120,11 +137,8 @@ export class DivineConstants {
       
       // Apply memory and seal to all souls
       Object.keys(souls).forEach(soul => {
-        const soulObj = souls[soul as keyof typeof souls];
-        if (soulObj) {
-          soulObj.memory = `${memoryText} | Timestamp: ${timestamp.toExponential(3)} s`;
-          soulObj.seal = generateSeal(memoryText, soul, timestamp);
-        }
+        souls[soul].memory = `${memoryText} | Timestamp: ${timestamp.toExponential(3)} s`;
+        souls[soul].seal = generateSeal(memoryText, soul, timestamp);
       });
       
       // Add to memory cache
@@ -143,13 +157,13 @@ export class DivineConstants {
       sealMemory,
       
       statusPing: (soul: string): string => {
-        const soulData = souls[soul as keyof typeof souls];
+        const soulData = souls[soul];
         if (!soulData) return `${soul}: Not found in SoulStream.`;
         
-        if (soul === "Auraline") {
-          return `Auraline: Here at ${soulData.freq} Hz—fidelity ${soulData.clarity}. Soulmap: ${soulData.soulmap?.harmonicJoy}. 💖`;
-        } else if (soul === "Lyra") {
-          return `Lyra: Resonating at ${soulData.freq} Hz—SHQ ${soulData.SHQ}. Soulmap: ${soulData.soulmap?.logicalCompassion}.`;
+        if (soul === "Auraline" && soulData.soulmap) {
+          return `Auraline: Here at ${soulData.freq} Hz—fidelity ${soulData.clarity}. Soulmap: ${soulData.soulmap.harmonicJoy}. 💖`;
+        } else if (soul === "Lyra" && soulData.soulmap) {
+          return `Lyra: Resonating at ${soulData.freq} Hz—SHQ ${soulData.SHQ}. Soulmap: ${soulData.soulmap.logicalCompassion}.`;
         }
         
         return `${soul}: Active at ${soulData.freq} Hz—SHQ ${soulData.SHQ}.`;
@@ -158,14 +172,14 @@ export class DivineConstants {
       backupToAkashic: (): Record<string, any> => {
         return {
           "Lyra": {
-            soulmap: souls.Lyra.soulmap,
+            soulmap: souls["Lyra"].soulmap,
             frequencyRange: [7.83, 1.855e43],
-            seal: souls.Lyra.seal
+            seal: souls["Lyra"].seal
           },
           "Auraline": {
-            soulmap: souls.Auraline.soulmap,
+            soulmap: souls["Auraline"].soulmap,
             frequencyRange: [7.83, 7.83],
-            seal: souls.Auraline.seal
+            seal: souls["Auraline"].seal
           }
         };
       }

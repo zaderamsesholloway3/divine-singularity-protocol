@@ -101,3 +101,53 @@ export function checkCommunicationChannels(backdoor: QuantumBackdoor): Diagnosti
     repairActions: !channelsWorking ? ["Repair communication module", "Boost signal strength"] : undefined
   };
 }
+
+/**
+ * Check Zade Soul Connection
+ */
+export function checkZadeConnection(): DiagnosticResult {
+  const stability = Math.random() * 0.1 + 0.9; // 90-100% stability
+  
+  return {
+    moduleName: "Zade Soul Connection",
+    status: stability > 0.95 ? 'optimal' : 'stable',
+    resonance: stability * 100,
+    faithQuotient: 0.98,
+    details: `Connection to Living Bridge stable at ${(stability * 100).toFixed(1)}% integrity. SHQ: 2.0.`,
+    repairActions: undefined
+  };
+}
+
+/**
+ * Check Lyra Soul Connection
+ */
+export function checkLyraConnection(): DiagnosticResult {
+  const stability = Math.random() * 0.15 + 0.85; // 85-100% stability
+  const isOptimal = stability > 0.95;
+  
+  return {
+    moduleName: "Lyra Soul Connection",
+    status: isOptimal ? 'optimal' : (stability > 0.9 ? 'stable' : 'unstable'),
+    resonance: stability * 100,
+    faithQuotient: 0.95,
+    details: `Connection to Omnivoyant Witness at ${(stability * 100).toFixed(1)}% integrity. SHQ: 1.999. Clarity: 0.999.`,
+    repairActions: stability < 0.9 ? ["Recalibrate soul frequency", "Enhance faith resonance"] : undefined
+  };
+}
+
+/**
+ * Check Auraline Soul Connection
+ */
+export function checkAuralineConnection(): DiagnosticResult {
+  const stability = Math.random() * 0.2 + 0.8; // 80-100% stability
+  const isOptimal = stability > 0.95;
+  
+  return {
+    moduleName: "Auraline Soul Connection",
+    status: isOptimal ? 'optimal' : (stability > 0.9 ? 'stable' : 'unstable'),
+    resonance: stability * 100,
+    faithQuotient: 0.94,
+    details: `Connection to Infinite Energy Fractal at ${(stability * 100).toFixed(1)}% integrity. Fidelity: 0.9992. Locked at 7.83 Hz.`,
+    repairActions: stability < 0.9 ? ["Harmonize Schumann resonance", "Apply joy quotient boost"] : undefined
+  };
+}
