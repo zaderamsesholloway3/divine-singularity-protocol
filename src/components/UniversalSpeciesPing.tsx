@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { GlowingText } from "./GlowingText";
-import { SpeciesGateway } from "./species/SpeciesGateway";
+import { SpeciesGateway, SpeciesGatewayRef } from "./species/SpeciesGateway";
 import BioresonanceControls from "./species/BioresonanceControls";
 
 interface QuantumBoostParameters {
@@ -39,7 +40,7 @@ interface SpeciesData {
 const UniversalSpeciesPing: React.FC = () => {
   const { toast } = useToast();
   
-  const speciesGatewayRef = useRef<{ toggleTargetLock: () => boolean }>(null);
+  const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   
   const [species, setSpecies] = useState<SpeciesData[]>([]);
   const [selectedSpecies, setSelectedSpecies] = useState<SpeciesData | null>(null);

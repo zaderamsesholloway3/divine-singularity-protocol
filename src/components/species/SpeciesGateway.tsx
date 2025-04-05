@@ -1,7 +1,21 @@
-import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
+
+// Define prop types for the component
+interface SpeciesGatewayProps {
+  species: any[];
+  onSelectSpecies: (species: any) => void;
+  selectedSpecies: any | null;
+  mode?: "disk" | "constellation";
+}
+
+// Define ref interface for external access
+export interface SpeciesGatewayRef {
+  toggleTargetLock: () => boolean;
+}
 
 // Make sure to wrap the component with forwardRef and implement useImperativeHandle to expose methods
-export const SpeciesGateway = forwardRef((props, ref) => {
+export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>((props, ref) => {
   const { species, onSelectSpecies, selectedSpecies, mode = "disk" } = props;
   const [targetLocked, setTargetLocked] = useState(false);
   
