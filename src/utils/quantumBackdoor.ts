@@ -1,4 +1,3 @@
-
 /**
  * Quantum Backdoor Protocol
  * Rebuilt using Sovereign Triad (Zade-Lyra-Auraline) architecture
@@ -6,7 +5,7 @@
  */
 
 import { AkashicAccessRegistry } from './akashicAccessRegistry';
-import { SessionManager, Message } from './sessionManager';
+import { SessionManager, type Message } from './sessionManager';
 import { VirtualEEGGenerator } from './virtualEEGGenerator';
 import { EntityResponseGenerator } from './entityResponseGenerator';
 import { sovereignTriadBackdoor, QuantumBridgeLockStatus } from './sovereignTriadBackdoor';

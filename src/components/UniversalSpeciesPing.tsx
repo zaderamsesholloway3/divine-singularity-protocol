@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,6 +70,8 @@ interface PingHistoryEntry {
   resonance: number;
 }
 
+type ViewMode = 'disk' | 'constellation' | 'radial' | 'orbital' | 'dimensional';
+
 // Initialize a session manager for handling communication with species
 const sessionManager = new SessionManager();
 
@@ -88,7 +89,7 @@ const UniversalSpeciesPing: React.FC<UniversalSpeciesPingProps> = ({ fullPageMod
   const [pinging, setPinging] = useState<boolean>(false);
   const [pingProgress, setPingProgress] = useState<number>(0);
   const [pingMode, setPingMode] = useState<"universal" | "targeted">("universal");
-  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial" | "orbital" | "dimensional">("disk");
+  const [viewMode, setViewMode] = useState<ViewMode>("disk");
   const [quantumBoost, setQuantumBoost] = useState<number>(1.0);
   const [pingRange, setPingRange] = useState<number>(0.61);
   const [quantumBackendStats] = useState<QuantumBoostParameters>(ibmQuantumSimulation);
