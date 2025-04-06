@@ -1,45 +1,23 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
-import { Volume2, VolumeX, Radio, Waves, Sparkles, Send, Rotate3d, Layers } from 'lucide-react';
-import { toast } from 'sonner';
-import { SpeciesGateway, SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 
-// Mock species data
-const mockSpecies = [
-  { name: "Arcturians", distance: 36.7, responding: true, realm: "existence", location: [0.7, 0.4], vibration: 7.83, population: 8900000000 },
-  { name: "Pleiadians", distance: 444.0, responding: true, realm: "existence", location: [0.3, -0.6], vibration: 7.12, population: 12400000000 },
-  { name: "Sirians", distance: 8.6, responding: false, realm: "existence", location: [0.1, 0.2], vibration: 5.25, population: 9300000000 },
-  { name: "Orion Collective", distance: 1344.0, responding: false, realm: "existence", location: [-0.8, -0.2], vibration: 4.89, population: 15700000000, phaseOffset: 45 },
-  { name: "Andromedans", distance: 2500000.0, responding: true, realm: "existence", location: [-0.5, 0.7], vibration: 8.33, population: 7800000000 },
-  { name: "Lyrans", distance: 25.3, responding: true, realm: "existence", archetype: "Feline", vibration: 9.41, population: 4200000000, phaseOffset: 15 },
-  { name: "Draconians", distance: 309.0, responding: false, realm: "existence", location: [0.4, -0.3], vibration: 3.72, population: 18900000000 },
-  { name: "Avians", distance: 87.2, responding: true, realm: "existence", archetype: "Bird-like", vibration: 10.82, population: 2800000000 },
-  { name: "Ouroboros", distance: 540000.0, responding: true, realm: "non-existence", fq: 1.855, vibration: 4.89, population: 1, phaseOffset: 180 },
-  { name: "Zeta Reticulans", distance: 39.0, responding: false, realm: "existence", archetype: "Gray", vibration: 6.15, population: 5100000000, phaseOffset: 90 },
-  { name: "Mantids", distance: 301.0, responding: true, realm: "existence", archetype: "Insectoid", vibration: 7.74, population: 1900000000 },
-  { name: "Inner Earth Agartha", distance: 0.01, responding: false, realm: "existence", location: [0.05, -0.03], vibration: 7.83, population: 3600000000 },
-  { name: "Venusians", distance: 0.28, responding: true, realm: "existence", location: [0.2, 0.15], vibration: 8.90, population: 980000000 },
-  { name: "Cassiopeians", distance: 228.0, responding: false, realm: "existence", location: [-0.3, 0.4], vibration: 6.28, population: 7100000000 },
-  { name: "Alpha Centaurians", distance: 4.37, responding: true, realm: "existence", location: [0.15, -0.1], vibration: 8.05, population: 6500000000 },
-  { name: "Procyonians", distance: 11.46, responding: false, realm: "existence", location: [0.25, -0.3], vibration: 7.32, population: 4900000000 },
-  { name: "Tau Cetians", distance: 11.9, responding: true, realm: "existence", location: [0.3, 0.25], vibration: 8.51, population: 8700000000 },
-  { name: "Nibiru", distance: 822.0, responding: false, realm: "non-existence", location: [-0.6, -0.5], vibration: 5.35, population: 2300000000, phaseOffset: 120 },
-  { name: "Carian", distance: 5621.0, responding: false, realm: "existence", archetype: "Reptilian", vibration: 4.45, population: 9800000000 },
-  { name: "Yahyel", distance: 14.8, responding: true, realm: "existence", archetype: "Hybrid", vibration: 8.94, population: 1200000000 },
-  { name: "Sassani", distance: 32.6, responding: true, realm: "new-existence", vibration: 9.87, population: 890000000 },
-  { name: "Lyra", distance: 25.3, responding: true, realm: "existence", fq: 1.855, vibration: 9.41, population: 1, phaseOffset: 0 }
-];
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { toast } from 'sonner';
+import { SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
+import { mockSpecies } from '@/components/species/mockData';
+import { Species, VisibleLayers, ViewMode, VisualStyle } from '@/components/species/types';
+import PingHeader from '@/components/species/PingHeader';
+import ControlsPanel from '@/components/species/ControlsPanel';
+import ActiveSignaturesPanel from '@/components/species/ActiveSignaturesPanel';
+import LayerControls from '@/components/species/LayerControls';
+import VisualizationArea from '@/components/species/VisualizationArea';
 
 // Define the props for the UniversalSpeciesPing component
 interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
   onSpeciesSelect?: (species: any) => void;
   selectedSpecies?: any | null;
-  visualStyle?: "celestial" | "lightweb" | "cosmic";
-  viewMode?: "disk" | "constellation" | "radial" | "signature";
+  visualStyle?: VisualStyle;
+  viewMode?: ViewMode;
   zadeMode?: boolean;
 }
 
@@ -58,13 +36,15 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [frequency, setFrequency] = useState(7.83);
   const [phase, setPhase] = useState(0);
   const [power, setPower] = useState(75);
-  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">(externalViewMode === "signature" ? "radial" : (externalViewMode || "radial"));
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    externalViewMode === "signature" ? "radial" : (externalViewMode || "radial")
+  );
   const [broadcastMode, setBroadcastMode] = useState<"universal" | "targeted">("universal");
   const [pingActive, setPingActive] = useState(false);
   const [message, setMessage] = useState("");
   const [rotate3dHint, setRotate3dHint] = useState(true);
   const [showPingTrail, setShowPingTrail] = useState(false);
-  const [visibleLayers, setVisibleLayers] = useState({
+  const [visibleLayers, setVisibleLayers] = useState<VisibleLayers>({
     existence: true,
     nonExistence: true,
     newExistence: true,
@@ -166,7 +146,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }, 10000) as unknown as number;
   };
   
-  const handleSpeciesSelect = (species: any) => {
+  const handleSpeciesSelect = (species: Species) => {
     // When a species is selected, hide the rotation hint
     setRotate3dHint(false);
     
@@ -213,356 +193,83 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }, 10000) as unknown as number;
   };
   
-  const toggleLayer = (layer: keyof typeof visibleLayers) => {
+  const toggleLayer = (layer: keyof VisibleLayers) => {
     setVisibleLayers({
       ...visibleLayers,
       [layer]: !visibleLayers[layer]
     });
   };
   
-  // Helper function to get visual style class name based on current style
-  const getVisualStyleClass = () => {
-    switch(visualStyle) {
-      case "celestial":
-        return "bg-gradient-to-b from-gray-950 to-blue-950 backdrop-blur-sm";
-      case "lightweb":
-        return "bg-gradient-to-b from-gray-900/90 to-blue-900/80 backdrop-blur-sm";
-      case "cosmic":
-        return "bg-gradient-to-b from-black to-purple-950/80";
-      default:
-        return "bg-gradient-to-b from-gray-950 to-blue-950";
-    }
-  };
-  
   return (
     <div className={`w-full ${fullPageMode ? 'h-full' : ''}`}>
       <Card className={`border-none shadow-none ${fullPageMode ? 'h-full' : ''}`}>
         <CardHeader className={`pb-0 ${fullPageMode ? 'pt-2' : ''}`}>
-          <CardTitle className="flex justify-between items-center">
-            <div className="flex items-center gap-2 text-base sm:text-lg">
-              <Waves className="h-5 w-5" />
-              Universal Species Ping
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${pingActive ? 'bg-green-500 animate-pulse' : 'bg-gray-600'} text-white ml-2`}>
-                {pingActive ? "ACTIVE" : "STANDBY"}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={toggleSound}
-              >
-                {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-8 ${viewMode === "disk" ? "bg-primary/10" : ""}`}
-                onClick={() => setViewMode("disk")}
-              >
-                Disk
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-8 ${viewMode === "constellation" ? "bg-primary/10" : ""}`}
-                onClick={() => setViewMode("constellation")}
-              >
-                Constellation
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-8 ${viewMode === "radial" ? "bg-primary/10" : ""}`}
-                onClick={() => {
-                  setViewMode("radial");
-                  setRotate3dHint(true);
-                }}
-              >
-                <Rotate3d className="h-4 w-4 mr-1" />
-                3D Orbital
-              </Button>
-            </div>
-          </CardTitle>
+          <PingHeader
+            pingActive={pingActive}
+            soundEnabled={soundEnabled}
+            toggleSound={toggleSound}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            setRotate3dHint={setRotate3dHint}
+          />
         </CardHeader>
         <CardContent className={`${fullPageMode ? 'h-[calc(100%-80px)]' : 'pt-4'}`}>
           <div className={`grid grid-cols-1 ${fullPageMode ? 'lg:grid-cols-5 h-full' : ''} gap-4`}>
             <div className={`${fullPageMode ? 'lg:col-span-4' : ''} relative`}>
-              <div 
-                className={`rounded-lg overflow-hidden ${fullPageMode ? 'h-full' : 'min-h-[400px]'} flex items-center justify-center ${getVisualStyleClass()}`}
-                style={{ transform: `scale(${zoomLevel})` }}
-              >
-                <SpeciesGateway 
-                  species={mockSpecies}
-                  onSelectSpecies={handleSpeciesSelect}
-                  selectedSpecies={selectedSpecies}
-                  mode={viewMode}
-                  ref={speciesGatewayRef}
-                  visualStyle={visualStyle}
-                  showPingTrail={showPingTrail}
-                  pingOrigin={selectedSpecies || null}
-                  visibleLayers={visibleLayers}
-                  showAllNames={showAllNames}
-                  zoomLevel={zoomLevel}
-                />
-              </div>
-              
-              {/* Zoom controls */}
-              <div className="absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-white"
-                  onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
-                >
-                  -
-                </Button>
-                <span className="inline-flex items-center text-xs text-white">
-                  {Math.round(zoomLevel * 100)}%
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-white"
-                  onClick={() => setZoomLevel(Math.min(2.0, zoomLevel + 0.1))}
-                >
-                  +
-                </Button>
-              </div>
-              
-              {/* 3D rotation hint overlay - only shown for radial mode when activated */}
-              {viewMode === "radial" && rotate3dHint && (
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
-                  <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />
-                  <p className="text-white font-medium">Drag to rotate the 3D view</p>
-                  <p className="text-xs text-gray-300 mt-1">Click on any species to select it</p>
-                </div>
-              )}
-              
-              {/* Show ping trail animation when active */}
-              {showPingTrail && (
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full
-                    ${visualStyle === "celestial" ? "bg-blue-500/10" : 
-                      visualStyle === "lightweb" ? "bg-white/10" : 
-                      "bg-purple-500/10"}`}
-                    style={{
-                      width: '10%',
-                      height: '10%',
-                      animation: 'ping 10s cubic-bezier(0, 0, 0.2, 1) forwards'
-                    }}
-                  />
-                  <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full
-                    ${visualStyle === "celestial" ? "bg-blue-500/5" : 
-                      visualStyle === "lightweb" ? "bg-white/5" : 
-                      "bg-purple-500/5"}`}
-                    style={{
-                      width: '5%',
-                      height: '5%',
-                      animation: 'ping 9s 0.3s cubic-bezier(0, 0, 0.2, 1) forwards'
-                    }}
-                  />
-                </div>
-              )}
+              <VisualizationArea
+                species={mockSpecies}
+                viewMode={viewMode}
+                selectedSpecies={selectedSpecies}
+                onSelectSpecies={handleSpeciesSelect}
+                speciesGatewayRef={speciesGatewayRef}
+                visualStyle={visualStyle}
+                showPingTrail={showPingTrail}
+                visibleLayers={visibleLayers}
+                showAllNames={showAllNames}
+                rotate3dHint={rotate3dHint}
+                zoomLevel={zoomLevel}
+                setZoomLevel={setZoomLevel}
+              />
             </div>
             
             <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
-              <div className={`space-y-4 ${visualStyle === "cosmic" ? "bg-gray-950/30" : "bg-gray-950/50"} p-4 rounded-lg ${visualStyle === "lightweb" ? "border border-white/10" : "border-none"}`}>
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-medium">Broadcast Mode</h3>
-                  <div className="flex items-center space-x-2">
-                    <span className={broadcastMode === "universal" ? "text-white" : "text-gray-500"}>Universal</span>
-                    <Switch 
-                      checked={broadcastMode === "targeted"}
-                      onCheckedChange={(checked) => setBroadcastMode(checked ? "targeted" : "universal")}
-                    />
-                    <span className={broadcastMode === "targeted" ? "text-white" : "text-gray-500"}>Targeted</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm">Frequency (Hz)</label>
-                    <span className="text-sm font-mono">{frequency.toFixed(2)} Hz</span>
-                  </div>
-                  <Slider
-                    value={[frequency]}
-                    min={1}
-                    max={15}
-                    step={0.01}
-                    onValueChange={([value]) => setFrequency(value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm">Phase Offset (°)</label>
-                    <span className="text-sm font-mono">{phase}°</span>
-                  </div>
-                  <Slider
-                    value={[phase]}
-                    min={0}
-                    max={360}
-                    step={5}
-                    onValueChange={([value]) => setPhase(value)}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <label className="text-sm">Power</label>
-                    <span className="text-sm font-mono">{power}%</span>
-                  </div>
-                  <Slider
-                    value={[power]}
-                    min={10}
-                    max={100}
-                    step={5}
-                    onValueChange={([value]) => setPower(value)}
-                  />
-                </div>
-                
-                <div className="pt-2">
-                  <Button
-                    className="w-full flex items-center gap-2"
-                    onClick={amplifyPing}
-                    disabled={pingActive}
-                  >
-                    <Radio className="h-4 w-4" />
-                    {pingActive ? "Ping Active..." : "Amplify Ping"}
-                    {pingActive && <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75"></span>}
-                  </Button>
-                </div>
-                
-                <div className="pt-2">
-                  <textarea
-                    className={`w-full h-20 ${
-                      visualStyle === "cosmic" ? "bg-gray-900/70 border-purple-900/50" : 
-                      visualStyle === "lightweb" ? "bg-gray-900/50 border-white/30" :
-                      "bg-gray-900 border-gray-700"
-                    } border rounded-md p-2 text-sm`}
-                    placeholder={broadcastMode === "universal" ? "Enter message for universal broadcast..." : `Enter message for ${selectedSpecies?.name || "selected species"}...`}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  ></textarea>
-                  <Button 
-                    className="w-full mt-2 flex items-center gap-2" 
-                    variant="outline"
-                    disabled={broadcastMode === "targeted" && !selectedSpecies}
-                    onClick={sendMessage}
-                  >
-                    <Send className="h-4 w-4" />
-                    Send Message
-                  </Button>
-                </div>
-              </div>
+              <ControlsPanel
+                frequency={frequency}
+                setFrequency={setFrequency}
+                phase={phase}
+                setPhase={setPhase}
+                power={power}
+                setPower={setPower}
+                soundEnabled={soundEnabled}
+                setSoundEnabled={setSoundEnabled}
+                pingActive={pingActive}
+                broadcastMode={broadcastMode}
+                setBroadcastMode={setBroadcastMode}
+                message={message}
+                setMessage={setMessage}
+                selectedSpecies={selectedSpecies}
+                amplifyPing={amplifyPing}
+                sendMessage={sendMessage}
+                visualStyle={visualStyle}
+              />
               
               {fullPageMode && (
-                <div className={`space-y-4 ${
-                  visualStyle === "cosmic" ? "bg-gray-950/30" : 
-                  visualStyle === "lightweb" ? "bg-gray-950/30 border border-white/10" : 
-                  "bg-gray-950/50"
-                } p-4 rounded-lg`}>
-                  <h3 className="text-sm font-medium">Active Signatures</h3>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {mockSpecies
-                      .filter(s => s.responding)
-                      .map(species => (
-                        <div 
-                          key={species.name} 
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
-                            selectedSpecies?.name === species.name 
-                              ? visualStyle === "cosmic" 
-                                ? 'bg-purple-900/20 border border-purple-500/30' 
-                                : 'bg-primary/20' 
-                              : 'hover:bg-gray-800'
-                          }`}
-                          onClick={() => handleSpeciesSelect(species)}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${
-                              visualStyle === "cosmic" ? 'bg-purple-400' : 
-                              visualStyle === "lightweb" ? 'bg-green-300' : 
-                              'bg-green-500'
-                            }`}></div>
-                            <span className="text-sm">{species.name}</span>
-                          </div>
-                          <span className="text-xs text-gray-400">{species.vibration?.toFixed(2)} Hz</span>
-                        </div>
-                      ))}
-                  </div>
-                </div>
+                <ActiveSignaturesPanel
+                  species={mockSpecies}
+                  selectedSpecies={selectedSpecies}
+                  onSelectSpecies={handleSpeciesSelect}
+                  visualStyle={visualStyle}
+                />
               )}
               
-              {/* Layer visibility controls */}
               {fullPageMode && (
-                <div className={`space-y-4 ${
-                  visualStyle === "cosmic" ? "bg-gray-950/30" : 
-                  visualStyle === "lightweb" ? "bg-gray-950/30 border border-white/10" : 
-                  "bg-gray-950/50"
-                } p-4 rounded-lg`}>
-                  <h3 className="text-sm font-medium">Layer Controls</h3>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                        Existence Realm
-                      </span>
-                      <Switch 
-                        checked={visibleLayers.existence}
-                        onCheckedChange={() => toggleLayer("existence")}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                        Non-Existence
-                      </span>
-                      <Switch 
-                        checked={visibleLayers.nonExistence}
-                        onCheckedChange={() => toggleLayer("nonExistence")}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                        New Existence
-                      </span>
-                      <Switch 
-                        checked={visibleLayers.newExistence}
-                        onCheckedChange={() => toggleLayer("newExistence")}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm flex items-center gap-1">
-                        <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
-                        Divine Frequency
-                      </span>
-                      <Switch 
-                        checked={visibleLayers.divine}
-                        onCheckedChange={() => toggleLayer("divine")}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="pt-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Entity Labels</span>
-                      <Switch 
-                        checked={showAllNames}
-                        onCheckedChange={(checked) => setShowAllNames(checked)}
-                      />
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      {showAllNames ? "Showing all names" : "Names on hover"}
-                    </div>
-                  </div>
-                </div>
+                <LayerControls
+                  visibleLayers={visibleLayers}
+                  toggleLayer={toggleLayer}
+                  showAllNames={showAllNames}
+                  setShowAllNames={setShowAllNames}
+                  visualStyle={visualStyle}
+                />
               )}
             </div>
           </div>
