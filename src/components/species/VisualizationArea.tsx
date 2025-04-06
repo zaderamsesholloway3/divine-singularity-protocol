@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
@@ -22,6 +23,7 @@ interface VisualizationAreaProps {
   welcomeMessage?: string;
   guardianNetSettings?: GuardianNetSettings;
   onToggleGuardianNetExpanded?: () => void;
+  fullPageMode?: boolean;
 }
 
 const VisualizationArea: React.FC<VisualizationAreaProps> = ({
@@ -39,10 +41,13 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   setZoomLevel,
   welcomeMessage,
   guardianNetSettings,
-  onToggleGuardianNetExpanded
+  onToggleGuardianNetExpanded,
+  fullPageMode = false
 }) => {
   const [isFullScreen, setIsFullScreen] = React.useState(false);
+  const [containerSize, setContainerSize] = React.useState(500);
   const [rotation, setRotation] = React.useState({ x: 15, y: 0, z: 0 });
+  const containerRef = React.useRef<HTMLDivElement>(null);
   
   // Helper function to get visual style class name based on current style
   const getVisualStyleClass = () => {
@@ -105,6 +110,39 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       return () => clearInterval(interval);
     }
   }, [speciesGatewayRef]);
+
+  // Update container size based on the container dimensions
+  React.useEffect(() => {
+    if (!containerRef.current) return;
+    
+    const updateSize = () => {
+      if (!containerRef.current) return;
+      
+      // For fullscreen or fullPageMode, use a dynamic size
+      if (isFullScreen || fullPageMode) {
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        const minSize = Math.min(width, height);
+        setContainerSize(minSize);
+      } else {
+        // Default fixed size for normal mode
+        setContainerSize(500);
+      }
+    };
+    
+    // Initial size update
+    updateSize();
+    
+    // Set up resize observer
+    const resizeObserver = new ResizeObserver(() => {
+      updateSize();
+    });
+    resizeObserver.observe(containerRef.current);
+    
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isFullScreen, fullPageMode]);
 
   // Observable Universe concentric rings
   const renderObservableUniverse = () => {
@@ -182,27 +220,45 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const isGuardianNetExpanded = guardianNetSettings?.expanded || false;
 
   return (
-    <div className="relative" id="species-visualization-container">
+    <div className="relative" id="species-visualization-container" ref={containerRef}>
       {renderObservableUniverse()}
       <div 
-        className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} flex items-center justify-center ${getVisualStyleClass()} ${isGuardianNetExpanded ? 'opacity-30' : ''}`}
-        style={{ transform: `scale(${zoomLevel})` }}
+        className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} 
+        ${fullPageMode ? 'w-full h-full' : ''} 
+        flex items-center justify-center ${getVisualStyleClass()} ${isGuardianNetExpanded ? 'opacity-30' : ''}`}
       >
         {renderCosmicFlow()}
         {renderStars()}
-        <SpeciesGateway 
-          species={species}
-          onSelectSpecies={onSelectSpecies}
-          selectedSpecies={selectedSpecies}
-          mode={viewMode}
-          ref={speciesGatewayRef}
-          visualStyle={visualStyle}
-          showPingTrail={showPingTrail}
-          pingOrigin={selectedSpecies || null}
-          visibleLayers={visibleLayers}
-          showAllNames={showAllNames}
-          zoomLevel={zoomLevel}
-        />
+        
+        <div 
+          className="relative" 
+          style={{ 
+            width: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
+            height: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
+            transform: `scale(${zoomLevel})` 
+          }}
+        >
+          <svg 
+            viewBox={`0 0 ${containerSize} ${containerSize}`}
+            width="100%"
+            height="100%" 
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <SpeciesGateway 
+              species={species}
+              onSelectSpecies={onSelectSpecies}
+              selectedSpecies={selectedSpecies}
+              mode={viewMode}
+              ref={speciesGatewayRef}
+              visualStyle={visualStyle}
+              showPingTrail={showPingTrail}
+              pingOrigin={selectedSpecies || null}
+              visibleLayers={visibleLayers}
+              showAllNames={showAllNames}
+              zoomLevel={zoomLevel}
+            />
+          </svg>
+        </div>
         
         {/* Welcome message display */}
         {welcomeMessage && !isGuardianNetExpanded && (

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Species, VisualStyle } from './types';
-import { formatDistanceToNow } from 'date-fns';
 
 export interface ConnectedSpecies {
   species: Species;
@@ -12,69 +11,97 @@ export interface ConnectedSpecies {
 interface ConnectionTrackerProps {
   connectedSpecies: ConnectedSpecies[];
   newcomerCount: number;
-  visualStyle?: VisualStyle;
+  visualStyle: VisualStyle;
 }
 
 const ConnectionTracker: React.FC<ConnectionTrackerProps> = ({
   connectedSpecies,
   newcomerCount,
-  visualStyle = "celestial"
+  visualStyle
 }) => {
   if (connectedSpecies.length === 0) return null;
   
-  const getBackgroundColor = () => {
+  const getStyleByVisualStyle = () => {
     switch(visualStyle) {
-      case "cosmic":
-        return "bg-gradient-to-r from-purple-900/80 to-indigo-900/80";
+      case "celestial":
+        return {
+          backgroundColor: "rgba(15, 23, 42, 0.8)",
+          border: "1px solid rgba(59, 130, 246, 0.2)",
+          boxShadow: "0 0 15px rgba(59, 130, 246, 0.1)"
+        };
       case "lightweb":
-        return "bg-gradient-to-r from-gray-900/80 to-blue-900/80";
-      case "monochrome":
-        return "bg-gradient-to-r from-gray-900/90 to-gray-800/90";
+        return {
+          backgroundColor: "rgba(15, 23, 42, 0.7)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          boxShadow: "0 0 15px rgba(255, 255, 255, 0.05)"
+        };
+      case "cosmic":
+        return {
+          backgroundColor: "rgba(15, 10, 30, 0.8)",
+          border: "1px solid rgba(139, 92, 246, 0.2)",
+          boxShadow: "0 0 15px rgba(139, 92, 246, 0.1)"
+        };
       default:
-        return "bg-gradient-to-r from-blue-900/80 to-indigo-900/80";
+        return {
+          backgroundColor: "rgba(15, 23, 42, 0.8)",
+          border: "1px solid rgba(59, 130, 246, 0.2)"
+        };
     }
   };
-
+  
+  const formatTimeSince = (timestamp: number) => {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    
+    if (seconds < 60) {
+      return `${seconds}s ago`;
+    } else if (seconds < 3600) {
+      const minutes = Math.floor(seconds / 60);
+      return `${minutes}m ago`;
+    } else {
+      const hours = Math.floor(seconds / 3600);
+      return `${hours}h ago`;
+    }
+  };
+  
   return (
-    <div className="absolute top-4 right-4 max-w-[240px]">
-      <div className={`${getBackgroundColor()} backdrop-blur-sm rounded-lg border border-blue-500/20 shadow-md shadow-blue-500/10 p-3`}>
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-xs font-semibold text-blue-200">
-            Connected Species
-          </h3>
-          {newcomerCount > 0 && (
-            <div className="bg-green-600/80 text-white text-xs px-2 py-0.5 rounded-full flex items-center">
-              +{newcomerCount} new
-            </div>
-          )}
+    <div className="absolute bottom-4 left-4 max-w-xs">
+      <div 
+        className="rounded-md px-3 py-2 backdrop-blur-sm"
+        style={getStyleByVisualStyle()}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-medium text-white">Connected Species</h3>
+          <div className="flex items-center">
+            <span className="text-xs text-white mr-2">{connectedSpecies.length}</span>
+            {newcomerCount > 0 && (
+              <span className="bg-green-500 text-xs rounded-full h-5 w-5 flex items-center justify-center text-white">
+                {newcomerCount}
+              </span>
+            )}
+          </div>
         </div>
-        
-        <div className="max-h-[150px] overflow-y-auto pr-1 space-y-2">
-          {connectedSpecies.map(({ species, connectedSince, isNewcomer }) => (
-            <div 
-              key={species.id} 
-              className={`text-xs p-2 rounded ${
-                isNewcomer 
-                  ? "bg-green-900/30 border border-green-400/30" 
-                  : "bg-blue-900/30 border border-blue-400/20"
-              }`}
-            >
-              <div className="flex justify-between">
-                <span className="font-medium text-white">{species.name}</span>
-                <span className={`text-[10px] ${isNewcomer ? "text-green-300" : "text-blue-300"}`}>
-                  {formatDistanceToNow(connectedSince, { addSuffix: true })}
-                </span>
+        <div className="space-y-1.5">
+          {connectedSpecies.slice(0, 5).map((conn) => (
+            <div key={conn.species.id || conn.species.name} className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div 
+                  className="w-2 h-2 rounded-full"
+                  style={{
+                    backgroundColor: conn.species.responding ? '#10b981' : '#f87171',
+                    boxShadow: conn.isNewcomer ? `0 0 5px ${conn.species.responding ? '#10b981' : '#f87171'}` : 'none'
+                  }}
+                />
+                <span className="text-xs text-white">{conn.species.name}</span>
               </div>
-              <div className="text-[10px] text-blue-300/80 mt-1">
-                {species.realm} • {species.distance ? 
-                  (species.distance < 1000 
-                    ? `${species.distance.toFixed(1)} ly` 
-                    : `${(species.distance/1000).toFixed(1)}k ly`
-                  ) : 'Unknown distance'
-                }
-              </div>
+              <span className="text-xs text-gray-400">{formatTimeSince(conn.connectedSince)}</span>
             </div>
           ))}
+          
+          {connectedSpecies.length > 5 && (
+            <div className="text-xs text-center text-blue-400 mt-1">
+              +{connectedSpecies.length - 5} more
+            </div>
+          )}
         </div>
       </div>
     </div>

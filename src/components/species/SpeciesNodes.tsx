@@ -21,6 +21,7 @@ interface SpeciesNodesProps {
     newExistence: boolean;
     divine: boolean;
   };
+  showAllNames?: boolean;
 }
 
 const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
@@ -34,7 +35,8 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   containerSize,
   rotation,
   visualStyle,
-  visibleLayers
+  visibleLayers,
+  showAllNames = false
 }) => {
   return (
     <>
@@ -53,6 +55,8 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
           const isSelected = selectedSpecies?.name === s.name;
           const isHovered = hoveredSpecies?.name === s.name;
           const speciesColor = getSpeciesColor(s, visualStyle);
+          const shouldShowName = showAllNames || isSelected || isHovered;
+          const nodeSize = isSelected ? 8 : isHovered ? 7 : 6;
           
           return (
             <g 
@@ -64,23 +68,26 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
               style={{ cursor: 'pointer' }}
             >
               <circle
-                r={6}
+                r={nodeSize}
                 fill={speciesColor}
-                stroke={isSelected ? 'white' : 'none'}
-                strokeWidth={isSelected ? 2 : 0}
+                stroke={isSelected ? 'white' : isHovered ? 'rgba(255,255,255,0.7)' : 'none'}
+                strokeWidth={isSelected ? 2 : isHovered ? 1 : 0}
+                filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(100,100,255,0.7))" : ""}
               />
-              <text
-                y={12}
-                fontSize="8"
-                textAnchor="middle"
-                fill="white"
-                style={{ 
-                  filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
-                  textShadow: "0 0 2px rgba(0,0,0,0.9)"
-                }}
-              >
-                {s.name}
-              </text>
+              {shouldShowName && (
+                <text
+                  y={nodeSize + 8}
+                  fontSize="8"
+                  textAnchor="middle"
+                  fill="white"
+                  style={{ 
+                    filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
+                    textShadow: "0 0 2px rgba(0,0,0,0.9)"
+                  }}
+                >
+                  {s.name}
+                </text>
+              )}
             </g>
           );
       })}

@@ -3,240 +3,135 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { 
   createMessageObject, 
-  forceTriadSync,
-  calculateFaithQuotient
+  forceTriadSync, 
+  calculateFaithQuotient 
 } from '@/utils/quantumMessagingUtils';
-import { useQuantumSessions } from './useQuantumSessions';
-import { useTriadBoost } from './useTriadBoost';
-import { bindQuantumSocket, createQuantumTunnelId } from '@/utils/quantumSocketBinding';
-import { sendQuantumMessage, activateTriadPing } from '@/utils/quantumTransmissionUtils';
 
-// Use export type for re-exports when isolatedModules is enabled
-export type { QuantumMessage } from '@/types/quantum-messaging';
-export type { MessageSession } from '@/types/quantum-messaging';
+export interface QuantumMessage {
+  id: string;
+  sender: string;
+  recipient: string;
+  content: string;
+  timestamp: string;
+  faithQuotient: number;
+  triadEnhanced: boolean;
+}
 
-export function useQuantumMessaging(userId: string) {
+interface UseQuantumMessagingOptions {
+  user?: string;
+  initialFaithQuotient?: number;
+}
+
+export function useQuantumMessaging(options: UseQuantumMessagingOptions = {}) {
   const { toast } = useToast();
-  const [newMessage, setNewMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [socketBound, setSocketBound] = useState(false);
-  const [tunnelId, setTunnelId] = useState('');
-  const [triadLoopActive, setTriadLoopActive] = useState(false);
+  const [messages, setMessages] = useState<QuantumMessage[]>([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [faithQuotient, setFaithQuotient] = useState(options.initialFaithQuotient || 0.5);
+  const [isTriadActive, setIsTriadActive] = useState(false);
+  const [targetEntity, setTargetEntity] = useState<string | null>(null);
   
-  // Use our smaller hooks
-  const { 
-    activeSessions, 
-    currentEntity, 
-    messages, 
-    setMessages,
-    startSession,
-    createNewSession,
-    clearSession,
-    updateSessionWithMessage
-  } = useQuantumSessions(userId);
-  
-  const { 
-    triadBoostActive, 
-    toggleTriadBoost,
-    emergencyProtocolActive,
-    activateEmergencyProtocol,
-    stabilityLevel
-  } = useTriadBoost();
-  
-  // Initialize quantum socket binding
+  // Initialize connection
   useEffect(() => {
-    const newTunnelId = createQuantumTunnelId();
-    setTunnelId(newTunnelId);
-    
-    const bindResult = bindQuantumSocket(newTunnelId);
-    if (bindResult.status === "bound") {
-      setSocketBound(true);
-      console.log(`Quantum Socket bound: ${newTunnelId} on ${bindResult.interface}`);
-      
-      // Activate triad ping
-      const pingResult = activateTriadPing();
-      setTriadLoopActive(pingResult.triad_loop);
-      console.log(`Triad ping activated: ${pingResult.ping.join(', ')}`);
-    } else {
-      console.error(`Quantum Socket binding failed: ${bindResult.reason}`);
-    }
-  }, []);
-  
-  // Send message to the current entity
-  const sendMessage = async () => {
-    if (!currentEntity || newMessage.trim() === '') return;
-    
-    // Check if socket is bound
-    if (!socketBound) {
-      toast({
-        title: "Quantum Socket Not Bound",
-        description: "Attempting to rebind socket...",
-        variant: "destructive",
-      });
-      
-      // Try to rebind
-      const newTunnelId = createQuantumTunnelId();
-      setTunnelId(newTunnelId);
-      const bindResult = bindQuantumSocket(newTunnelId);
-      
-      if (bindResult.status === "bound") {
-        setSocketBound(true);
-      } else {
+    const initConnection = async () => {
+      try {
+        setIsConnected(true);
         toast({
-          title: "Socket Rebinding Failed",
-          description: "Try activating emergency protocol",
+          title: "Quantum Channel Established",
+          description: "Connection to the cosmic network established",
+        });
+      } catch (error) {
+        toast({
+          title: "Connection Failed",
+          description: "Unable to establish quantum connection. Try again later.",
           variant: "destructive",
         });
-        return;
       }
-    }
+    };
     
-    setIsLoading(true);
+    initConnection();
     
-    // Process message through quantum transmitter first
-    const transmissionResult = sendQuantumMessage(newMessage, "Zade", "high");
-    
-    if (transmissionResult.status === "error") {
+    return () => {
+      setIsConnected(false);
+    };
+  }, [toast]);
+  
+  // Send a quantum message
+  const sendMessage = async (recipient: string, content: string) => {
+    if (!isConnected) {
       toast({
-        title: "Transmission Error",
-        description: transmissionResult.reason || "Unknown error",
+        title: "Not Connected",
+        description: "Quantum channel not established. Cannot send message.",
         variant: "destructive",
       });
-      setIsLoading(false);
-      return;
+      return false;
     }
     
-    // Calculate faith quotient
-    const faithQuotient = calculateFaithQuotient(newMessage);
-    const hasFaithBoost = faithQuotient > 0.7;
-    
-    // Display faith boost notification if relevant
-    if (hasFaithBoost) {
-      toast({
-        title: "Ultimate Faith Quotient Detected",
-        description: `Message enhanced with UFQ: ${(faithQuotient * 100).toFixed(0)}%`,
-      });
-    }
-    
-    // Create message object with faith quotient
-    const messageObj = createMessageObject('Zade', currentEntity, newMessage, undefined, faithQuotient);
-    
-    // Add message to list
-    setMessages(prev => [...prev, messageObj]);
-    
-    // Clear input
-    setNewMessage('');
-    
-    // Check triad loop
-    if (!triadLoopActive && !emergencyProtocolActive) {
-      const pingResult = activateTriadPing();
-      setTriadLoopActive(pingResult.triad_loop);
-      
-      toast({
-        title: "Triad Ping Activated",
-        description: `Loop established with ${pingResult.ping.join(' and ')}`,
-      });
-    }
-    
-    // Process with quantum backdoor
     try {
-      // If we have transmission failures and emergency protocol isn't active, activate it
-      if (!socketBound && !triadBoostActive && !emergencyProtocolActive && stabilityLevel < 0.7 && !hasFaithBoost) {
-        // Try to use forced triad sync as a last resort
-        const forcedSync = forceTriadSync(newMessage);
-        
-        if (forcedSync.stability < 0.7) {
-          // If even forced sync isn't enough, recommend emergency protocol
-          toast({
-            title: "Critical Quantum Interference",
-            description: "Triad sync critical. Activating emergency protocol.",
-            variant: "destructive",
-          });
-          
-          // Auto-activate emergency protocol
-          activateEmergencyProtocol();
-        }
-      }
+      const msgFq = calculateFaithQuotient(content, faithQuotient);
+      const message = createMessageObject(
+        options.user || "User",
+        recipient,
+        content,
+        msgFq
+      );
       
-      // Simulate network delay (shorter with faith boost)
-      setTimeout(() => {
-        // Use our quantum transmission system
-        const encodedMessage = transmissionResult.encoded_msg;
-        console.log(`Transmitting encoded message: ${encodedMessage}`);
-        
-        const response = {
-          content: `Response to: ${newMessage}`,
-          triadEnhanced: triadBoostActive,
-          faithQuotient: faithQuotient
-        };
-        
-        // Create response message
-        const responseMessage = createMessageObject(
-          currentEntity!, 
-          'Zade', 
-          response.content, 
-          response.triadEnhanced,
-          response.faithQuotient
-        );
-        
-        // Add response to messages
-        setMessages(prev => [...prev, responseMessage]);
-        
-        // Update session last message
-        updateSessionWithMessage(currentEntity!, response.content);
-        
-        setIsLoading(false);
-        
-        // Display toast for special enhancements
-        if (response.triadEnhanced && response.faithQuotient && response.faithQuotient > 0.8) {
-          toast({
-            title: "Triad & Faith Enhanced Response",
-            description: "Message quantum-validated with ultimate resonance boost",
-            variant: "default",
-          });
-        } else if (response.triadEnhanced) {
-          toast({
-            title: "Triad-Enhanced Response",
-            description: "Message quantum-validated with triad enhancement"
-          });
-        } else if (response.faithQuotient && response.faithQuotient > 0.8) {
-          toast({
-            title: "UFQ-Amplified Response",
-            description: "Ultimate Faith Quotient boosting connection",
-          });
-        }
-      }, hasFaithBoost ? 500 + Math.random() * 500 : 1000 + Math.random() * 1000);
+      setMessages(prev => [...prev, message]);
+      setFaithQuotient(msgFq); // Update FQ based on message content
+      
+      toast({
+        title: "Message Sent",
+        description: `Quantum message sent to ${recipient}`,
+      });
+      
+      return true;
     } catch (error) {
-      console.error("Error sending message:", error);
       toast({
         title: "Message Failed",
-        description: "Quantum backdoor encountered interference. Activating emergency protocol.",
+        description: "Failed to send quantum message.",
         variant: "destructive",
       });
+      return false;
+    }
+  };
+  
+  // Activate triad boost
+  const activateTriadBoost = async () => {
+    try {
+      const result = await forceTriadSync(faithQuotient);
+      setIsTriadActive(result.success);
       
-      // Auto-activate emergency protocol on error
-      activateEmergencyProtocol();
-      setIsLoading(false);
+      if (result.success) {
+        toast({
+          title: "Triad Boost Activated",
+          description: `Resonance increased to ${result.resonance.toFixed(2)}Hz`,
+        });
+      } else {
+        toast({
+          title: "Triad Boost Failed",
+          description: "Unable to synchronize quantum triad",
+          variant: "destructive",
+        });
+      }
+      
+      return result.success;
+    } catch (error) {
+      toast({
+        title: "Triad System Error",
+        description: "A quantum fluctuation prevented triad activation",
+        variant: "destructive",
+      });
+      return false;
     }
   };
   
   return {
     messages,
-    activeSessions,
-    currentEntity,
-    newMessage,
-    setNewMessage,
-    triadBoostActive,
-    emergencyProtocolActive,
-    isLoading,
-    socketBound,
-    tunnelId,
-    triadLoopActive,
+    isConnected,
+    faithQuotient,
+    isTriadActive,
+    targetEntity,
+    setTargetEntity,
     sendMessage,
-    startSession,
-    toggleTriadBoost,
-    activateEmergencyProtocol,
-    clearSession,
-    createNewSession
+    activateTriadBoost
   };
 }

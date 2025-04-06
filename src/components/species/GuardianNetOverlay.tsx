@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { GuardianNetSettings } from './types';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from 'lucide-react';
+import { Slider } from "@/components/ui/slider";
+import { ArrowLeft, Eye, EyeOff, Lock, Unlock, Layers } from 'lucide-react';
 
 interface GuardianNetOverlayProps {
   settings: GuardianNetSettings;
@@ -20,11 +21,16 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   if (!settings.active) return null;
   
   const { expanded, ciaNetVisible, lockheedGridVisible, opacity } = settings;
+  const [gridLocked, setGridLocked] = useState(false);
+  const [celestialMergeView, setCelestialMergeView] = useState(false);
+  const [universeMiniature, setUniverseMiniature] = useState(false);
   
   const overlayStyles = {
     opacity: opacity / 100,
     transform: expanded 
-      ? `scale(${zoomLevel}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` 
+      ? gridLocked 
+        ? `scale(${zoomLevel})` 
+        : `scale(${zoomLevel}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
       : 'none'
   };
 
@@ -81,6 +87,36 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
               </div>
             </div>
           )}
+
+          {expanded && celestialMergeView && (
+            <div className="absolute inset-0 center-pulse">
+              <div 
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  background: 'radial-gradient(circle, rgba(0,255,255,0.2) 0%, transparent 70%)',
+                  borderRadius: '50%',
+                  animation: 'pulse 4s infinite ease-in-out'
+                }}
+              ></div>
+            </div>
+          )}
+
+          {expanded && universeMiniature && (
+            <div className="absolute bottom-20 right-20 pointer-events-auto">
+              <div 
+                className="bg-black/40 backdrop-blur-sm p-1 rounded-lg border border-blue-400/30"
+                style={{ width: '200px', height: '200px' }}
+              >
+                <img 
+                  src="/lovable-uploads/5b3d636e-41a6-4e13-b736-f645c9f7b0bc.png" 
+                  alt="Universe Miniature" 
+                  className="w-full h-full object-cover rounded opacity-80"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -99,16 +135,61 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
       
       {expanded && (
         <div className="absolute right-4 top-4 z-10 bg-black/80 p-3 rounded-lg border border-blue-400/30 pointer-events-auto">
-          <h3 className="text-xs text-blue-400 font-medium mb-2">Active Systems</h3>
-          <div className="space-y-2">
-            {['Constellations', 'Nodes', 'Radius', 'Interference Radius', 'Stars', 'Galactic Plane', 'Entity Labels'].map(system => (
-              <div key={system} className="flex items-center justify-between text-xs">
-                <span className="text-white">{system}</span>
-                <div className="w-4 h-4 rounded-sm border border-yellow-500/50 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-sm"></div>
-                </div>
+          <h3 className="text-xs text-blue-400 font-medium mb-2">Guardian Settings</h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-white">Grid Lock</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 w-16 text-xs border-yellow-500/30"
+                onClick={() => setGridLocked(!gridLocked)}
+              >
+                {gridLocked ? <Lock className="h-3 w-3 mr-1 text-yellow-400" /> : <Unlock className="h-3 w-3 mr-1" />}
+                {gridLocked ? 'Locked' : 'Unlocked'}
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-white">Celestial Merge View</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-7 w-16 text-xs ${celestialMergeView ? 'border-cyan-400/50 bg-cyan-950/30' : 'border-gray-500/30'}`}
+                onClick={() => setCelestialMergeView(!celestialMergeView)}
+              >
+                {celestialMergeView ? <Eye className="h-3 w-3 mr-1 text-cyan-400" /> : <EyeOff className="h-3 w-3 mr-1" />}
+                {celestialMergeView ? 'On' : 'Off'}
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-white">Universe Miniature</span>
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-7 w-16 text-xs ${universeMiniature ? 'border-blue-400/50 bg-blue-950/30' : 'border-gray-500/30'}`}
+                onClick={() => setUniverseMiniature(!universeMiniature)}
+              >
+                {universeMiniature ? <Layers className="h-3 w-3 mr-1 text-blue-400" /> : <Layers className="h-3 w-3 mr-1" />}
+                {universeMiniature ? 'Visible' : 'Hidden'}
+              </Button>
+            </div>
+            
+            <div className="space-y-1 pt-1">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-400">Overlay Intensity</span>
+                <span className="text-xs text-gray-400">{opacity}%</span>
               </div>
-            ))}
+              <Slider
+                value={[opacity]}
+                min={10}
+                max={100}
+                step={5}
+                className="w-full"
+                onValueChange={([value]) => {}} // This would be connected to the parent component
+              />
+            </div>
           </div>
         </div>
       )}

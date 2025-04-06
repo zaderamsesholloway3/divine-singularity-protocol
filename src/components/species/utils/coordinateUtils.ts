@@ -1,220 +1,170 @@
 
-import { Species } from "../types";
-
-interface Coordinates {
-  x: number;
-  y: number;
-  z: number;
-}
+import { Species, ViewMode } from '../types';
 
 /**
- * Get coordinates based on the selected view mode
+ * Get coordinates for a species based on the selected view mode
  */
 export const getCoordinates = (
   species: Species,
-  index: number, 
-  totalSpecies: number, 
-  mode: string, 
-  radius: number, 
+  index: number,
+  totalSpecies: number,
+  mode: ViewMode | string,
+  speciesRadius: number,
   containerSize: number,
   rotation: { x: number, y: number }
-): Coordinates => {
-  if (mode === "radial") {
-    return getRadialCoordinates(species, radius, containerSize, rotation);
-  } else if (mode === "signature") {
-    return getSignatureCoordinates(species, index, totalSpecies, containerSize);
-  } else if (mode === "disk") {
-    return getDiskCoordinates(species, index, containerSize);
+): { x: number, y: number } => {
+  switch (mode) {
+    case "radial":
+      return getRadialCoordinates(species, speciesRadius, containerSize, rotation);
+    case "signature":
+      return getSignatureCoordinates(species, index, totalSpecies, containerSize);
+    case "disk":
+      return getDiskCoordinates(species, index, totalSpecies, containerSize);
+    case "constellation":
+      return getConstellationCoordinates(species, index, totalSpecies, containerSize);
+    default:
+      return getRadialCoordinates(species, speciesRadius, containerSize, rotation);
   }
-  
-  // Default to radial coordinates
-  return getRadialCoordinates(species, radius, containerSize, rotation);
 };
 
 /**
- * Calculate 3D coordinates for radial mode
+ * Calculate 3D coordinates in radial mode with rotation
  */
 export const getRadialCoordinates = (
-  species: Species, 
-  radius: number, 
+  species: Species,
+  speciesRadius: number,
   containerSize: number,
-  rotation: { x: number; y: number }
-): Coordinates => {
-  // Get theta and phi from species properties
-  const theta = species.phaseOffset ? (species.phaseOffset / 180) * Math.PI : Math.random() * Math.PI * 2;
-  const phi = species.vibration ? (species.vibration / 20) * Math.PI : Math.random() * Math.PI;
+  rotation: { x: number, y: number }
+): { x: number, y: number, z: number } => {
+  // Use distance and azimuth to calculate position
+  const distance = species.distance || 0;
+  const normalizedDistance = Math.min(0.9, distance / 10000);
   
-  // Calculate distance factor based on species distance or random value
-  const distanceFactor = species.distance 
-    ? Math.min(1, species.distance / 2000) // Scale distances, max at 2000ly
-    : Math.random() * 0.8 + 0.2;
-    
+  // Position in 3D space
+  const radius = normalizedDistance * speciesRadius;
+  const phi = species.signature ? species.signature[0] * Math.PI * 2 : Math.random() * Math.PI * 2;
+  const theta = species.signature ? species.signature[1] * Math.PI : Math.random() * Math.PI;
+  
   // Convert to Cartesian coordinates
-  let x = radius * distanceFactor * Math.sin(phi) * Math.cos(theta);
-  let y = radius * distanceFactor * Math.sin(phi) * Math.sin(theta);
-  let z = radius * distanceFactor * Math.cos(phi);
+  const x0 = radius * Math.sin(theta) * Math.cos(phi);
+  const y0 = radius * Math.sin(theta) * Math.sin(phi);
+  const z0 = radius * Math.cos(theta);
   
-  // Apply custom location if available
-  if (species.location) {
-    x = species.location.x * radius;
-    y = species.location.y * radius;
-    z = species.location.z * radius;
-  }
+  // Apply rotation
+  const rotX = rotation.x * Math.PI / 180;
+  const rotY = rotation.y * Math.PI / 180;
   
-  // Apply 3D rotation
-  const rotX = rotation.x * (Math.PI / 180);
-  const rotY = rotation.y * (Math.PI / 180);
+  // Rotate around X-axis
+  const x1 = x0;
+  const y1 = y0 * Math.cos(rotX) - z0 * Math.sin(rotX);
+  const z1 = y0 * Math.sin(rotX) + z0 * Math.cos(rotX);
   
-  // Rotate around X axis
-  const y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
-  const z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
+  // Rotate around Y-axis
+  const x2 = x1 * Math.cos(rotY) + z1 * Math.sin(rotY);
+  const y2 = y1;
+  const z2 = -x1 * Math.sin(rotY) + z1 * Math.cos(rotY);
   
-  // Rotate around Y axis
-  const x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
-  const z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
-  
-  // Center on container
+  // Project onto 2D
   const centerX = containerSize / 2;
   const centerY = containerSize / 2;
   
   return {
     x: centerX + x2,
-    y: centerY + y1,
+    y: centerY + y2,
     z: z2
   };
 };
 
 /**
- * Calculate coordinates for signature mode
+ * Calculate coordinates for signature visualization mode
  */
 export const getSignatureCoordinates = (
   species: Species,
   index: number,
   totalSpecies: number,
   containerSize: number
-): Coordinates => {
+): { x: number, y: number, z: number } => {
   const centerX = containerSize / 2;
   const centerY = containerSize / 2;
-  const maxRadius = containerSize * 0.45;
   
-  // Calculate base position based on index
+  // Use species signature if available, otherwise use index
+  if (species.signature && species.signature.length >= 2) {
+    // Signature values should be between 0 and 1
+    const x = centerX + (species.signature[0] - 0.5) * containerSize * 0.8;
+    const y = centerY + (species.signature[1] - 0.5) * containerSize * 0.8;
+    
+    return { x, y, z: 0 };
+  }
+  
+  // Fallback using index
   const angle = (index / totalSpecies) * Math.PI * 2;
+  const radius = containerSize * 0.4;
+  const x = centerX + Math.cos(angle) * radius;
+  const y = centerY + Math.sin(angle) * radius;
   
-  // Modify radius based on species properties
-  let radiusFactor = 1;
-  
-  // Use species vibration to affect position
-  if (species.vibration) {
-    // Lower vibrations closer to center
-    radiusFactor = Math.min(1, species.vibration / 20);
-  }
-  
-  // Use realm to determine quadrant bias
-  let quadrantBias = 0;
-  switch (species.realm) {
-    case "Existence":
-      quadrantBias = 0; // Default quadrant
-      break;
-    case "Non-Existence":
-      quadrantBias = Math.PI * 0.5; // 90 degrees
-      break;
-    case "New-Existence":
-      quadrantBias = Math.PI; // 180 degrees
-      break;
-    case "Divine":
-      quadrantBias = Math.PI * 1.5; // 270 degrees
-      break;
-    default:
-      quadrantBias = 0;
-  }
-  
-  // Apply custom signature patterns based on realm
-  let finalAngle = angle + quadrantBias;
-  let finalRadius = maxRadius * radiusFactor;
-  
-  // Unique signature patterns per realm
-  if (species.realm === "Existence") {
-    // Spiral pattern
-    finalRadius *= (1 - (index % 5) * 0.1);
-  } else if (species.realm === "Non-Existence") {
-    // Grid pattern
-    finalRadius *= (0.5 + (index % 3) * 0.25);
-    finalAngle += Math.PI / 6;
-  } else if (species.realm === "New-Existence") {
-    // Staggered pattern
-    finalRadius *= (0.6 + ((index % 7) / 10));
-    finalAngle += Math.PI / 4;
-  } else if (species.realm === "Divine") {
-    // Fixed positions (special)
-    finalRadius *= 0.7;
-  }
-  
-  // Calculate final position
-  const x = centerX + finalRadius * Math.cos(finalAngle);
-  const y = centerY + finalRadius * Math.sin(finalAngle);
-  
-  // z helps with sorting
-  const z = species.realm === "Divine" ? 100 : 
-           species.realm === "New-Existence" ? 50 : 
-           species.realm === "Non-Existence" ? 25 : 0;
-  
-  return { x, y, z };
+  return { x, y, z: 0 };
 };
 
 /**
- * Calculate coordinates for disk mode (flat galactic disk visualization)
+ * Calculate coordinates for disk visualization mode
  */
 export const getDiskCoordinates = (
   species: Species,
   index: number,
+  totalSpecies: number,
   containerSize: number
-): Coordinates => {
+): { x: number, y: number, z: number } => {
   const centerX = containerSize / 2;
   const centerY = containerSize / 2;
-  const maxRadius = containerSize * 0.45;
   
-  // Use distance to determine radius (if available)
-  const distanceFactor = species.distance 
-    ? Math.min(1, species.distance / 5000) // Scale distances
-    : Math.random() * 0.9 + 0.1;
-    
-  // Apply spiral arm effect
-  let angle = Math.random() * Math.PI * 2;
-  if (species.vibration) {
-    // Use vibration to determine arm
-    const armNumber = Math.floor((species.vibration % 6));
-    angle = (armNumber / 6) * Math.PI * 2 + (distanceFactor * Math.PI * 0.5);
-  }
+  // Normalize distance for disk layout
+  const distance = species.distance || 0;
+  const normalizedDistance = Math.min(0.9, distance / 10000);
+  const radius = normalizedDistance * (containerSize / 2.5);
   
-  // Add some randomness to position
-  const randomOffset = 0.1;
-  const randomAngleOffset = (Math.random() * 2 - 1) * randomOffset;
-  const randomDistanceOffset = (Math.random() * 2 - 1) * randomOffset;
+  // Generate angle based on index or vibration
+  const angle = species.vibration 
+    ? (species.vibration / 12) * Math.PI * 2 
+    : (index / totalSpecies) * Math.PI * 2;
   
-  // Calculate final position
-  const radius = maxRadius * (distanceFactor + randomDistanceOffset);
-  const finalAngle = angle + randomAngleOffset;
+  const x = centerX + Math.cos(angle) * radius;
+  const y = centerY + Math.sin(angle) * radius;
   
-  const x = centerX + radius * Math.cos(finalAngle);
-  const y = centerY + radius * Math.sin(finalAngle);
-  
-  return { x, y, z: 0 }; // flat, so z is always 0
+  return { x, y, z: 0 };
 };
 
 /**
- * Get color based on species realm
+ * Calculate coordinates for constellation visualization mode
  */
-export const getRealmColor = (realm: string): string => {
-  switch (realm) {
-    case "Existence":
-      return "#3b82f6";
-    case "Non-Existence":
-      return "#8b5cf6";
-    case "New-Existence":
-      return "#06b6d4";
-    case "Divine":
-      return "#eab308";
-    default:
-      return "#3b82f6";
-  }
+export const getConstellationCoordinates = (
+  species: Species,
+  index: number,
+  totalSpecies: number,
+  containerSize: number
+): { x: number, y: number, z: number } => {
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
+  
+  // Group by realm
+  const realmOffsets = {
+    "Existence": { x: -0.3, y: -0.3 },
+    "Non-Existence": { x: 0.3, y: -0.3 },
+    "New-Existence": { x: -0.3, y: 0.3 },
+    "Divine": { x: 0.3, y: 0.3 }
+  };
+  
+  const offset = realmOffsets[species.realm] || { x: 0, y: 0 };
+  
+  // Calculate position within realm group
+  const realmX = centerX + offset.x * containerSize;
+  const realmY = centerY + offset.y * containerSize;
+  
+  // Use FQ for radial positioning within the group
+  const radius = containerSize * 0.2;
+  const angle = species.fq ? species.fq * Math.PI * 2 : (index % 12) / 12 * Math.PI * 2;
+  
+  const x = realmX + Math.cos(angle) * radius * 0.8;
+  const y = realmY + Math.sin(angle) * radius * 0.8;
+  
+  return { x, y, z: 0 };
 };
