@@ -15,7 +15,6 @@ export interface Species {
     amplitude: number;
     frequency: number;
   };
-  // Add missing properties that are being used in the code
   color?: string;
   fq?: number;
   intelligence?: number;

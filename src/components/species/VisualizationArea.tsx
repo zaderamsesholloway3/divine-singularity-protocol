@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -44,12 +43,12 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   onToggleGuardianNetExpanded,
   fullPageMode = false
 }) => {
-  const [isFullScreen, setIsFullScreen] = React.useState(false);
-  const [containerSize, setContainerSize] = React.useState(500);
-  const [rotation, setRotation] = React.useState({ x: 15, y: 0, z: 0 });
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [containerSize, setContainerSize] = useState(500);
+  const [rotation, setRotation] = useState({ x: 15, y: 0, z: 0 });
+  const [showRotateHint, setShowRotateHint] = useState(rotate3dHint);
+  const containerRef = useRef<HTMLDivElement>(null);
   
-  // Helper function to get visual style class name based on current style
   const getVisualStyleClass = () => {
     switch(visualStyle) {
       case "celestial":
@@ -63,7 +62,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     }
   };
 
-  // Toggle fullscreen mode
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
       const visualizationElement = document.getElementById('species-visualization-container');
@@ -83,8 +81,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     }
   };
 
-  // Listen for exiting fullscreen with Escape key
-  React.useEffect(() => {
+  useEffect(() => {
     const handleFullScreenChange = () => {
       setIsFullScreen(!!document.fullscreenElement);
     };
@@ -95,8 +92,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     };
   }, []);
 
-  // Update rotation from SpeciesGateway
-  React.useEffect(() => {
+  useEffect(() => {
     if (speciesGatewayRef.current && 'getRotation' in speciesGatewayRef.current) {
       const updateRotation = () => {
         if (speciesGatewayRef.current && 'getRotation' in speciesGatewayRef.current) {
@@ -111,29 +107,30 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     }
   }, [speciesGatewayRef]);
 
-  // Update container size based on the container dimensions
-  React.useEffect(() => {
+  useEffect(() => {
+    if (rotation.x !== 15 || rotation.y !== 0) {
+      setShowRotateHint(false);
+    }
+  }, [rotation.x, rotation.y]);
+
+  useEffect(() => {
     if (!containerRef.current) return;
     
     const updateSize = () => {
       if (!containerRef.current) return;
       
-      // For fullscreen or fullPageMode, use a dynamic size
       if (isFullScreen || fullPageMode) {
         const width = containerRef.current.clientWidth;
         const height = containerRef.current.clientHeight;
         const minSize = Math.min(width, height);
         setContainerSize(minSize);
       } else {
-        // Default fixed size for normal mode
         setContainerSize(500);
       }
     };
     
-    // Initial size update
     updateSize();
     
-    // Set up resize observer
     const resizeObserver = new ResizeObserver(() => {
       updateSize();
     });
@@ -144,7 +141,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     };
   }, [isFullScreen, fullPageMode]);
 
-  // Observable Universe concentric rings
   const renderObservableUniverse = () => {
     return (
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
@@ -170,7 +166,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
-  // New cosmic flow background
   const renderCosmicFlow = () => {
     if (visualStyle !== "cosmic") return null;
     
@@ -194,9 +189,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
-  // Render stars for the background
   const renderStars = () => {
-    // Generate star data
     const starsData = generateStars(100, 1000, visualStyle);
     
     return (
@@ -216,12 +209,9 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
-  // Check if Guardian Net is in expanded mode
   const isGuardianNetExpanded = guardianNetSettings?.expanded || false;
 
-  // Determine if 3D hint should be shown
-  // Only show rotation hint if in radial mode AND rotate3dHint is true AND not in expanded mode
-  const shouldShowRotationHint = viewMode === "radial" && rotate3dHint && !isGuardianNetExpanded && !selectedSpecies;
+  const shouldShowRotationHint = viewMode === "radial" && showRotateHint && !isGuardianNetExpanded && !selectedSpecies;
 
   return (
     <div className="relative" id="species-visualization-container" ref={containerRef}>
@@ -264,7 +254,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           </svg>
         </div>
         
-        {/* Welcome message display */}
         {welcomeMessage && !isGuardianNetExpanded && (
           <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm px-6 py-3 rounded-full text-white text-center max-w-[80%] animate-fade-in-up">
             <p className="text-sm md:text-base font-semibold">
@@ -274,7 +263,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         )}
       </div>
       
-      {/* Guardian Net Overlay */}
       {guardianNetSettings && (
         <GuardianNetOverlay
           settings={guardianNetSettings}
@@ -284,7 +272,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         />
       )}
       
-      {/* Zoom controls */}
       <div className={`absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
         <Button
           variant="ghost"
@@ -308,7 +295,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           +
         </Button>
         
-        {/* Fullscreen toggle button */}
         <Button
           variant="ghost"
           size="sm"
@@ -321,16 +307,14 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </Button>
       </div>
       
-      {/* 3D rotation hint overlay - Only show when conditions are met */}
       {shouldShowRotationHint && (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in z-10">
           <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />
           <p className="text-white font-medium">Drag to rotate the 3D view</p>
           <p className="text-xs text-gray-300 mt-1">Click on any species to select it</p>
         </div>
       )}
       
-      {/* Show ping trail animation when active */}
       {showPingTrail && !isGuardianNetExpanded && (
         <div className="absolute inset-0 pointer-events-none">
           <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full

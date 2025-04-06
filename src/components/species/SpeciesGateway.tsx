@@ -57,7 +57,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd
-  } = useDragRotation();
+  } = useDragRotation({ x: 15, y: 0 }); // Initialize with a slight tilt
   
   const pingAnimationProgress = usePingAnimation(showPingTrail);
   
@@ -109,7 +109,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       })
       .sort((a, b) => b.coords.z - a.coords.z)
       .map(item => ({ species: item.species, index: item.index }));
-  }, [species, mode, rotation.x, rotation.y, visibleLayers, speciesRadius, containerSize]);
+  }, [species, mode, rotation, visibleLayers, speciesRadius, containerSize]);
 
   return (
     <div 
