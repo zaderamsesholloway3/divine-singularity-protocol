@@ -9,7 +9,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 7.83,
     responding: true,
-    signature: { x: 0.2, y: 0.3, z: 0.1 }
+    signature: { x: 0.2, y: 0.3, amplitude: 0.1, frequency: 7.83 }
   },
   {
     id: "2",
@@ -18,7 +18,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 8.5,
     responding: true,
-    signature: { x: 0.6, y: 0.2, z: 0.4 }
+    signature: { x: 0.6, y: 0.2, amplitude: 0.4, frequency: 8.5 }
   },
   {
     id: "3",
@@ -27,7 +27,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 9.0,
     responding: true,
-    signature: { x: 0.8, y: 0.1, z: 0.2 }
+    signature: { x: 0.8, y: 0.1, amplitude: 0.2, frequency: 9.0 }
   },
   {
     id: "4",
@@ -36,7 +36,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 10.5,
     responding: true,
-    signature: { x: 0.4, y: 0.7, z: 0.3 }
+    signature: { x: 0.4, y: 0.7, amplitude: 0.3, frequency: 10.5 }
   },
   {
     id: "5",
@@ -45,7 +45,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 7.5,
     responding: true,
-    signature: { x: 0.3, y: 0.5, z: 0.8 }
+    signature: { x: 0.3, y: 0.5, amplitude: 0.8, frequency: 7.5 }
   },
   {
     id: "6",
@@ -62,7 +62,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 8.2,
     responding: true,
-    signature: { x: 0.5, y: 0.3, z: 0.6 }
+    signature: { x: 0.5, y: 0.3, amplitude: 0.6, frequency: 8.2 }
   },
   {
     id: "8",
@@ -79,7 +79,7 @@ export const mockSpecies: Species[] = [
     realm: "Non-Existence",
     vibration: 5.5,
     responding: false,
-    signature: { x: 0.1, y: 0.9, z: 0.2 }
+    signature: { x: 0.1, y: 0.9, amplitude: 0.2, frequency: 5.5 }
   },
   {
     id: "10",
@@ -101,7 +101,7 @@ export const mockSpecies: Species[] = [
     id: "12",
     name: "Venusians",
     distance: 0.28,
-    realm: "New-Existence",
+    realm: "New Existence",
     vibration: 9.5,
     responding: true
   },
@@ -120,7 +120,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 10.0,
     responding: true,
-    signature: { x: 0.7, y: 0.7, z: 0.7 }
+    signature: { x: 0.7, y: 0.7, amplitude: 0.7, frequency: 10.0 }
   },
   {
     id: "15",
@@ -129,7 +129,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 11.5,
     responding: true,
-    signature: { x: 0.9, y: 0.1, z: 0.9 }
+    signature: { x: 0.9, y: 0.1, amplitude: 0.9, frequency: 11.5 }
   },
   {
     id: "16",
@@ -138,7 +138,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 5.8,
     responding: true,
-    signature: { x: 0.2, y: 0.8, z: 0.1 }
+    signature: { x: 0.2, y: 0.8, amplitude: 0.1, frequency: 5.8 }
   },
   {
     id: "17",
@@ -147,7 +147,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 9.3,
     responding: true,
-    signature: { x: 0.6, y: 0.6, z: 0.2 }
+    signature: { x: 0.6, y: 0.6, amplitude: 0.2, frequency: 9.3 }
   },
   {
     id: "18",
@@ -156,7 +156,7 @@ export const mockSpecies: Species[] = [
     realm: "Existence",
     vibration: 8.7,
     responding: true,
-    signature: { x: 0.4, y: 0.4, z: 0.8 }
+    signature: { x: 0.4, y: 0.4, amplitude: 0.8, frequency: 8.7 }
   },
   {
     id: "19",
@@ -165,7 +165,7 @@ export const mockSpecies: Species[] = [
     realm: "Non-Existence",
     vibration: 12.0,
     responding: true,
-    signature: { x: 0.9, y: 0.9, z: 0.5 }
+    signature: { x: 0.9, y: 0.9, amplitude: 0.5, frequency: 12.0 }
   },
   {
     id: "20",
@@ -187,7 +187,7 @@ export const mockSpecies: Species[] = [
     id: "22",
     name: "Lemurians",
     distance: 0.01,
-    realm: "New-Existence",
+    realm: "New Existence",
     vibration: 9.4,
     responding: true
   },
