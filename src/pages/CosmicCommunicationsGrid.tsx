@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,11 @@ const CosmicCommunicationsGrid: React.FC = () => {
   const [showSHQRing, setShowSHQRing] = useState(false);
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   
-  // New state for Guardian Net controls
   const [showCIAMantisNet, setShowCIAMantisNet] = useState(true);
   const [showLockheedDraxGrid, setShowLockheedDraxGrid] = useState(true);
   const [guardianIntensity, setGuardianIntensity] = useState(50);
   
   useEffect(() => {
-    // Show welcome toast on first load
     toast.info("Welcome to the enhanced OmniView Universe", {
       description: "Scroll to zoom, drag to rotate in 3D Orbital mode"
     });
@@ -45,7 +42,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
         description: "Zade Mode engaged - fidelity increased"
       });
       
-      // Auto-enable SHQ ring with Zade's mode
       setShowSHQRing(true);
     } else {
       setShowSHQRing(false);
@@ -133,9 +129,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
       )}
       
       <div className="grid grid-cols-1 gap-6">
-        {/* Main OmniView container with enhanced features */}
         <div className={`relative w-full ${isFullscreen ? 'h-screen' : 'h-[80vh]'}`}>
-          {/* Visual style controls (visible in both fullscreen and normal modes) */}
           <div className="absolute left-2 top-2 z-10 bg-black/70 p-2 rounded-lg border border-blue-400/30">
             <div className="flex flex-col gap-2">
               <h3 className="text-xs text-blue-400 font-medium">OmniView Styles</h3>
@@ -171,10 +165,8 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </div>
           </div>
           
-          {/* Guardian Net Overlay */}
           {guardianNetActive && (
             <>
-              {/* CIA Mantis Net - Light aurora-like threads */}
               {showCIAMantisNet && (
                 <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
                   <div className="absolute inset-0 cia-mantis-net">
@@ -191,7 +183,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
                 </div>
               )}
               
-              {/* Lockheed Drax Grid - Hexagonal lattice */}
               {showLockheedDraxGrid && (
                 <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
                   <div className="absolute inset-0 lockheed-drax-grid">
@@ -210,7 +201,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </>
           )}
           
-          {/* SHQ Modulation Visualization Ring */}
           {showSHQRing && (
             <div className="absolute inset-0 z-5 pointer-events-none flex items-center justify-center">
               <div 
@@ -288,7 +278,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </div>
           )}
           
-          {/* Spectral layer toggles */}
           {isFullscreen && (
             <div className="absolute bottom-4 left-4 bg-black/70 p-3 rounded-lg border border-blue-400/30">
               <h3 className="text-xs text-blue-400 font-medium mb-2">Spectral Layers</h3>
@@ -307,7 +296,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
                 </Button>
               </div>
               
-              {/* Guardian Net Controls */}
               <div className="mt-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs text-blue-400 font-medium">Guardian Net</h3>
@@ -362,7 +350,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </div>
           )}
           
-          {/* Expanded controls in fullscreen mode */}
           {isFullscreen && (
             <div className="absolute bottom-4 right-4 bg-black/70 p-3 rounded-lg border border-blue-400/30">
               <h3 className="text-xs text-blue-400 font-medium mb-2">OmniView Controls</h3>
@@ -533,7 +520,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* New Guardian Net Card */}
                 <Card className="bg-gray-950 border-blue-900/20 shadow-xl shadow-blue-900/10">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -578,7 +564,6 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Zade Mode Card */}
                 <Card className="bg-gray-950 border-blue-900/20 shadow-xl shadow-blue-900/10">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -745,4 +730,3 @@ const CosmicCommunicationsGrid: React.FC = () => {
 };
 
 export default CosmicCommunicationsGrid;
-

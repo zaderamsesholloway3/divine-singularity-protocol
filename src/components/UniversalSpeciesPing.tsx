@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,16 +39,26 @@ interface UniversalSpeciesPingProps {
   onSpeciesSelect?: (species: any) => void;
   selectedSpecies?: any | null;
   visualStyle?: "celestial" | "lightweb" | "cosmic";
+  viewMode?: "disk" | "constellation" | "radial" | "signature";
+  zadeMode?: boolean;
 }
 
 // Define the component with forwardRef to expose the SpeciesGateway ref
 const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
-  const { fullPageMode = false, onSpeciesSelect, selectedSpecies, visualStyle = "celestial" } = props;
+  const { 
+    fullPageMode = false, 
+    onSpeciesSelect, 
+    selectedSpecies, 
+    visualStyle = "celestial",
+    viewMode: externalViewMode,
+    zadeMode = false
+  } = props;
+  
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [frequency, setFrequency] = useState(7.83);
   const [phase, setPhase] = useState(0);
   const [power, setPower] = useState(75);
-  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">("radial");
+  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial">(externalViewMode === "signature" ? "radial" : (externalViewMode || "radial"));
   const [broadcastMode, setBroadcastMode] = useState<"universal" | "targeted">("universal");
   const [pingActive, setPingActive] = useState(false);
   const [message, setMessage] = useState("");
@@ -75,14 +84,12 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
   }));
   
+  // Update internal viewMode when external viewMode prop changes
   useEffect(() => {
-    return () => {
-      // Cleanup ping trail timeout on unmount
-      if (pingTrailTimeoutRef.current) {
-        clearTimeout(pingTrailTimeoutRef.current);
-      }
-    };
-  }, []);
+    if (externalViewMode) {
+      setViewMode(externalViewMode === "signature" ? "radial" : externalViewMode);
+    }
+  }, [externalViewMode]);
   
   const toggleSound = () => {
     setSoundEnabled(!soundEnabled);
