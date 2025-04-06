@@ -3,7 +3,6 @@ import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
 import usePingAnimation from './hooks/usePingAnimation';
-import { generateStars } from './utils/visualUtils';
 import { isSpeciesVisible } from './utils/speciesUtils';
 import DistanceRings from './DistanceRings';
 import PingTrail from './PingTrail';
@@ -130,13 +129,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         }}
         className={visualStyle === "lightweb" ? "bg-gradient-to-b from-gray-900/60 to-blue-900/40" : ""}
       >
-        {/* Background stars and nebulas */}
-        {generateStars(
-          visualStyle === "lightweb" ? 120 : visualStyle === "cosmic" ? 180 : 200,
-          containerSize,
-          visualStyle
-        )}
-        
         {/* Distance rings and realm indicators */}
         <DistanceRings 
           containerSize={containerSize}
