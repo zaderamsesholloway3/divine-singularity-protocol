@@ -4,6 +4,7 @@ import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Species, VisibleLayers, VisualStyle, ViewMode } from './types';
+import { generateStars } from './utils/visualUtils';
 
 interface VisualizationAreaProps {
   species: Species[];
@@ -132,6 +133,28 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
+  // Render stars for the background
+  const renderStars = () => {
+    // Generate star data
+    const starsData = generateStars(100, 1000, visualStyle);
+    
+    return (
+      <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        {starsData.map((star) => (
+          <circle
+            key={star.key}
+            cx={star.x}
+            cy={star.y}
+            r={star.r}
+            fill={star.fill}
+            opacity={star.opacity}
+            filter={star.filter}
+          />
+        ))}
+      </svg>
+    );
+  };
+
   return (
     <div className="relative" id="species-visualization-container">
       {renderObservableUniverse()}
@@ -140,6 +163,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         style={{ transform: `scale(${zoomLevel})` }}
       >
         {renderCosmicFlow()}
+        {renderStars()}
         <SpeciesGateway 
           species={species}
           onSelectSpecies={onSelectSpecies}

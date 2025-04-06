@@ -1,10 +1,18 @@
 
-import React from 'react';
 import { VisualStyle, VisibleLayers } from '../types';
 
 // Create a starry background with nebula effect based on visual style
 export const generateStars = (count: number, containerSize: number, visualStyle: VisualStyle) => {
-  const stars: React.ReactNode[] = [];
+  const stars: Array<{
+    type: 'star' | 'glow';
+    x: number;
+    y: number;
+    r: number;
+    fill: string;
+    opacity: number;
+    filter?: string;
+    key: string;
+  }> = [];
   
   // Visual style specific adjustments
   const starOpacityBase = visualStyle === "lightweb" ? 0.7 : visualStyle === "cosmic" ? 0.5 : 0.8;
@@ -22,37 +30,33 @@ export const generateStars = (count: number, containerSize: number, visualStyle:
                        visualStyle === "lightweb" ? "rgb(220, 220, 255)" : 
                        "rgb(180, 180, 220)";
     
-    stars.push(
-      <circle
-        key={`star-${i}`}
-        cx={x}
-        cy={y}
-        r={size}
-        fill={starColor}
-        opacity={opacity}
-        filter={visualStyle === "lightweb" ? "blur(0.5px)" : "none"}
-      />
-    );
+    stars.push({
+      type: 'star',
+      key: `star-${i}`,
+      x: x,
+      y: y,
+      r: size,
+      fill: starColor,
+      opacity: opacity,
+      filter: visualStyle === "lightweb" ? "blur(0.5px)" : undefined
+    });
     
     // Add occasional star glow
     if (Math.random() > (visualStyle === "cosmic" ? 0.9 : 0.85)) {
       const glowSize = visualStyle === "cosmic" ? 2 : visualStyle === "lightweb" ? 4 : 3;
       const glowOpacity = visualStyle === "cosmic" ? 0.3 : visualStyle === "lightweb" ? 0.7 : 0.5;
       
-      stars.push(
-        <circle
-          key={`star-glow-${i}`}
-          cx={x}
-          cy={y}
-          r={size * glowSize}
-          fill={
-            visualStyle === "cosmic" ? "rgba(138, 43, 226, 0.3)" : 
-            visualStyle === "lightweb" ? "rgba(255, 255, 255, 0.3)" :
-            "rgba(255, 255, 255, 0.3)"
-          }
-          opacity={glowOpacity}
-        />
-      );
+      stars.push({
+        type: 'glow',
+        key: `star-glow-${i}`,
+        x: x,
+        y: y,
+        r: size * glowSize,
+        fill: visualStyle === "cosmic" ? "rgba(138, 43, 226, 0.3)" : 
+              visualStyle === "lightweb" ? "rgba(255, 255, 255, 0.3)" :
+              "rgba(255, 255, 255, 0.3)",
+        opacity: glowOpacity
+      });
     }
   }
   
@@ -88,16 +92,17 @@ export const generateStars = (count: number, containerSize: number, visualStyle:
   ];
   
   nebulae.forEach((nebula, i) => {
-    stars.push(
-      <circle
-        key={`nebula-${i}`}
-        cx={nebula.x}
-        cy={nebula.y}
-        r={nebula.size}
-        fill={nebula.color}
-        filter={visualStyle === "lightweb" ? "blur(20px)" : visualStyle === "cosmic" ? "blur(15px)" : "blur(10px)"}
-      />
-    );
+    stars.push({
+      type: 'star',
+      key: `nebula-${i}`,
+      x: nebula.x,
+      y: nebula.y,
+      r: nebula.size,
+      fill: nebula.color,
+      filter: visualStyle === "lightweb" ? "blur(20px)" : 
+              visualStyle === "cosmic" ? "blur(15px)" : "blur(10px)",
+      opacity: 1
+    });
   });
   
   return stars;
