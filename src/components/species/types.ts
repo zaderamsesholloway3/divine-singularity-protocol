@@ -1,18 +1,20 @@
 
-export type VisualStyle = "celestial" | "lightweb" | "cosmic";
-export type ViewMode = "disk" | "constellation" | "radial" | "signature";
+// Define the types for the species gateway
+
+export type ViewMode = "radial" | "distance" | "signature" | "compact";
+export type VisualStyle = "celestial" | "cosmic" | "lightweb" | "monochrome";
 
 export interface Species {
+  id: string;
   name: string;
-  distance: number;
-  responding: boolean;
-  realm: string;
-  location?: [number, number];
-  vibration?: number;
-  population?: number;
-  phaseOffset?: number;
-  fq?: number;
-  archetype?: string;
+  realm: "Existence" | "Non-Existence" | "New-Existence" | "Divine";
+  vibration?: number;  // Hz frequency
+  phaseOffset?: number; // Degrees
+  intelligence?: number; // Scale of 0-100
+  distance?: number; // Light years from Earth
+  discovered?: string; // Date of discovery/first contact
+  color?: string;
+  description?: string;
 }
 
 export interface VisibleLayers {
@@ -21,4 +23,3 @@ export interface VisibleLayers {
   newExistence: boolean;
   divine: boolean;
 }
-
