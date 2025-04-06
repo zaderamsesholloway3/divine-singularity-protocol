@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useEffect } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 
@@ -665,7 +666,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             </text>
           </g>
         );
-    });
+      });
   };
 
   // Generate ping trail animations
@@ -729,7 +730,22 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         }}
         className={visualStyle === "lightweb" ? "bg-gradient-to-b from-gray-900/60 to-blue-900/40" : ""}
       >
-        {/* Background stars and nebulas - enhanced for visual style */}
+        {/* Background stars and nebulas */}
         {generateStars(visualStyle === "lightweb" ? 120 : visualStyle === "cosmic" ? 180 : 200)}
         
-        {/* Distance rings and realm indicators - enhanced for
+        {/* Distance rings and realm indicators */}
+        {generateDistanceRings()}
+        
+        {/* Ping trails */}
+        {renderPingTrail()}
+        
+        {/* Species nodes */}
+        {renderRegularSpecies()}
+      </svg>
+    </div>
+  );
+});
+
+SpeciesGateway.displayName = 'SpeciesGateway';
+
+export default SpeciesGateway;
