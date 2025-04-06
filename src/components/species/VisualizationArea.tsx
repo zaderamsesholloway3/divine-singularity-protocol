@@ -219,6 +219,10 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   // Check if Guardian Net is in expanded mode
   const isGuardianNetExpanded = guardianNetSettings?.expanded || false;
 
+  // Determine if 3D hint should be shown
+  // Only show rotation hint if in radial mode AND rotate3dHint is true AND not in expanded mode
+  const shouldShowRotationHint = viewMode === "radial" && rotate3dHint && !isGuardianNetExpanded && !selectedSpecies;
+
   return (
     <div className="relative" id="species-visualization-container" ref={containerRef}>
       {renderObservableUniverse()}
@@ -317,8 +321,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </Button>
       </div>
       
-      {/* 3D rotation hint overlay */}
-      {viewMode === "radial" && rotate3dHint && !isGuardianNetExpanded && (
+      {/* 3D rotation hint overlay - Only show when conditions are met */}
+      {shouldShowRotationHint && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
           <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />
           <p className="text-white font-medium">Drag to rotate the 3D view</p>

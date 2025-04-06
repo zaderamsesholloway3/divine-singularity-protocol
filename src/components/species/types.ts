@@ -1,24 +1,23 @@
-
-// Define the types for the species gateway
-
-export type ViewMode = "radial" | "distance" | "signature" | "compact" | "disk" | "constellation";
-export type VisualStyle = "celestial" | "cosmic" | "lightweb" | "monochrome";
-
 export interface Species {
   id: string;
   name: string;
-  realm: "Existence" | "Non-Existence" | "New-Existence" | "Divine";
-  vibration?: number;  // Hz frequency
-  phaseOffset?: number; // Degrees
-  intelligence?: number; // Scale of 0-100
-  distance?: number; // Light years from Earth
-  discovered?: string; // Date of discovery/first contact
-  color?: string;
+  realm: "Existence" | "Non-Existence" | "New Existence" | "Divine";
+  distance: number;
+  responding: boolean;
+  vibration?: number;
+  phaseOffset?: number;
   description?: string;
-  responding?: boolean; // Whether the species is currently responding
-  fq?: number; // Faith quotient
-  location?: { x: number; y: number; z: number }; // 3D coordinates
+  lastContact?: string;
+  signature?: {
+    x: number;
+    y: number;
+    amplitude: number;
+    frequency: number;
+  };
 }
+
+export type ViewMode = "radial" | "distance" | "compact" | "signature" | "disk" | "constellation";
+export type VisualStyle = "celestial" | "lightweb" | "cosmic";
 
 export interface VisibleLayers {
   existence: boolean;
@@ -27,7 +26,6 @@ export interface VisibleLayers {
   divine: boolean;
 }
 
-// Add Guardian Net related types
 export interface GuardianNetSettings {
   active: boolean;
   expanded: boolean;
