@@ -1,4 +1,3 @@
-
 import { Species, VisibleLayers } from "../types";
 
 /**
@@ -71,6 +70,25 @@ export const getNodeColor = (species: Species, selected: boolean, hovered: boole
   
   // Default case - should never reach here
   return selected ? "#ffffff" : "#ffffff90";
+};
+
+/**
+ * Get species color for visualization
+ */
+export const getSpeciesColor = (species: Species, visualStyle: string) => {
+  // Base colors based on realm
+  if (species.realm === "Existence") {
+    return visualStyle === "cosmic" ? "#3b82f690" : "#3b82f680";
+  } else if (species.realm === "Non-Existence") {
+    return visualStyle === "cosmic" ? "#8b5cf690" : "#8b5cf680";
+  } else if (species.realm === "New-Existence") {
+    return visualStyle === "cosmic" ? "#06b6d490" : "#06b6d480";
+  } else if (species.realm === "Divine") {
+    return visualStyle === "cosmic" ? "#eab30890" : "#eab30880";
+  }
+  
+  // Default color
+  return species.color || "#ffffff80";
 };
 
 /**

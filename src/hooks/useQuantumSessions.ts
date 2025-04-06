@@ -94,7 +94,8 @@ export function useQuantumSessions(userId: string) {
         ? {
             ...session,
             lastMessage,
-            lastTimestamp: new Date().toISOString()
+            lastTimestamp: new Date().toISOString(),
+            unread: session.unread + 1
           }
         : session
     ));

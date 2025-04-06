@@ -8,6 +8,30 @@ interface Coordinates {
 }
 
 /**
+ * Get coordinates based on the selected view mode
+ */
+export const getCoordinates = (
+  species: Species,
+  index: number, 
+  totalSpecies: number, 
+  mode: string, 
+  radius: number, 
+  containerSize: number,
+  rotation: { x: number, y: number }
+): Coordinates => {
+  if (mode === "radial") {
+    return getRadialCoordinates(species, radius, containerSize, rotation);
+  } else if (mode === "signature") {
+    return getSignatureCoordinates(species, index, totalSpecies, containerSize);
+  } else if (mode === "disk") {
+    return getDiskCoordinates(species, index, containerSize);
+  }
+  
+  // Default to radial coordinates
+  return getRadialCoordinates(species, radius, containerSize, rotation);
+};
+
+/**
  * Calculate 3D coordinates for radial mode
  */
 export const getRadialCoordinates = (

@@ -41,7 +41,15 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       {species
         .filter(s => isSpeciesVisible(s, visibleLayers))
         .map((s, i) => {
-          const { x, y } = getCoordinates(s, i, species.length, mode, speciesRadius, containerSize, rotation);
+          const { x, y } = getCoordinates(
+            s,
+            i,
+            species.length,
+            mode,
+            speciesRadius,
+            containerSize,
+            rotation
+          );
           const isSelected = selectedSpecies?.name === s.name;
           const isHovered = hoveredSpecies?.name === s.name;
           const speciesColor = getSpeciesColor(s, visualStyle);
