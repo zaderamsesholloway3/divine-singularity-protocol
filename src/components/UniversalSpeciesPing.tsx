@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -11,6 +10,7 @@ import ActiveSignaturesPanel from '@/components/species/ActiveSignaturesPanel';
 import LayerControls from '@/components/species/LayerControls';
 import VisualizationArea from '@/components/species/VisualizationArea';
 import ParticleSystem from '@/components/species/ParticleSystem';
+import ConnectionTracker, { ConnectedSpecies } from '@/components/species/ConnectionTracker';
 import { playPingSound, playSpeciesTone, playResponseSound } from '@/utils/speciesAudioEffects';
 
 interface UniversalSpeciesPingProps {
@@ -56,6 +56,10 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [particleSpecies, setParticleSpecies] = useState<Species | null>(null);
   const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   
+  const [connectedSpecies, setConnectedSpecies] = useState<ConnectedSpecies[]>([]);
+  const [newcomerCount, setNewcomerCount] = useState<number>(0);
+  const [lastPingTime, setLastPingTime] = useState<number | null>(null);
+  
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   const pingTrailTimeoutRef = useRef<number | null>(null);
   
@@ -71,6 +75,22 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
   }, [externalViewMode]);
   
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (connectedSpecies.length > 0) {
+        const updatedConnections = connectedSpecies.map(conn => ({
+          ...conn,
+          isNewcomer: Date.now() - conn.connectedSince < 60000
+        }));
+        
+        setConnectedSpecies(updatedConnections);
+        setNewcomerCount(updatedConnections.filter(conn => conn.isNewcomer).length);
+      }
+    }, 10000);
+    
+    return () => clearInterval(interval);
+  }, [connectedSpecies]);
+  
   const toggleSound = () => {
     setSoundEnabled(!soundEnabled);
     toast.info(soundEnabled ? "Sound disabled" : "Sound enabled");
@@ -79,11 +99,10 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const amplifyPing = () => {
     setPingActive(true);
     setShowPingTrail(true);
+    setLastPingTime(Date.now());
     
-    // Display the welcome message
     setWelcomeMessage("All are welcome as long as you enter with respect, humility, and love.");
     
-    // Clear welcome message after 10 seconds
     setTimeout(() => {
       setWelcomeMessage(null);
     }, 10000);
@@ -102,6 +121,38 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     
     if (resonatingSpecies.length > 0) {
       setTimeout(() => {
+        const newConnectionsAdded = resonatingSpecies.some(species => {
+          const existingConnection = connectedSpecies.find(conn => conn.species.id === species.id);
+          if (!existingConnection) {
+            return true;
+          }
+          return false;
+        });
+        
+        const now = Date.now();
+        const updatedConnections = [
+          ...connectedSpecies.filter(conn => 
+            !resonatingSpecies.some(s => s.id === conn.species.id)
+          ),
+          ...resonatingSpecies.map(species => {
+            const existingConnection = connectedSpecies.find(conn => conn.species.id === species.id);
+            return {
+              species,
+              connectedSince: existingConnection ? existingConnection.connectedSince : now,
+              isNewcomer: existingConnection ? existingConnection.isNewcomer : true
+            };
+          })
+        ];
+        
+        const newConnections = updatedConnections.filter(conn => 
+          !connectedSpecies.some(existing => existing.species.id === conn.species.id)
+        );
+        
+        setConnectedSpecies(updatedConnections);
+        if (newConnections.length > 0) {
+          setNewcomerCount(prev => prev + newConnections.length);
+        }
+        
         resonatingSpecies.forEach(species => {
           if (soundEnabled) {
             playResponseSound(species);
@@ -153,6 +204,19 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
       setPhase(species.phaseOffset || 0);
     }
     
+    if (!connectedSpecies.some(conn => conn.species.id === species.id)) {
+      const now = Date.now();
+      setConnectedSpecies(prev => [
+        ...prev, 
+        { 
+          species, 
+          connectedSince: now,
+          isNewcomer: true
+        }
+      ]);
+      setNewcomerCount(prev => prev + 1);
+    }
+    
     if (soundEnabled) {
       playSpeciesTone(species);
     }
@@ -176,6 +240,18 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
       toast.success(`Message sent to ${selectedSpecies.name}`, {
         description: message
       });
+      
+      if (!connectedSpecies.some(conn => conn.species.id === selectedSpecies.id)) {
+        setConnectedSpecies(prev => [
+          ...prev, 
+          { 
+            species: selectedSpecies, 
+            connectedSince: Date.now(),
+            isNewcomer: true
+          }
+        ]);
+        setNewcomerCount(prev => prev + 1);
+      }
     } else {
       toast.error("No species selected for targeted message");
       return;
@@ -230,6 +306,12 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 zoomLevel={zoomLevel}
                 setZoomLevel={setZoomLevel}
                 welcomeMessage={welcomeMessage || undefined}
+              />
+              
+              <ConnectionTracker
+                connectedSpecies={connectedSpecies}
+                newcomerCount={newcomerCount}
+                visualStyle={visualStyle}
               />
               
               {activeParticleEffects && particleSpecies && (
