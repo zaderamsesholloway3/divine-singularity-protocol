@@ -120,7 +120,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
                 width: `${size}%`, 
                 height: `${size}%`,
                 boxShadow: '0 0 20px rgba(100, 180, 255, 0.1) inset',
-                opacity: 0.5 - index * 0.1
+                opacity: 0.5 - index * 0.1,
+                animation: `pulse ${7 + index}s infinite ease-in-out alternate`
               }}
             />
           ))}
@@ -132,6 +133,30 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
+  // New cosmic flow background
+  const renderCosmicFlow = () => {
+    if (visualStyle !== "cosmic") return null;
+    
+    return (
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div 
+          className="cosmic-flow absolute inset-0" 
+          style={{
+            backgroundImage: 'radial-gradient(circle at 50% 50%, rgba(90, 30, 160, 0.1) 0%, transparent 70%)',
+            animation: 'rotate 120s linear infinite'
+          }}
+        ></div>
+        <div 
+          className="cosmic-flow-2 absolute inset-0" 
+          style={{
+            backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(168, 85, 247, 0.07) 0%, transparent 60%)',
+            animation: 'rotate 180s linear reverse infinite'
+          }}
+        ></div>
+      </div>
+    );
+  };
+
   return (
     <div className="relative">
       {renderObservableUniverse()}
@@ -139,6 +164,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         className={`rounded-lg overflow-hidden min-h-[400px] flex items-center justify-center ${getVisualStyleClass()}`}
         style={{ transform: `scale(${zoomLevel})` }}
       >
+        {renderCosmicFlow()}
         {renderMantisNet()}
         {renderDraxGrid()}
         <SpeciesGateway 
@@ -179,7 +205,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </Button>
       </div>
       
-      {/* 3D rotation hint overlay - only shown for radial mode when activated */}
+      {/* 3D rotation hint overlay */}
       {viewMode === "radial" && rotate3dHint && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
           <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />

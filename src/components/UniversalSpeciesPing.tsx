@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -10,8 +9,9 @@ import ControlsPanel from '@/components/species/ControlsPanel';
 import ActiveSignaturesPanel from '@/components/species/ActiveSignaturesPanel';
 import LayerControls from '@/components/species/LayerControls';
 import VisualizationArea from '@/components/species/VisualizationArea';
+import ParticleSystem from '@/components/species/ParticleSystem';
+import { playPingSound, playSpeciesTone, playResponseSound } from '@/utils/speciesAudioEffects';
 
-// Define the props for the UniversalSpeciesPing component
 interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
   onSpeciesSelect?: (species: Species) => void;
@@ -21,7 +21,6 @@ interface UniversalSpeciesPingProps {
   zadeMode?: boolean;
 }
 
-// Define the component with forwardRef to expose the SpeciesGateway ref
 const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
   const { 
     fullPageMode = false, 
@@ -52,19 +51,18 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   });
   const [showAllNames, setShowAllNames] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [activeParticleEffects, setActiveParticleEffects] = useState(false);
+  const [particleSpecies, setParticleSpecies] = useState<Species | null>(null);
   
-  // Reference to the SpeciesGateway component
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   const pingTrailTimeoutRef = useRef<number | null>(null);
   
-  // Forward the SpeciesGateway methods to the parent component
   useImperativeHandle(ref, () => ({
     toggleTargetLock: () => {
       return speciesGatewayRef.current?.toggleTargetLock() || false;
     }
   }));
   
-  // Update internal viewMode when external viewMode prop changes
   useEffect(() => {
     if (externalViewMode) {
       setViewMode(externalViewMode);
@@ -80,34 +78,14 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     setPingActive(true);
     setShowPingTrail(true);
     
-    // Play sound if enabled
     if (soundEnabled) {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.type = 'sine';
-      oscillator.frequency.value = frequency; 
-      gainNode.gain.value = 0.1; // Keep volume low
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.start();
-      
-      // Fade out the sound
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
-      setTimeout(() => {
-        oscillator.stop();
-      }, 2000);
+      playPingSound(frequency, power);
     }
     
-    // Show toast message
     toast.success(`Ping amplified at ${frequency.toFixed(2)}Hz with ${power}% power`, {
       description: `Phase offset: ${phase}°`
     });
     
-    // Find species that resonate with the current frequency (within 0.5Hz)
     const resonatingSpecies = mockSpecies.filter(s => 
       Math.abs((s.vibration || 0) - frequency) < 0.5
     );
@@ -115,6 +93,16 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     if (resonatingSpecies.length > 0) {
       setTimeout(() => {
         resonatingSpecies.forEach(species => {
+          if (soundEnabled) {
+            playResponseSound(species);
+          }
+          
+          if (!particleSpecies) {
+            setParticleSpecies(species);
+            setActiveParticleEffects(true);
+            setTimeout(() => setActiveParticleEffects(false), 2000);
+          }
+          
           toast.success(`Response detected from ${species.name}`, {
             description: `Distance: ${species.distance < 1000 ? 
               species.distance.toFixed(1) + ' light years' : 
@@ -130,35 +118,38 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
       }, 2000);
     }
     
-    // Reset ping active state after animation completes
     setTimeout(() => {
       setPingActive(false);
     }, 3000);
     
-    // Clear previous timeout and set new one for ping trail
     if (pingTrailTimeoutRef.current) {
       clearTimeout(pingTrailTimeoutRef.current);
     }
     
-    // Remove ping trail after 10 seconds
     pingTrailTimeoutRef.current = window.setTimeout(() => {
       setShowPingTrail(false);
     }, 10000) as unknown as number;
   };
   
   const handleSpeciesSelect = (species: Species) => {
-    // When a species is selected, hide the rotation hint
     setRotate3dHint(false);
     
     if (onSpeciesSelect) {
       onSpeciesSelect(species);
     }
     
-    // Update frequency to match species if in targeted mode
     if (broadcastMode === "targeted") {
       setFrequency(species.vibration || 7.83);
       setPhase(species.phaseOffset || 0);
     }
+    
+    if (soundEnabled) {
+      playSpeciesTone(species);
+    }
+    
+    setParticleSpecies(species);
+    setActiveParticleEffects(true);
+    setTimeout(() => setActiveParticleEffects(false), 2000);
   };
   
   const sendMessage = () => {
@@ -183,7 +174,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     setMessage("");
     setShowPingTrail(true);
     
-    // Remove ping trail after 10 seconds
     if (pingTrailTimeoutRef.current) {
       clearTimeout(pingTrailTimeoutRef.current);
     }
@@ -230,6 +220,15 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 zoomLevel={zoomLevel}
                 setZoomLevel={setZoomLevel}
               />
+              
+              {activeParticleEffects && particleSpecies && (
+                <ParticleSystem 
+                  species={particleSpecies}
+                  active={activeParticleEffects}
+                  containerSize={500}
+                  visualStyle={visualStyle || "celestial"}
+                />
+              )}
             </div>
             
             <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
@@ -279,7 +278,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   );
 });
 
-// Add display name for forwardRef component
 UniversalSpeciesPing.displayName = 'UniversalSpeciesPing';
 
 export default UniversalSpeciesPing;
