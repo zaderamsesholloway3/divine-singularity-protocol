@@ -143,6 +143,32 @@ export const getConstellationCoordinates = (
   };
 };
 
+// Add the missing getCoordinates function that combines all coordinate systems
+export const getCoordinates = (
+  species: Species,
+  index: number,
+  totalCount: number,
+  mode: string,
+  radius: number,
+  containerSize: number,
+  rotation: { x: number; y: number }
+): Coordinates => {
+  // Select the appropriate coordinate system based on view mode
+  switch (mode) {
+    case "radial":
+      return getRadialCoordinates(species, radius, containerSize, rotation);
+    case "signature":
+      return getSignatureCoordinates(species, index, totalCount, containerSize);
+    case "disk":
+      return getDiskCoordinates(species, radius, containerSize);
+    case "constellation":
+      return getConstellationCoordinates(species, index, totalCount, containerSize);
+    default:
+      // Default to radial view
+      return getRadialCoordinates(species, radius, containerSize, rotation);
+  }
+};
+
 // Helper function to generate a number hash from a string
 const hashCode = (str: string): number => {
   let hash = 0;
