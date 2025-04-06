@@ -1,24 +1,56 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Globe, Radio, Heart, ArrowLeft, Send, Inbox, 
   Mail, Sparkles, Maximize2, Minimize2, Rotate3d, 
-  Layers, Eye, EyeOff, CircleArrowUp
+  Layers, Eye, EyeOff, CircleArrowUp, Shield,
+  Network, Wand2, Fingerprint, GaugeCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import UniversalSpeciesPing from '@/components/UniversalSpeciesPing';
 import { SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
 
 const CosmicCommunicationsGrid: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedSpecies, setSelectedSpecies] = useState<any | null>(null);
   const [visualStyle, setVisualStyle] = useState<"celestial" | "lightweb" | "cosmic">("celestial");
   const [activeTab, setActiveTab] = useState("species-view");
+  const [guardianNetActive, setGuardianNetActive] = useState(false);
+  const [zadesMode, setZadesMode] = useState(false);
+  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial" | "signature">("radial");
+  const [showSHQRing, setShowSHQRing] = useState(false);
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
+  
+  // New state for Guardian Net controls
+  const [showCIAMantisNet, setShowCIAMantisNet] = useState(true);
+  const [showLockheedDraxGrid, setShowLockheedDraxGrid] = useState(true);
+  const [guardianIntensity, setGuardianIntensity] = useState(50);
+  
+  useEffect(() => {
+    // Show welcome toast on first load
+    toast.info("Welcome to the enhanced OmniView Universe", {
+      description: "Scroll to zoom, drag to rotate in 3D Orbital mode"
+    });
+  }, []);
+  
+  useEffect(() => {
+    if (zadesMode) {
+      toast.success("SHQ-enhanced interface activated", {
+        description: "Zade Mode engaged - fidelity increased"
+      });
+      
+      // Auto-enable SHQ ring with Zade's mode
+      setShowSHQRing(true);
+    } else {
+      setShowSHQRing(false);
+    }
+  }, [zadesMode]);
   
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -53,6 +85,31 @@ const CosmicCommunicationsGrid: React.FC = () => {
     };
     
     toast.info(`Visual style changed to ${styleLabels[style]}`);
+  };
+  
+  const toggleGuardianNet = () => {
+    setGuardianNetActive(!guardianNetActive);
+    if (!guardianNetActive) {
+      toast.success("Guardian Net Overlay activated", {
+        description: "CIA Mantis Net and Lockheed Drax Grid now visible"
+      });
+    } else {
+      toast.info("Guardian Net Overlay deactivated");
+    }
+  };
+  
+  const handleViewModeChange = (mode: "disk" | "constellation" | "radial" | "signature") => {
+    setViewMode(mode);
+    const modeDescriptions = {
+      disk: "Flat galactic disk visualization",
+      constellation: "Star constellation mapping",
+      radial: "3D Orbital perspective with depth",
+      signature: "Quantum signature grid pattern"
+    };
+    
+    toast.info(`View changed to ${mode} mode`, {
+      description: modeDescriptions[mode]
+    });
   };
   
   return (
@@ -90,7 +147,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   onClick={() => handleStyleChange("celestial")}
                 >
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-gray-300 to-blue-300 mr-1"></div>
-                  Celestial
+                  Lyra
                 </Button>
                 <Button 
                   size="sm"
@@ -99,7 +156,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   onClick={() => handleStyleChange("lightweb")}
                 >
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-white to-gray-300 mr-1"></div>
-                  Lightweb
+                  Auraline
                 </Button>
                 <Button 
                   size="sm"
@@ -108,11 +165,73 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   onClick={() => handleStyleChange("cosmic")}
                 >
                   <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-900 to-purple-500 mr-1"></div>
-                  Glyphs
+                  Elaira
                 </Button>
               </div>
             </div>
           </div>
+          
+          {/* Guardian Net Overlay */}
+          {guardianNetActive && (
+            <>
+              {/* CIA Mantis Net - Light aurora-like threads */}
+              {showCIAMantisNet && (
+                <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
+                  <div className="absolute inset-0 cia-mantis-net">
+                    <img 
+                      src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
+                      alt="" 
+                      className="w-full h-full object-cover opacity-20"
+                      style={{
+                        filter: `brightness(1.2) contrast(1.1) opacity(${guardianIntensity / 100})`,
+                      }}
+                    />
+                    <div className="absolute top-4 left-4 cia-indicator">CIA Mantis Net</div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Lockheed Drax Grid - Hexagonal lattice */}
+              {showLockheedDraxGrid && (
+                <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
+                  <div className="absolute inset-0 lockheed-drax-grid">
+                    <img 
+                      src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
+                      alt="" 
+                      className="w-full h-full object-cover opacity-20"
+                      style={{
+                        filter: `hue-rotate(220deg) brightness(0.9) opacity(${guardianIntensity / 100})`,
+                      }}
+                    />
+                    <div className="absolute bottom-4 right-4 lockheed-indicator">LOCKHEED MARTIN Drax Grid</div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+          
+          {/* SHQ Modulation Visualization Ring */}
+          {showSHQRing && (
+            <div className="absolute inset-0 z-5 pointer-events-none flex items-center justify-center">
+              <div 
+                className="shq-ring" 
+                style={{
+                  width: '70%', 
+                  height: '70%',
+                  opacity: zadesMode ? 0.4 : 0.2
+                }}
+              ></div>
+              <div 
+                className="shq-ring" 
+                style={{
+                  width: '85%', 
+                  height: '85%',
+                  animationDelay: '2s',
+                  opacity: zadesMode ? 0.3 : 0.15
+                }}
+              ></div>
+            </div>
+          )}
           
           <UniversalSpeciesPing 
             fullPageMode={true} 
@@ -120,6 +239,8 @@ const CosmicCommunicationsGrid: React.FC = () => {
             selectedSpecies={selectedSpecies}
             ref={speciesGatewayRef}
             visualStyle={visualStyle}
+            viewMode={viewMode}
+            zadeMode={zadesMode}
           />
           
           <div className="absolute top-2 right-2 flex gap-2">
@@ -185,6 +306,59 @@ const CosmicCommunicationsGrid: React.FC = () => {
                   <Layers className="h-3 w-3 mr-2" /> Divine
                 </Button>
               </div>
+              
+              {/* Guardian Net Controls */}
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs text-blue-400 font-medium">Guardian Net</h3>
+                  <Switch 
+                    checked={guardianNetActive} 
+                    onCheckedChange={toggleGuardianNet}
+                    className="data-[state=checked]:bg-yellow-600"
+                  />
+                </div>
+                
+                {guardianNetActive && (
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-yellow-300/80 flex items-center gap-1">
+                        <Network className="h-3 w-3" /> CIA Mantis Net
+                      </span>
+                      <Switch 
+                        checked={showCIAMantisNet} 
+                        onCheckedChange={setShowCIAMantisNet}
+                        className="h-4 w-7 data-[state=checked]:bg-yellow-700/50"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-blue-300/80 flex items-center gap-1">
+                        <Shield className="h-3 w-3" /> Lockheed Drax Grid
+                      </span>
+                      <Switch 
+                        checked={showLockheedDraxGrid} 
+                        onCheckedChange={setShowLockheedDraxGrid}
+                        className="h-4 w-7 data-[state=checked]:bg-blue-700/50"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1 pt-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400">Intensity</span>
+                        <span className="text-xs text-gray-400">{guardianIntensity}%</span>
+                      </div>
+                      <Slider
+                        value={[guardianIntensity]}
+                        min={10}
+                        max={100}
+                        step={5}
+                        onValueChange={([value]) => setGuardianIntensity(value)}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
           
@@ -201,6 +375,71 @@ const CosmicCommunicationsGrid: React.FC = () => {
                     <EyeOff className="h-3 w-3 mr-2" /> Names on Hover
                   </Button>
                 </div>
+                
+                <div className="flex gap-2 mt-1">
+                  <Button 
+                    variant={viewMode === "disk" ? "secondary" : "outline"} 
+                    size="sm" 
+                    className="flex-1 text-xs h-7 bg-black/50"
+                    onClick={() => handleViewModeChange("disk")}
+                  >
+                    Disk
+                  </Button>
+                  <Button 
+                    variant={viewMode === "radial" ? "secondary" : "outline"} 
+                    size="sm" 
+                    className="flex-1 text-xs h-7 bg-black/50"
+                    onClick={() => handleViewModeChange("radial")}
+                  >
+                    Orbital
+                  </Button>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant={viewMode === "constellation" ? "secondary" : "outline"} 
+                    size="sm" 
+                    className="flex-1 text-xs h-7 bg-black/50"
+                    onClick={() => handleViewModeChange("constellation")}
+                  >
+                    Constellation
+                  </Button>
+                  <Button 
+                    variant={viewMode === "signature" ? "secondary" : "outline"} 
+                    size="sm" 
+                    className="flex-1 text-xs h-7 bg-black/50"
+                    onClick={() => handleViewModeChange("signature")}
+                  >
+                    Signature
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="h-3 w-3 text-yellow-400" />
+                    <span className="text-xs text-yellow-300">Zade Mode</span>
+                  </div>
+                  <Switch 
+                    checked={zadesMode} 
+                    onCheckedChange={setZadesMode}
+                    className="data-[state=checked]:bg-yellow-600"
+                  />
+                </div>
+                
+                {zadesMode && (
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2">
+                      <GaugeCircle className="h-3 w-3 text-yellow-400" />
+                      <span className="text-xs text-yellow-300">SHQ Ring</span>
+                    </div>
+                    <Switch 
+                      checked={showSHQRing} 
+                      onCheckedChange={setShowSHQRing}
+                      className="data-[state=checked]:bg-yellow-600/70"
+                    />
+                  </div>
+                )}
+                
                 <Button variant="secondary" size="sm" className="text-xs h-7 bg-blue-900/50 hover:bg-blue-800/70 mt-1">
                   <CircleArrowUp className="h-3 w-3 mr-2" /> Universal Ping
                 </Button>
@@ -291,6 +530,87 @@ const CosmicCommunicationsGrid: React.FC = () => {
                       <Sparkles className="mr-2 h-4 w-4" />
                       Activate Field
                     </Button>
+                  </CardContent>
+                </Card>
+                
+                {/* New Guardian Net Card */}
+                <Card className="bg-gray-950 border-blue-900/20 shadow-xl shadow-blue-900/10">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-blue-400" />
+                      Guardian Net Overlay
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Visualize protective dimensional boundaries
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm">Overlay Status</span>
+                      <Switch 
+                        checked={guardianNetActive} 
+                        onCheckedChange={toggleGuardianNet}
+                        className="data-[state=checked]:bg-yellow-600"
+                      />
+                    </div>
+                    
+                    {guardianNetActive && (
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-yellow-400/90">CIA Mantis Net</span>
+                          <Switch 
+                            checked={showCIAMantisNet} 
+                            onCheckedChange={setShowCIAMantisNet}
+                            className="data-[state=checked]:bg-yellow-700/50"
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-blue-400/90">Lockheed Drax Grid</span>
+                          <Switch 
+                            checked={showLockheedDraxGrid} 
+                            onCheckedChange={setShowLockheedDraxGrid}
+                            className="data-[state=checked]:bg-blue-700/50"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                
+                {/* Zade Mode Card */}
+                <Card className="bg-gray-950 border-blue-900/20 shadow-xl shadow-blue-900/10">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Fingerprint className="h-4 w-4 text-yellow-400" />
+                      SHQ Integration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      SHQ-enhanced interface fidelity settings
+                    </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm">Zade Mode</span>
+                      <Switch 
+                        checked={zadesMode} 
+                        onCheckedChange={setZadesMode}
+                        className="data-[state=checked]:bg-yellow-600"
+                      />
+                    </div>
+                    
+                    {zadesMode && (
+                      <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-yellow-400/90">SHQ Modulation Ring</span>
+                          <Switch 
+                            checked={showSHQRing} 
+                            onCheckedChange={setShowSHQRing}
+                            className="data-[state=checked]:bg-yellow-600/70"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -425,3 +745,4 @@ const CosmicCommunicationsGrid: React.FC = () => {
 };
 
 export default CosmicCommunicationsGrid;
+

@@ -19,7 +19,7 @@
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
 }
 
-/* Celestial Fog theme */
+/* Celestial Fog theme (Lyra's choice) */
 .celestial-theme {
   background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 100%);
 }
@@ -28,7 +28,7 @@
   filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5));
 }
 
-/* Lightweb Grid theme */
+/* Lightweb Grid theme (Auraline's choice) */
 .lightweb-theme {
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 58, 138, 0.7) 100%);
   backdrop-filter: blur(5px);
@@ -38,11 +38,137 @@
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
 }
 
-/* Dark Cosmic Glyphs theme */
+/* Dark Cosmic Glyphs theme (Elaira's choice) */
 .cosmic-theme {
   background: linear-gradient(180deg, #000000 0%, #1a1f2c 100%);
 }
 
 .cosmic-entity {
   filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.5));
+}
+
+/* Guardian Net Overlay Effects */
+@keyframes mantis-flow {
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes drax-pulse {
+  0% {
+    opacity: 0.1;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.1;
+    transform: scale(0.98);
+  }
+}
+
+.cia-mantis-net {
+  opacity: 0.3;
+  animation: mantis-flow 8s infinite;
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+}
+
+.lockheed-drax-grid {
+  opacity: 0.2;
+  animation: drax-pulse 12s infinite;
+  filter: drop-shadow(0 0 3px rgba(100, 180, 255, 0.3));
+}
+
+/* New view modes */
+.radiant-net-mode {
+  background: linear-gradient(180deg, #000000 0%, #1e1e2f 100%);
+}
+
+.signature-grid-mode {
+  background: linear-gradient(180deg, #0a0a1a 0%, #0f1020 100%);
+}
+
+/* Guardian indicators */
+.cia-indicator {
+  color: rgba(255, 215, 0, 0.8);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.4);
+}
+
+.lockheed-indicator {
+  color: rgba(100, 180, 255, 0.8);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-shadow: 0 0 4px rgba(100, 180, 255, 0.4);
+}
+
+/* SHQ enhancement */
+.zade-mode {
+  filter: contrast(1.05) saturate(1.1);
+}
+
+/* Message system */
+.message-sigil {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(100,180,255,0.4) 100%);
+  box-shadow: 0 0 8px rgba(100, 180, 255, 0.6);
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.message-trail {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(56, 189, 248, 0.1) 50%, transparent 100%);
+  animation: message-pulse 3s ease-out forwards;
+}
+
+@keyframes message-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+/* SHQ modulation visualization */
+.shq-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  animation: shq-pulse 5s infinite alternate;
+}
+
+@keyframes shq-pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+    transform: scale(0.98);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+    transform: scale(1.02);
+  }
+}
+
+/* Depth and fading for entities */
+.entity-depth-fade {
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
