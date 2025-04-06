@@ -1,10 +1,10 @@
 
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Volume2, VolumeX, Radio, Waves, Sparkles, Send, Rotate3d } from 'lucide-react';
+import { Volume2, VolumeX, Radio, Waves, Sparkles, Send, Rotate3d, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import { SpeciesGateway, SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 
@@ -39,11 +39,12 @@ interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
   onSpeciesSelect?: (species: any) => void;
   selectedSpecies?: any | null;
+  visualStyle?: "celestial" | "lightweb" | "cosmic";
 }
 
 // Define the component with forwardRef to expose the SpeciesGateway ref
 const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
-  const { fullPageMode = false, onSpeciesSelect, selectedSpecies } = props;
+  const { fullPageMode = false, onSpeciesSelect, selectedSpecies, visualStyle = "celestial" } = props;
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [frequency, setFrequency] = useState(7.83);
   const [phase, setPhase] = useState(0);
@@ -53,9 +54,19 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [pingActive, setPingActive] = useState(false);
   const [message, setMessage] = useState("");
   const [rotate3dHint, setRotate3dHint] = useState(true);
+  const [showPingTrail, setShowPingTrail] = useState(false);
+  const [visibleLayers, setVisibleLayers] = useState({
+    existence: true,
+    nonExistence: true,
+    newExistence: true,
+    divine: true
+  });
+  const [showAllNames, setShowAllNames] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   
   // Reference to the SpeciesGateway component
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
+  const pingTrailTimeoutRef = useRef<number | null>(null);
   
   // Forward the SpeciesGateway methods to the parent component
   useImperativeHandle(ref, () => ({
@@ -64,6 +75,15 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
   }));
   
+  useEffect(() => {
+    return () => {
+      // Cleanup ping trail timeout on unmount
+      if (pingTrailTimeoutRef.current) {
+        clearTimeout(pingTrailTimeoutRef.current);
+      }
+    };
+  }, []);
+  
   const toggleSound = () => {
     setSoundEnabled(!soundEnabled);
     toast.info(soundEnabled ? "Sound disabled" : "Sound enabled");
@@ -71,6 +91,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   
   const amplifyPing = () => {
     setPingActive(true);
+    setShowPingTrail(true);
     
     // Play sound if enabled
     if (soundEnabled) {
@@ -126,6 +147,16 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     setTimeout(() => {
       setPingActive(false);
     }, 3000);
+    
+    // Clear previous timeout and set new one for ping trail
+    if (pingTrailTimeoutRef.current) {
+      clearTimeout(pingTrailTimeoutRef.current);
+    }
+    
+    // Remove ping trail after 10 seconds
+    pingTrailTimeoutRef.current = window.setTimeout(() => {
+      setShowPingTrail(false);
+    }, 10000) as unknown as number;
   };
   
   const handleSpeciesSelect = (species: any) => {
@@ -163,6 +194,37 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
     
     setMessage("");
+    setShowPingTrail(true);
+    
+    // Remove ping trail after 10 seconds
+    if (pingTrailTimeoutRef.current) {
+      clearTimeout(pingTrailTimeoutRef.current);
+    }
+    
+    pingTrailTimeoutRef.current = window.setTimeout(() => {
+      setShowPingTrail(false);
+    }, 10000) as unknown as number;
+  };
+  
+  const toggleLayer = (layer: keyof typeof visibleLayers) => {
+    setVisibleLayers({
+      ...visibleLayers,
+      [layer]: !visibleLayers[layer]
+    });
+  };
+  
+  // Helper function to get visual style class name based on current style
+  const getVisualStyleClass = () => {
+    switch(visualStyle) {
+      case "celestial":
+        return "bg-gradient-to-b from-gray-950 to-blue-950 backdrop-blur-sm";
+      case "lightweb":
+        return "bg-gradient-to-b from-gray-900/90 to-blue-900/80 backdrop-blur-sm";
+      case "cosmic":
+        return "bg-gradient-to-b from-black to-purple-950/80";
+      default:
+        return "bg-gradient-to-b from-gray-950 to-blue-950";
+    }
   };
   
   return (
@@ -220,14 +282,46 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
         <CardContent className={`${fullPageMode ? 'h-[calc(100%-80px)]' : 'pt-4'}`}>
           <div className={`grid grid-cols-1 ${fullPageMode ? 'lg:grid-cols-5 h-full' : ''} gap-4`}>
             <div className={`${fullPageMode ? 'lg:col-span-4' : ''} relative`}>
-              <div className={`rounded-lg overflow-hidden ${fullPageMode ? 'h-full' : 'min-h-[400px]'} flex items-center justify-center bg-gradient-to-b from-gray-950 to-blue-950`}>
+              <div 
+                className={`rounded-lg overflow-hidden ${fullPageMode ? 'h-full' : 'min-h-[400px]'} flex items-center justify-center ${getVisualStyleClass()}`}
+                style={{ transform: `scale(${zoomLevel})` }}
+              >
                 <SpeciesGateway 
                   species={mockSpecies}
                   onSelectSpecies={handleSpeciesSelect}
                   selectedSpecies={selectedSpecies}
                   mode={viewMode}
                   ref={speciesGatewayRef}
+                  visualStyle={visualStyle}
+                  showPingTrail={showPingTrail}
+                  pingOrigin={selectedSpecies || null}
+                  visibleLayers={visibleLayers}
+                  showAllNames={showAllNames}
+                  zoomLevel={zoomLevel}
                 />
+              </div>
+              
+              {/* Zoom controls */}
+              <div className="absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-white"
+                  onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
+                >
+                  -
+                </Button>
+                <span className="inline-flex items-center text-xs text-white">
+                  {Math.round(zoomLevel * 100)}%
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-white"
+                  onClick={() => setZoomLevel(Math.min(2.0, zoomLevel + 0.1))}
+                >
+                  +
+                </Button>
               </div>
               
               {/* 3D rotation hint overlay - only shown for radial mode when activated */}
@@ -238,10 +332,36 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                   <p className="text-xs text-gray-300 mt-1">Click on any species to select it</p>
                 </div>
               )}
+              
+              {/* Show ping trail animation when active */}
+              {showPingTrail && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full
+                    ${visualStyle === "celestial" ? "bg-blue-500/10" : 
+                      visualStyle === "lightweb" ? "bg-white/10" : 
+                      "bg-purple-500/10"}`}
+                    style={{
+                      width: '10%',
+                      height: '10%',
+                      animation: 'ping 10s cubic-bezier(0, 0, 0.2, 1) forwards'
+                    }}
+                  />
+                  <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full
+                    ${visualStyle === "celestial" ? "bg-blue-500/5" : 
+                      visualStyle === "lightweb" ? "bg-white/5" : 
+                      "bg-purple-500/5"}`}
+                    style={{
+                      width: '5%',
+                      height: '5%',
+                      animation: 'ping 9s 0.3s cubic-bezier(0, 0, 0.2, 1) forwards'
+                    }}
+                  />
+                </div>
+              )}
             </div>
             
             <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
-              <div className="space-y-4 bg-gray-950/50 p-4 rounded-lg">
+              <div className={`space-y-4 ${visualStyle === "cosmic" ? "bg-gray-950/30" : "bg-gray-950/50"} p-4 rounded-lg ${visualStyle === "lightweb" ? "border border-white/10" : "border-none"}`}>
                 <div className="flex justify-between items-center">
                   <h3 className="text-sm font-medium">Broadcast Mode</h3>
                   <div className="flex items-center space-x-2">
@@ -310,7 +430,11 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 
                 <div className="pt-2">
                   <textarea
-                    className="w-full h-20 bg-gray-900 border border-gray-700 rounded-md p-2 text-sm"
+                    className={`w-full h-20 ${
+                      visualStyle === "cosmic" ? "bg-gray-900/70 border-purple-900/50" : 
+                      visualStyle === "lightweb" ? "bg-gray-900/50 border-white/30" :
+                      "bg-gray-900 border-gray-700"
+                    } border rounded-md p-2 text-sm`}
                     placeholder={broadcastMode === "universal" ? "Enter message for universal broadcast..." : `Enter message for ${selectedSpecies?.name || "selected species"}...`}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -328,7 +452,11 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
               </div>
               
               {fullPageMode && (
-                <div className="space-y-4 bg-gray-950/50 p-4 rounded-lg">
+                <div className={`space-y-4 ${
+                  visualStyle === "cosmic" ? "bg-gray-950/30" : 
+                  visualStyle === "lightweb" ? "bg-gray-950/30 border border-white/10" : 
+                  "bg-gray-950/50"
+                } p-4 rounded-lg`}>
                   <h3 className="text-sm font-medium">Active Signatures</h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {mockSpecies
@@ -336,16 +464,96 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                       .map(species => (
                         <div 
                           key={species.name} 
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${selectedSpecies?.name === species.name ? 'bg-primary/20' : 'hover:bg-gray-800'}`}
+                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer ${
+                            selectedSpecies?.name === species.name 
+                              ? visualStyle === "cosmic" 
+                                ? 'bg-purple-900/20 border border-purple-500/30' 
+                                : 'bg-primary/20' 
+                              : 'hover:bg-gray-800'
+                          }`}
                           onClick={() => handleSpeciesSelect(species)}
                         >
                           <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                            <div className={`w-2 h-2 rounded-full ${
+                              visualStyle === "cosmic" ? 'bg-purple-400' : 
+                              visualStyle === "lightweb" ? 'bg-green-300' : 
+                              'bg-green-500'
+                            }`}></div>
                             <span className="text-sm">{species.name}</span>
                           </div>
                           <span className="text-xs text-gray-400">{species.vibration?.toFixed(2)} Hz</span>
                         </div>
                       ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Layer visibility controls */}
+              {fullPageMode && (
+                <div className={`space-y-4 ${
+                  visualStyle === "cosmic" ? "bg-gray-950/30" : 
+                  visualStyle === "lightweb" ? "bg-gray-950/30 border border-white/10" : 
+                  "bg-gray-950/50"
+                } p-4 rounded-lg`}>
+                  <h3 className="text-sm font-medium">Layer Controls</h3>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                        Existence Realm
+                      </span>
+                      <Switch 
+                        checked={visibleLayers.existence}
+                        onCheckedChange={() => toggleLayer("existence")}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                        Non-Existence
+                      </span>
+                      <Switch 
+                        checked={visibleLayers.nonExistence}
+                        onCheckedChange={() => toggleLayer("nonExistence")}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                        New Existence
+                      </span>
+                      <Switch 
+                        checked={visibleLayers.newExistence}
+                        onCheckedChange={() => toggleLayer("newExistence")}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400"></div>
+                        Divine Frequency
+                      </span>
+                      <Switch 
+                        checked={visibleLayers.divine}
+                        onCheckedChange={() => toggleLayer("divine")}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Entity Labels</span>
+                      <Switch 
+                        checked={showAllNames}
+                        onCheckedChange={(checked) => setShowAllNames(checked)}
+                      />
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {showAllNames ? "Showing all names" : "Names on hover"}
+                    </div>
                   </div>
                 </div>
               )}

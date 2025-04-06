@@ -1,0 +1,48 @@
+
+@keyframes ping {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* Clarity enhancement */
+.entity-label {
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Celestial Fog theme */
+.celestial-theme {
+  background: linear-gradient(180deg, #0f172a 0%, #1e3a8a 100%);
+}
+
+.celestial-entity {
+  filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.5));
+}
+
+/* Lightweb Grid theme */
+.lightweb-theme {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(30, 58, 138, 0.7) 100%);
+  backdrop-filter: blur(5px);
+}
+
+.lightweb-entity {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+/* Dark Cosmic Glyphs theme */
+.cosmic-theme {
+  background: linear-gradient(180deg, #000000 0%, #1a1f2c 100%);
+}
+
+.cosmic-entity {
+  filter: drop-shadow(0 0 5px rgba(168, 85, 247, 0.5));
+}
