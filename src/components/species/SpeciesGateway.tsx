@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useEffect } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 
@@ -624,14 +625,14 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       })
       .sort((a, b) => b.coords.z - a.coords.z)
       .map(item => ({ species: item.species, index: item.index }));
-  }, [species, mode, rotation.x, rotation.y, visibleLayers]);
+  }, [species, mode, rotation.x, rotation.y, visibleLayers, speciesRadius, containerSize]);
 
   // Regular rendering for non-radial modes
   const renderRegularSpecies = () => {
     return species
       .filter(s => isSpeciesVisible(s))
       .map((s, i) => {
-        const { x, y } = getCoordinates(s, i);
+        const { x, y } = getCoordinates(s, i, species.length);
         const isSelected = selectedSpecies?.name === s.name;
         const isHovered = hoveredSpecies?.name === s.name;
         const speciesColor = getSpeciesColor(s);
@@ -739,9 +740,12 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         {renderPingTrail()}
         
         {/* Species visualization with depth sorting for 3D effect */}
-        {mode === "radial" || mode === "signature" ? 
-          sortedSpecies.map(({ species: s, index: i }) => {
-            const { x, y, z } = getCoordinates(s, i);
+        {(mode === "radial" || mode === "signature") ? 
+          sortedSpecies.map((item) => {
+            const s = item.species;
+            const i = item.index;
+            
+            const { x, y, z } = getCoordinates(s, i, species.length);
             
             // Scale based on z-depth for perspective effect
             const depthScale = 1000 / (1000 + z);
@@ -751,7 +755,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             const isSpecial = isDivineFrequency(s);
             
             const baseSize = s.realm === "existence" ? 6 : 4;
-            const populationScale = Math.log10(s.population) / 6;
+            const populationScale = s.population ? Math.log10(s.population) / 6 : 0;
             const scaledSize = (baseSize + populationScale * 6) * depthScale;
             
             const isSelected = selectedSpecies?.name === s.name;
@@ -1263,3 +1267,4 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
 
 // Need to add a displayName for forwardRef components
 SpeciesGateway.displayName = 'SpeciesGateway';
+
