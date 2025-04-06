@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
-import { Rotate3d } from 'lucide-react';
+import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Species, VisibleLayers, VisualStyle, ViewMode } from './types';
 
@@ -34,6 +34,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   zoomLevel,
   setZoomLevel
 }) => {
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
+  
   // Helper function to get visual style class name based on current style
   const getVisualStyleClass = () => {
     switch(visualStyle) {
@@ -48,64 +50,37 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     }
   };
 
-  // Guardian Net Overlay effects based on the reference image
-  const renderMantisNet = () => {
-    return (
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="cia-mantis-net absolute top-0 left-0 w-1/2 h-full">
-          {/* Golden grid pattern */}
-          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="mantis-grid" width="10" height="10" patternUnits="userSpaceOnUse">
-                <path 
-                  d="M 10 0 L 0 0 0 10" 
-                  fill="none" 
-                  stroke="rgba(255, 215, 0, 0.3)" 
-                  strokeWidth="0.2"
-                />
-              </pattern>
-            </defs>
-            <path 
-              d="M0,0 Q30,30 0,60 Q30,90 50,100 Q70,80 100,90 Q80,60 100,30 Q70,10 50,0 Q30,10 0,0 Z" 
-              fill="url(#mantis-grid)" 
-              stroke="rgba(255, 215, 0, 0.4)" 
-              strokeWidth="0.3" 
-            />
-          </svg>
-          <div className="absolute top-4 left-8 cia-indicator">CIA</div>
-        </div>
-      </div>
-    );
+  // Toggle fullscreen mode
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      const visualizationElement = document.getElementById('species-visualization-container');
+      if (visualizationElement) {
+        visualizationElement.requestFullscreen().catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+        setIsFullScreen(true);
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(err => {
+          console.error(`Error attempting to exit fullscreen: ${err.message}`);
+        });
+        setIsFullScreen(false);
+      }
+    }
   };
 
-  const renderDraxGrid = () => {
-    return (
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="lockheed-drax-grid absolute top-0 right-0 w-1/2 h-full">
-          {/* Blue hexagonal grid pattern */}
-          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="drax-grid" width="10" height="8.7" patternUnits="userSpaceOnUse">
-                <path 
-                  d="M5,0 L10,2.5 L10,7.5 L5,10 L0,7.5 L0,2.5 Z" 
-                  fill="none" 
-                  stroke="rgba(100, 180, 255, 0.3)" 
-                  strokeWidth="0.2"
-                />
-              </pattern>
-            </defs>
-            <path 
-              d="M100,0 Q70,30 100,60 Q70,90 50,100 Q30,80 0,90 Q20,60 0,30 Q30,10 50,0 Q70,10 100,0 Z" 
-              fill="url(#drax-grid)" 
-              stroke="rgba(100, 180, 255, 0.4)" 
-              strokeWidth="0.3" 
-            />
-          </svg>
-          <div className="absolute bottom-4 right-8 lockheed-indicator">LOCKHEED MARTIN</div>
-        </div>
-      </div>
-    );
-  };
+  // Listen for exiting fullscreen with Escape key
+  React.useEffect(() => {
+    const handleFullScreenChange = () => {
+      setIsFullScreen(!!document.fullscreenElement);
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    };
+  }, []);
 
   // Observable Universe concentric rings
   const renderObservableUniverse = () => {
@@ -158,15 +133,13 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative" id="species-visualization-container">
       {renderObservableUniverse()}
       <div 
-        className={`rounded-lg overflow-hidden min-h-[400px] flex items-center justify-center ${getVisualStyleClass()}`}
+        className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} flex items-center justify-center ${getVisualStyleClass()}`}
         style={{ transform: `scale(${zoomLevel})` }}
       >
         {renderCosmicFlow()}
-        {renderMantisNet()}
-        {renderDraxGrid()}
         <SpeciesGateway 
           species={species}
           onSelectSpecies={onSelectSpecies}
@@ -202,6 +175,17 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           onClick={() => setZoomLevel(Math.min(2.0, zoomLevel + 0.1))}
         >
           +
+        </Button>
+        
+        {/* Fullscreen toggle button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-white ml-2"
+          onClick={toggleFullScreen}
+          title={isFullScreen ? "Exit full screen" : "Enter full screen"}
+        >
+          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
       </div>
       
