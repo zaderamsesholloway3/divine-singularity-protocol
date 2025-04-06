@@ -40,6 +40,33 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
 }) => {
   return (
     <>
+      {/* Central Origin Point */}
+      <g
+        className="origin-point"
+        transform={`translate(${containerSize/2}, ${containerSize/2})`}
+      >
+        <circle
+          r={4}
+          fill="white"
+          opacity={0.8}
+          filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255,255,255,0.7))" : ""}
+        />
+        <text
+          y={16}
+          fontSize="8"
+          textAnchor="middle"
+          fill="white"
+          opacity={0.9}
+          style={{ 
+            filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
+            textShadow: "0 0 2px rgba(0,0,0,0.9)"
+          }}
+        >
+          Earth
+        </text>
+      </g>
+
+      {/* Individual Species Nodes */}
       {species
         .filter(s => isSpeciesVisible(s, visibleLayers))
         .map((s, i) => {
@@ -52,15 +79,15 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
             containerSize,
             rotation
           );
-          const isSelected = selectedSpecies?.name === s.name;
-          const isHovered = hoveredSpecies?.name === s.name;
+          const isSelected = selectedSpecies?.id === s.id;
+          const isHovered = hoveredSpecies?.id === s.id;
           const speciesColor = getSpeciesColor(s, visualStyle);
           const shouldShowName = showAllNames || isSelected || isHovered;
           const nodeSize = isSelected ? 8 : isHovered ? 7 : 6;
           
           return (
             <g 
-              key={s.name}
+              key={s.id}
               transform={`translate(${x}, ${y})`}
               onClick={() => onSelectSpecies(s)}
               onMouseEnter={() => setHoveredSpecies(s)}
@@ -74,9 +101,22 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
                 strokeWidth={isSelected ? 2 : isHovered ? 1 : 0}
                 filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(100,100,255,0.7))" : ""}
               />
+              {/* Ping indicator for responding species */}
+              {s.responding && (
+                <circle
+                  r={nodeSize + 2}
+                  fill="none"
+                  stroke={speciesColor}
+                  strokeWidth={1}
+                  opacity={0.6}
+                  style={{
+                    animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite'
+                  }}
+                />
+              )}
               {shouldShowName && (
                 <text
-                  y={nodeSize + 8}
+                  y={nodeSize + 10}
                   fontSize="8"
                   textAnchor="middle"
                   fill="white"

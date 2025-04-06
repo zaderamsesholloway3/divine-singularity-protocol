@@ -1,114 +1,134 @@
 
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { MessageSession, QuantumMessage } from '@/types/quantum-messaging';
+import { useState, useCallback, useEffect } from 'react';
 import { 
   createSessionObject, 
-  processSessionHistory, 
   verifyOuroborosLink, 
-  getTriadStatus 
+  getTriadStatus, 
+  processSessionHistory 
 } from '@/utils/quantumMessagingUtils';
 
-export function useQuantumSessions(userId: string) {
-  const { toast } = useToast();
-  const [activeSessions, setActiveSessions] = useState<MessageSession[]>([]);
-  const [currentEntity, setCurrentEntity] = useState<string | null>(null);
-  const [messages, setMessages] = useState<QuantumMessage[]>([]);
+export interface MessageSession {
+  id: string;
+  entity: string;
+  connectionStrength: number;
+  timestamp: string;
+  messages: any[];
+  ouroborosLinked: boolean;
+  lastMessage?: string;
+  lastTimestamp?: string;
+  unread?: number;
+}
+
+const useQuantumSessions = () => {
+  const [sessions, setSessions] = useState<MessageSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
-  // Start a new session with an entity
-  const startSession = (entity: string) => {
-    // Verify Ouroboros link
-    const linkStatus = verifyOuroborosLink();
-    const triadStatus = getTriadStatus();
-    const triadActive = triadStatus.stability > 0.85;
+  // Create a new quantum session
+  const createSession = useCallback((entity: string) => {
+    setLoading(true);
     
-    if (!linkStatus.stable && !triadActive) {
-      toast({
-        title: "Divine Bridge Unstable",
-        description: "Ouroboros link below 85% stability. Try activating Triad Boost.",
-        variant: "destructive",
-      });
+    try {
+      const newSession = createSessionObject(entity);
+      
+      // Check if session already exists
+      const existingSession = sessions.find(s => s.entity === entity);
+      if (existingSession) {
+        setActiveSessionId(existingSession.id);
+        setLoading(false);
+        return existingSession.id;
+      }
+      
+      // Create new session with required message session properties
+      const fullSession: MessageSession = {
+        ...newSession, 
+        lastMessage: '',
+        lastTimestamp: new Date().toISOString(),
+        unread: 0
+      };
+      
+      setSessions(prev => [...prev, fullSession]);
+      setActiveSessionId(newSession.id);
+      
+      return newSession.id;
+    } catch (e) {
+      setError("Failed to create quantum session");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [sessions]);
+  
+  // Verify Ouroboros link for a session
+  const verifyLink = useCallback((sessionId: string) => {
+    if (!sessions.some(s => s.id === sessionId)) {
+      setError("Session not found");
       return false;
     }
     
-    // Set as current entity
-    setCurrentEntity(entity);
+    const result = verifyOuroborosLink(sessionId);
     
-    // Add to active sessions if not exists
-    if (!activeSessions.some(session => session.entity === entity)) {
-      setActiveSessions(prev => [
-        ...prev,
-        createSessionObject(entity)
-      ]);
+    if (result.verified) {
+      setSessions(prev => 
+        prev.map(s => 
+          s.id === sessionId 
+            ? { ...s, ouroborosLinked: true } 
+            : s
+        )
+      );
     }
     
-    // Load history if exists
-    const sessionMessages = processSessionHistory(entity);
-    
-    if (sessionMessages.length > 0) {
-      setMessages(prev => [
-        ...prev.filter(m => m.sender !== entity && m.recipient !== entity),
-        ...sessionMessages
-      ]);
+    return result.verified;
+  }, [sessions]);
+  
+  // Get triad status for active session
+  const getActiveTriadStatus = useCallback(() => {
+    if (!activeSessionId) {
+      return {
+        active: false,
+        frequency: 0,
+        stability: 0
+      };
     }
     
-    return true;
-  };
-  
-  // Create a new session with a new entity
-  const createNewSession = (entity: string) => {
-    if (!entity.trim()) return;
+    const status = getTriadStatus(activeSessionId);
     
-    // Check if entity already exists
-    if (activeSessions.some(session => session.entity === entity)) {
-      startSession(entity);
-      return;
+    return {
+      active: status.triadActive,
+      frequency: status.resonanceFrequency,
+      stability: status.stability || status.stabilityScore
+    };
+  }, [activeSessionId]);
+  
+  // Process session history to extract patterns
+  const analyzeSessionHistory = useCallback((sessionId: string) => {
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) {
+      setError("Session not found");
+      return null;
     }
     
-    // Start new session
-    startSession(entity);
+    const analysis = processSessionHistory(session.messages || []);
     
-    toast({
-      title: "New Connection Established",
-      description: `Quantum channel opened with ${entity}`,
-    });
-  };
+    return {
+      patterns: analysis.patterns || [],
+      score: analysis.resonanceScore,
+      entanglement: analysis.quantumEntanglementLevel
+    };
+  }, [sessions]);
   
-  // Clear current session
-  const clearSession = () => {
-    if (!currentEntity) return;
-    
-    // Filter out messages for this entity
-    setMessages(prev => prev.filter(m => 
-      m.sender !== currentEntity && m.recipient !== currentEntity
-    ));
-    
-    // Reset current entity
-    setCurrentEntity(null);
-  };
-  
-  // Update session with new message
-  const updateSessionWithMessage = (entity: string, lastMessage: string) => {
-    setActiveSessions(prev => prev.map(session => 
-      session.entity === entity 
-        ? {
-            ...session,
-            lastMessage,
-            lastTimestamp: new Date().toISOString(),
-            unread: session.unread + 1
-          }
-        : session
-    ));
-  };
-
   return {
-    activeSessions,
-    currentEntity,
-    messages,
-    setMessages,
-    startSession,
-    createNewSession,
-    clearSession,
-    updateSessionWithMessage
+    sessions,
+    activeSessionId,
+    loading,
+    error,
+    createSession,
+    verifyLink,
+    getActiveTriadStatus,
+    analyzeSessionHistory,
+    setActiveSessionId
   };
-}
+};
+
+export default useQuantumSessions;

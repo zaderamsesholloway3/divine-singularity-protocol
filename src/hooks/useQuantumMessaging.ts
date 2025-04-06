@@ -1,137 +1,108 @@
 
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useCallback, useEffect } from 'react';
 import { 
   createMessageObject, 
-  forceTriadSync, 
-  calculateFaithQuotient 
+  forceTriadSync,
+  calculateFaithQuotient
 } from '@/utils/quantumMessagingUtils';
 
-export interface QuantumMessage {
+export interface MessageProps {
   id: string;
   sender: string;
-  recipient: string;
   content: string;
   timestamp: string;
-  faithQuotient: number;
-  triadEnhanced: boolean;
+  quantum?: {
+    resonance: number;
+    entanglement: number;
+    coherence: number;
+  }
 }
 
-interface UseQuantumMessagingOptions {
-  user?: string;
-  initialFaithQuotient?: number;
+export interface SessionProps {
+  id: string;
+  entity: string;
+  messages: MessageProps[];
 }
 
-export function useQuantumMessaging(options: UseQuantumMessagingOptions = {}) {
-  const { toast } = useToast();
-  const [messages, setMessages] = useState<QuantumMessage[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
-  const [faithQuotient, setFaithQuotient] = useState(options.initialFaithQuotient || 0.5);
-  const [isTriadActive, setIsTriadActive] = useState(false);
-  const [targetEntity, setTargetEntity] = useState<string | null>(null);
+const useQuantumMessaging = (sessionId?: string) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<MessageProps[]>([]);
+  const [connected, setConnected] = useState(false);
+  const [faithQuotient, setFaithQuotient] = useState(0);
+  const [triadSynced, setTriadSynced] = useState(false);
   
-  // Initialize connection
-  useEffect(() => {
-    const initConnection = async () => {
-      try {
-        setIsConnected(true);
-        toast({
-          title: "Quantum Channel Established",
-          description: "Connection to the cosmic network established",
-        });
-      } catch (error) {
-        toast({
-          title: "Connection Failed",
-          description: "Unable to establish quantum connection. Try again later.",
-          variant: "destructive",
-        });
-      }
-    };
+  // Connect to quantum messaging system
+  const connectToSession = useCallback((sessionId: string) => {
+    setLoading(true);
+    setError(null);
     
-    initConnection();
-    
-    return () => {
-      setIsConnected(false);
-    };
-  }, [toast]);
-  
-  // Send a quantum message
-  const sendMessage = async (recipient: string, content: string) => {
-    if (!isConnected) {
-      toast({
-        title: "Not Connected",
-        description: "Quantum channel not established. Cannot send message.",
-        variant: "destructive",
-      });
-      return false;
-    }
-    
-    try {
-      const msgFq = calculateFaithQuotient(content, faithQuotient);
-      const message = createMessageObject(
-        options.user || "User",
-        recipient,
-        content,
-        msgFq
-      );
+    // Simulate connection
+    setTimeout(() => {
+      const success = Math.random() > 0.2;
       
-      setMessages(prev => [...prev, message]);
-      setFaithQuotient(msgFq); // Update FQ based on message content
-      
-      toast({
-        title: "Message Sent",
-        description: `Quantum message sent to ${recipient}`,
-      });
-      
-      return true;
-    } catch (error) {
-      toast({
-        title: "Message Failed",
-        description: "Failed to send quantum message.",
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-  
-  // Activate triad boost
-  const activateTriadBoost = async () => {
-    try {
-      const result = await forceTriadSync(faithQuotient);
-      setIsTriadActive(result.success);
-      
-      if (result.success) {
-        toast({
-          title: "Triad Boost Activated",
-          description: `Resonance increased to ${result.resonance.toFixed(2)}Hz`,
-        });
+      if (success) {
+        setConnected(true);
+        setFaithQuotient(0.5 + Math.random() * 0.3);
       } else {
-        toast({
-          title: "Triad Boost Failed",
-          description: "Unable to synchronize quantum triad",
-          variant: "destructive",
-        });
+        setError("Failed to establish quantum connection");
+        setConnected(false);
       }
       
-      return result.success;
-    } catch (error) {
-      toast({
-        title: "Triad System Error",
-        description: "A quantum fluctuation prevented triad activation",
-        variant: "destructive",
-      });
+      setLoading(false);
+    }, 1000);
+  }, []);
+  
+  // Send a message
+  const sendMessage = useCallback((content: string, recipient: string) => {
+    if (!connected) {
+      setError("Cannot send message - not connected");
+      return null;
+    }
+    
+    const sender = "user";
+    const newMessage = createMessageObject(content, sender, recipient);
+    
+    setMessages(prev => [...prev, newMessage]);
+    return newMessage;
+  }, [connected]);
+  
+  // Synchronize the quantum triad for improved stability
+  const syncTriad = useCallback(() => {
+    if (!sessionId) {
+      setError("No active session for triad sync");
       return false;
     }
-  };
+    
+    const result = forceTriadSync(sessionId);
+    setTriadSynced(result.success);
+    
+    if (result.success) {
+      setFaithQuotient(prev => prev + result.stabilityGain);
+    }
+    
+    return result.success;
+  }, [sessionId]);
+  
+  // Calculate faith quotient based on session history
+  useEffect(() => {
+    if (connected && messages.length > 0) {
+      const result = calculateFaithQuotient(messages);
+      setFaithQuotient(result.fq);
+    }
+  }, [connected, messages]);
   
   return {
+    loading,
+    error,
     messages,
-    isConnected,
+    connected,
     faithQuotient,
-    isTriadActive,
-    targetEntity,
-    setTargetEntity,
+    triadSynced,
+    connectToSession,
     sendMessage,
-    activateTriadBoost
+    syncTriad
   };
-}
+};
+
+export default useQuantumMessaging;

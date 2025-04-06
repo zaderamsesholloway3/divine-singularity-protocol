@@ -1,146 +1,149 @@
-import { Species, VisibleLayers } from "../types";
+import { Species, VisibleLayers, VisualStyle } from '../types';
 
 /**
- * Determine the node size based on species properties
+ * Get species highlight score based on properties
  */
-export const getNodeSize = (species: Species, selected: boolean) => {
-  // Base size
-  let baseSize = 3; 
+export const getSpeciesHighlightScore = (species: Species): number => {
+  let score = 0;
   
-  // Adjust based on intelligence
-  if (species.intelligence) {
-    baseSize += species.intelligence / 50;
+  // Add score based on intelligence if available
+  if (species.intelligence !== undefined) {
+    score += Math.min(species.intelligence * 5, 30);
   }
   
-  // Adjust for faith quotient if it exists
+  // Add score based on frequency quotient if available
   if (species.fq !== undefined) {
-    baseSize += species.fq * 2;
+    score += Math.min(species.fq * 20, 40);
   }
   
-  // Increase size if selected
-  if (selected) {
-    baseSize *= 1.5;
+  // Add score based on vibration if available
+  if (species.vibration !== undefined) {
+    score += Math.min(species.vibration, 15);
   }
   
-  return Math.max(2, Math.min(8, baseSize));
-};
+  // Active species get bonus
+  if (species.responding) {
+    score += 20;
+  }
+  
+  return Math.min(score, 100);
+}
 
 /**
- * Get node color based on species properties
+ * Get color for species based on properties and visual style
  */
-export const getNodeColor = (species: Species, selected: boolean, hovered: boolean) => {
-  // Custom color specified in the species data
+export const getSpeciesColor = (species: Species, visualStyle: VisualStyle): string => {
+  // Use explicit color if available
   if (species.color) {
-    if (selected) return `${species.color}`;
-    if (hovered) return `${species.color}90`;
-    return `${species.color}70`;
+    return visualStyle === "cosmic" ? species.color + "cc" : 
+           visualStyle === "lightweb" ? species.color + "ee" :
+           species.color;
   }
   
-  // Default colors based on the realm
-  if (species.responding !== undefined) {
-    if (species.responding) {
-      if (selected) return "#84cc16";
-      if (hovered) return "#84cc16cc";
-      return "#84cc1690";
-    } else {
-      if (selected) return "#ef4444";
-      if (hovered) return "#ef4444cc";
-      return "#ef444490";  
-    }
+  // Otherwise generate color based on realm and responding status
+  switch (species.realm) {
+    case "Existence":
+      return species.responding 
+        ? visualStyle === "cosmic" ? "#50ff50" : "#00ff00"
+        : visualStyle === "cosmic" ? "#308830" : "#008800";
+    
+    case "Non-Existence":
+      return species.responding
+        ? visualStyle === "cosmic" ? "#ff50ff" : "#ff00ff"
+        : visualStyle === "cosmic" ? "#883088" : "#880088";
+    
+    case "New Existence":
+      return species.responding
+        ? visualStyle === "cosmic" ? "#5050ff" : "#0000ff"
+        : visualStyle === "cosmic" ? "#303088" : "#000088";
+    
+    case "Divine":
+      return species.responding
+        ? visualStyle === "cosmic" ? "#ffff50" : "#ffff00"
+        : visualStyle === "cosmic" ? "#888830" : "#888800";
+    
+    default:
+      return species.responding ? "#ffffff" : "#888888";
   }
-  
-  // Fallback colors based on realm
-  if (species.realm === "Existence") {
-    if (selected) return "#3b82f6";
-    if (hovered) return "#3b82f6cc";
-    return "#3b82f690";
-  } else if (species.realm === "Non-Existence") {
-    if (selected) return "#8b5cf6";
-    if (hovered) return "#8b5cf6cc";
-    return "#8b5cf690";
-  } else if (species.realm === "New-Existence") {
-    if (selected) return "#06b6d4";
-    if (hovered) return "#06b6d4cc";
-    return "#06b6d490";
-  } else if (species.realm === "Divine") {
-    if (selected) return "#eab308";
-    if (hovered) return "#eab308cc";
-    return "#eab30890";
-  }
-  
-  // Default case - should never reach here
-  return selected ? "#ffffff" : "#ffffff90";
 };
 
 /**
- * Get species color for visualization
+ * Get the glow color for a species in cosmic mode
  */
-export const getSpeciesColor = (species: Species, visualStyle: string) => {
-  // Base colors based on realm
-  if (species.realm === "Existence") {
-    return visualStyle === "cosmic" ? "#3b82f690" : "#3b82f680";
-  } else if (species.realm === "Non-Existence") {
-    return visualStyle === "cosmic" ? "#8b5cf690" : "#8b5cf680";
-  } else if (species.realm === "New-Existence") {
-    return visualStyle === "cosmic" ? "#06b6d490" : "#06b6d480";
-  } else if (species.realm === "Divine") {
-    return visualStyle === "cosmic" ? "#eab30890" : "#eab30880";
+export const getSpeciesGlowColor = (species: Species): string => {
+  switch (species.realm) {
+    case "Existence":
+      return "rgba(0, 255, 0, 0.6)";
+    case "Non-Existence":
+      return "rgba(255, 0, 255, 0.6)";
+    case "New Existence":
+      return "rgba(0, 0, 255, 0.6)";
+    case "Divine":
+      return "rgba(255, 255, 0, 0.6)";
+    default:
+      return "rgba(255, 255, 255, 0.6)";
   }
-  
-  // Default color
-  return species.color || "#ffffff80";
 };
 
 /**
- * Determine if a species should be visible based on filter settings
+ * Check if a species should be visible based on layer filters
  */
-export const isSpeciesVisible = (species: Species, visibleLayers: VisibleLayers): boolean => {
-  if (species.realm === "Existence" && !visibleLayers.existence) {
-    return false;
+export const isSpeciesVisible = (species: Species, layers: VisibleLayers): boolean => {
+  switch (species.realm) {
+    case "Existence":
+      return layers.existence;
+    case "Non-Existence":
+      return layers.nonExistence;
+    case "New Existence":
+      return layers.newExistence;
+    case "Divine":
+      return layers.divine;
+    default:
+      return true;
   }
-  
-  if (species.realm === "Non-Existence" && !visibleLayers.nonExistence) {
-    return false;
-  }
-  
-  if (species.realm === "New-Existence" && !visibleLayers.newExistence) {
-    return false;
-  }
-  
-  if (species.realm === "Divine" && !visibleLayers.divine) {
-    return false;
-  }
-  
-  return true;
 };
 
 /**
- * Get filter class for species based on its realm
+ * Get border style for a species node
  */
-export const getSpeciesFilter = (species: Species, visualStyle: string): string => {
-  if (species.realm === "Existence") {
-    return visualStyle === "cosmic" 
-      ? "filter drop-shadow(0 0 2px rgba(59, 130, 246, 0.7))"
-      : "";
-  } 
+export const getSpeciesNodeStyle = (
+  species: Species, 
+  isSelected: boolean, 
+  isHovered: boolean, 
+  visualStyle: VisualStyle
+): React.CSSProperties => {
+  const baseColor = species.color || getSpeciesColor(species, visualStyle);
   
-  if (species.realm === "Non-Existence") {
-    return visualStyle === "cosmic" 
-      ? "filter drop-shadow(0 0 2px rgba(139, 92, 246, 0.7))"
-      : "";
+  return {
+    backgroundColor: baseColor,
+    boxShadow: visualStyle === "cosmic" 
+      ? `0 0 8px ${baseColor}aa` 
+      : visualStyle === "lightweb"
+      ? `0 0 5px ${baseColor}88`
+      : "none",
+    border: isSelected 
+      ? `2px solid white` 
+      : isHovered 
+      ? `1px solid rgba(255, 255, 255, 0.7)` 
+      : "none",
+    opacity: species.responding ? 1 : 0.7,
+  };
+};
+
+/**
+ * Get a readable name for the realm
+ */
+export const getRealmDisplayName = (realm: string): string => {
+  switch (realm) {
+    case "Existence":
+      return "Existence Realm";
+    case "Non-Existence":
+      return "Non-Existence Realm";
+    case "New Existence":
+      return "New Existence Realm";
+    case "Divine":
+      return "Divine Realm";
+    default:
+      return realm;
   }
-  
-  if (species.realm === "New-Existence") {
-    return visualStyle === "cosmic" 
-      ? "filter drop-shadow(0 0 2px rgba(6, 182, 212, 0.7))"
-      : "";
-  }
-  
-  if (species.realm === "Divine") {
-    return visualStyle === "cosmic" 
-      ? "filter drop-shadow(0 0 3px rgba(234, 179, 8, 0.8))"
-      : "";
-  }
-  
-  return "";
 };

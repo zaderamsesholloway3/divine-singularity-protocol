@@ -1,3 +1,4 @@
+
 export interface Species {
   id: string;
   name: string;
@@ -14,6 +15,10 @@ export interface Species {
     amplitude: number;
     frequency: number;
   };
+  // Add missing properties that are being used in the code
+  color?: string;
+  fq?: number;
+  intelligence?: number;
 }
 
 export type ViewMode = "radial" | "distance" | "compact" | "signature" | "disk" | "constellation";

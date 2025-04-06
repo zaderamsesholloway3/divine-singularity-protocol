@@ -12,7 +12,7 @@ export const getCoordinates = (
   speciesRadius: number,
   containerSize: number,
   rotation: { x: number, y: number }
-): { x: number, y: number } => {
+): { x: number, y: number, z?: number } => {
   switch (mode) {
     case "radial":
       return getRadialCoordinates(species, speciesRadius, containerSize, rotation);
@@ -42,8 +42,20 @@ export const getRadialCoordinates = (
   
   // Position in 3D space
   const radius = normalizedDistance * speciesRadius;
-  const phi = species.signature ? species.signature[0] * Math.PI * 2 : Math.random() * Math.PI * 2;
-  const theta = species.signature ? species.signature[1] * Math.PI : Math.random() * Math.PI;
+  
+  // Use signature if available, or generate random position
+  let phi = 0;
+  let theta = 0;
+  
+  if (species.signature) {
+    phi = species.signature.x * Math.PI * 2;
+    theta = species.signature.y * Math.PI;
+  } else {
+    // Generate consistent pseudo-random values based on species id
+    const idSum = species.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    phi = (idSum % 100) / 100 * Math.PI * 2;
+    theta = (idSum % 50) / 50 * Math.PI;
+  }
   
   // Convert to Cartesian coordinates
   const x0 = radius * Math.sin(theta) * Math.cos(phi);
@@ -87,11 +99,11 @@ export const getSignatureCoordinates = (
   const centerX = containerSize / 2;
   const centerY = containerSize / 2;
   
-  // Use species signature if available, otherwise use index
-  if (species.signature && species.signature.length >= 2) {
+  // Use species signature if available
+  if (species.signature) {
     // Signature values should be between 0 and 1
-    const x = centerX + (species.signature[0] - 0.5) * containerSize * 0.8;
-    const y = centerY + (species.signature[1] - 0.5) * containerSize * 0.8;
+    const x = centerX + (species.signature.x - 0.5) * containerSize * 0.8;
+    const y = centerY + (species.signature.y - 0.5) * containerSize * 0.8;
     
     return { x, y, z: 0 };
   }
@@ -149,17 +161,18 @@ export const getConstellationCoordinates = (
   const realmOffsets = {
     "Existence": { x: -0.3, y: -0.3 },
     "Non-Existence": { x: 0.3, y: -0.3 },
-    "New-Existence": { x: -0.3, y: 0.3 },
+    "New Existence": { x: -0.3, y: 0.3 },
     "Divine": { x: 0.3, y: 0.3 }
   };
   
-  const offset = realmOffsets[species.realm] || { x: 0, y: 0 };
+  const realmKey = species.realm as keyof typeof realmOffsets;
+  const offset = realmOffsets[realmKey] || { x: 0, y: 0 };
   
   // Calculate position within realm group
   const realmX = centerX + offset.x * containerSize;
   const realmY = centerY + offset.y * containerSize;
   
-  // Use FQ for radial positioning within the group
+  // Use FQ for radial positioning within the group or fallback to index
   const radius = containerSize * 0.2;
   const angle = species.fq ? species.fq * Math.PI * 2 : (index % 12) / 12 * Math.PI * 2;
   
