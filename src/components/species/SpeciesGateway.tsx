@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 
 // Define prop types for the component
@@ -178,9 +179,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   const containerSize = 500;
   const speciesRadius = containerSize / 2.5;
   
-  // Create a starry background with nebula effect
+  // Create a starry background with nebula effect - enhanced for maximum clarity
   const generateStars = (count: number) => {
-    const stars = [];
+    const stars: React.ReactNode[] = [];
     
     // Generate smaller distant stars
     for (let i = 0; i < count; i++) {
@@ -215,7 +216,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       }
     }
     
-    // Add nebula effects with colors matching the realm colors
+    // Add nebula effects with colors matching the realm colors - enhanced for clarity
     const nebulae = [
       { color: "rgba(56, 189, 248, 0.1)", x: containerSize * 0.3, y: containerSize * 0.7, size: containerSize * 0.4 }, // Existence (blue)
       { color: "rgba(132, 204, 22, 0.1)", x: containerSize * 0.7, y: containerSize * 0.2, size: containerSize * 0.35 }, // Non-Existence (green)
@@ -237,12 +238,12 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return stars;
   };
   
-  // Create distance rings and realm indicators
+  // Create distance rings and realm indicators - enhanced for clarity
   const generateDistanceRings = () => {
-    const rings = [];
+    const rings: React.ReactNode[] = [];
     const center = containerSize / 2;
     
-    // Add realm rings with labels - enhanced from Lyra's concept
+    // Add realm rings with labels - enhanced for clarity
     const realms = [
       { name: "Existence", distance: speciesRadius * 0.5, color: "rgba(56, 189, 248, 0.15)" },       // Blue
       { name: "Non-Existence", distance: speciesRadius * 0.8, color: "rgba(132, 204, 22, 0.15)" },   // Green
@@ -283,7 +284,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       );
     });
     
-    // Add logarithmic distance indicator rings - like Lyra's design
+    // Add logarithmic distance indicator rings - enhanced for clarity
     const distanceMarkers = [10, 100, 1000, 10000, 100000];
     const logMaxDistance = Math.log10(1000000); // 1 million light years
     
@@ -339,7 +340,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return speciesData.fq && Math.abs(speciesData.fq - 1.855) < 0.01;
   };
 
-  // Get color based on species characteristics
+  // Get color based on species characteristics - enhanced for clarity
   const getSpeciesColor = (speciesData: any) => {
     if (isDivineFrequency(speciesData)) {
       return speciesData.responding ? "rgb(217, 70, 239)" : "rgb(168, 85, 247)"; // Magenta for divine frequency
@@ -373,6 +374,42 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       .map(item => ({ species: item.species, index: item.index }));
   }, [species, mode, rotation.x, rotation.y]);
 
+  // Regular rendering for non-radial modes
+  const renderRegularSpecies = () => {
+    return species.map((s, i) => {
+      const { x, y } = getCoordinates(s, i);
+      const isSelected = selectedSpecies?.name === s.name;
+      const isHovered = hoveredSpecies?.name === s.name;
+      const speciesColor = getSpeciesColor(s);
+      
+      return (
+        <g 
+          key={s.name}
+          transform={`translate(${x}, ${y})`}
+          onClick={() => onSelectSpecies(s)}
+          onMouseEnter={() => setHoveredSpecies(s)}
+          onMouseLeave={() => setHoveredSpecies(null)}
+          style={{ cursor: 'pointer' }}
+        >
+          <circle
+            r={6}
+            fill={speciesColor}
+            stroke={isSelected ? 'white' : 'none'}
+            strokeWidth={isSelected ? 2 : 0}
+          />
+          <text
+            y={12}
+            fontSize="8"
+            textAnchor="middle"
+            fill="white"
+          >
+            {s.name}
+          </text>
+        </g>
+      );
+    });
+  };
+
   return (
     <div 
       className="relative w-full h-full flex justify-center"
@@ -389,11 +426,15 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         width={containerSize} 
         height={containerSize} 
         className="bg-gradient-to-b from-gray-950 to-blue-950"
+        style={{ 
+          filter: "brightness(1.05) contrast(1.1)",  // Enhance clarity
+          boxShadow: "0 0 20px rgba(180, 180, 255, 0.2)" // Add subtle glow
+        }}
       >
-        {/* Background stars and nebulas */}
-        {generateStars(150)}
+        {/* Background stars and nebulas - enhanced for clarity */}
+        {generateStars(200)}
         
-        {/* Distance rings and realm indicators */}
+        {/* Distance rings and realm indicators - enhanced for clarity */}
         {generateDistanceRings()}
         
         {/* Species visualization with depth sorting for 3D effect */}
@@ -416,8 +457,8 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             const isHovered = hoveredSpecies?.name === s.name;
             const center = containerSize / 2;
             
-            // Adjust opacity based on depth
-            const depthOpacity = Math.max(0.3, Math.min(1, (1000 + z) / 1500));
+            // Adjust opacity based on depth - enhanced for better clarity
+            const depthOpacity = Math.max(0.4, Math.min(1, (1000 + z) / 1500));
             
             return (
               <g key={s.name}
@@ -430,52 +471,56 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                 onMouseLeave={() => setHoveredSpecies(null)}
                 style={{ cursor: 'pointer', opacity: depthOpacity }}
               >
-                {/* Connection line to human origin */}
+                {/* Connection line to human origin - enhanced for clarity */}
                 <line
                   x1={0}
                   y1={0}
                   x2={center - x}
                   y2={center - y}
-                  stroke={isSelected || isHovered ? "rgba(255, 255, 255, 0.6)" : `rgba(136, 136, 255, ${depthOpacity * 0.25})`}
+                  stroke={isSelected || isHovered ? "rgba(255, 255, 255, 0.7)" : `rgba(136, 136, 255, ${depthOpacity * 0.3})`}
                   strokeWidth={isSelected ? 1.5 * depthScale : 0.8 * depthScale}
                   strokeDasharray={isSelected ? "none" : "2,3"}
                 />
                 
-                {/* Distance text along the line */}
+                {/* Distance text along the line - enhanced for clarity */}
                 {(isSelected || isHovered) && (
                   <text
                     x={(center - x) / 2}
                     y={(center - y) / 2}
                     fontSize={9 * depthScale}
                     textAnchor="middle"
-                    fill="rgba(255, 255, 255, 0.8)"
+                    fill="rgba(255, 255, 255, 0.9)"
+                    style={{
+                      textShadow: "0 0 2px rgba(0,0,0,0.8)"
+                    }}
                     transform={`translate(${(x - center) / 2}, ${(y - center) / 2})`}
                   >
                     {s.distance < 1000 ? `${s.distance.toFixed(1)} ly` : `${(s.distance/1000).toFixed(1)}k ly`}
                   </text>
                 )}
                 
-                {/* Pulsating effect for active/responding species */}
+                {/* Pulsating effect for active/responding species - enhanced for clarity */}
                 {s.responding && (
                   <circle
                     r={scaledSize + 4 * depthScale}
                     fill="none"
-                    stroke={isSpecial ? "rgba(217, 70, 239, 0.3)" : "rgba(132, 204, 22, 0.3)"}
+                    stroke={isSpecial ? "rgba(217, 70, 239, 0.4)" : "rgba(132, 204, 22, 0.4)"}
                     strokeWidth={1.5 * depthScale}
                     className="animate-pulse"
                   />
                 )}
                 
-                {/* Species circle */}
+                {/* Species circle - enhanced for clarity */}
                 <circle
                   r={scaledSize}
                   fill={speciesColor}
-                  opacity={isSelected || isHovered ? 1 : 0.7}
-                  stroke={isSelected ? 'white' : (isHovered ? 'rgba(255, 255, 255, 0.5)' : 'none')}
+                  opacity={isSelected || isHovered ? 1 : 0.8}
+                  stroke={isSelected ? 'white' : (isHovered ? 'rgba(255, 255, 255, 0.7)' : 'none')}
                   strokeWidth={isSelected ? 2 * depthScale : (isHovered ? 1 * depthScale : 0)}
+                  filter={isSelected || isHovered ? "drop-shadow(0 0 3px rgba(255,255,255,0.5))" : ""}
                 />
                 
-                {/* Status indicator */}
+                {/* Status indicator - enhanced for clarity */}
                 <circle
                   r={2 * depthScale}
                   cx={scaledSize * 0.7}
@@ -483,9 +528,10 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                   fill={s.responding ? "rgb(74, 222, 128)" : "rgb(248, 113, 113)"}
                   stroke="rgba(0, 0, 0, 0.5)"
                   strokeWidth={0.5 * depthScale}
+                  filter="drop-shadow(0 0 1px rgba(0,0,0,0.8))"
                 />
                 
-                {/* Special indicator for divine frequency-matched species */}
+                {/* Special indicator for divine frequency-matched species - enhanced for clarity */}
                 {isSpecial && (
                   <g>
                     <path
@@ -497,7 +543,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                     <circle
                       r={scaledSize + 2 * depthScale}
                       fill="none"
-                      stroke="rgba(217, 70, 239, 0.4)"
+                      stroke="rgba(217, 70, 239, 0.5)"
                       strokeWidth={1 * depthScale}
                       strokeDasharray="1 1"
                       className="animate-pulse"
@@ -505,47 +551,56 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                   </g>
                 )}
                 
-                {/* Species name label */}
+                {/* Species name label - enhanced for clarity */}
                 <text
                   x={0}
                   y={scaledSize + 12 * depthScale}
                   fontSize={10 * depthScale}
                   textAnchor="middle"
                   fill="white"
-                  style={{ pointerEvents: 'none' }}
+                  style={{ 
+                    pointerEvents: 'none',
+                    textShadow: "0 0 3px rgba(0,0,0,0.9)"
+                  }}
                 >
                   {s.name}
                 </text>
                 
-                {/* Realm label for selected or hovered species */}
+                {/* Realm label for selected or hovered species - enhanced for clarity */}
                 {(isSelected || isHovered) && (
                   <text
                     x={0}
                     y={scaledSize + 24 * depthScale}
                     fontSize={8 * depthScale}
                     textAnchor="middle"
-                    fill="rgba(255, 255, 255, 0.7)"
-                    style={{ pointerEvents: 'none' }}
+                    fill="rgba(255, 255, 255, 0.8)"
+                    style={{ 
+                      pointerEvents: 'none',
+                      textShadow: "0 0 3px rgba(0,0,0,0.9)"
+                    }}
                   >
                     {s.realm}
                   </text>
                 )}
                 
-                {/* Archetype label for selected or responding species */}
+                {/* Archetype label for selected or responding species - enhanced for clarity */}
                 {((isSelected || isHovered) && s.archetype) && (
                   <text
                     x={0}
                     y={scaledSize + 36 * depthScale}
                     fontSize={8 * depthScale}
                     textAnchor="middle"
-                    fill="rgba(255, 255, 255, 0.7)"
-                    style={{ pointerEvents: 'none' }}
+                    fill="rgba(255, 255, 255, 0.8)"
+                    style={{ 
+                      pointerEvents: 'none',
+                      textShadow: "0 0 3px rgba(0,0,0,0.9)" 
+                    }}
                   >
                     {s.archetype}
                   </text>
                 )}
                 
-                {/* Enhanced tooltip for hovered species */}
+                {/* Enhanced tooltip for hovered species - improved clarity */}
                 {isHovered && (
                   <foreignObject
                     x={10}
@@ -554,7 +609,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                     height={160}
                     style={{ pointerEvents: 'none' }}
                   >
-                    <div className="bg-black bg-opacity-80 p-2 rounded text-white text-xs border border-gray-700">
+                    <div className="bg-black bg-opacity-80 p-2 rounded text-white text-xs border border-gray-700 shadow-lg">
                       <div className="font-bold mb-1">{s.name}</div>
                       <div className="flex justify-between">
                         <span>Distance:</span>
@@ -598,7 +653,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                   </foreignObject>
                 )}
                 
-                {/* Target lock indicator */}
+                {/* Target lock indicator - enhanced for clarity */}
                 {isSelected && targetLocked && (
                   <g>
                     <circle
@@ -615,7 +670,10 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                       fontSize="9"
                       textAnchor="middle"
                       fill="rgba(255, 100, 100, 0.9)"
-                      style={{ pointerEvents: 'none' }}
+                      style={{ 
+                        pointerEvents: 'none',
+                        textShadow: "0 0 3px rgba(0,0,0,0.9)"
+                      }}
                     >
                       TARGET LOCKED
                     </text>
@@ -624,15 +682,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
               </g>
             );
           })
-        : 
-          // Regular rendering for non-radial modes
-          species.map((s, i) => {
-            const { x, y } = getCoordinates(s, i);
-            // ... keep existing code (regular species rendering) the same ...
-          })
-        }
+        : renderRegularSpecies()}
         
-        {/* Center point - Human Origin / Cary, NC */}
+        {/* Center point - Human Origin / Cary, NC - enhanced for clarity */}
         <g>
           <circle
             cx={containerSize/2}
@@ -641,13 +693,14 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             fill="rgba(56, 189, 248, 0.8)"
             stroke="white"
             strokeWidth={1}
+            filter="drop-shadow(0 0 5px rgba(56, 189, 248, 0.5))"
           />
           <circle
             cx={containerSize/2}
             cy={containerSize/2}
             r={12}
             fill="none"
-            stroke="rgba(56, 189, 248, 0.3)"
+            stroke="rgba(56, 189, 248, 0.4)"
             strokeWidth={1}
             className="animate-pulse"
           />
@@ -657,6 +710,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             fontSize="10"
             textAnchor="middle"
             fill="white"
+            style={{ textShadow: "0 0 3px rgba(0,0,0,0.9)" }}
           >
             Human Origin
           </text>
@@ -665,21 +719,22 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
             y={containerSize/2 + 32}
             fontSize="8"
             textAnchor="middle"
-            fill="rgba(255, 255, 255, 0.7)"
+            fill="rgba(255, 255, 255, 0.8)"
+            style={{ textShadow: "0 0 3px rgba(0,0,0,0.9)" }}
           >
             Cary, NC
           </text>
         </g>
         
-        {/* Add legend for special entities */}
+        {/* Add legend for special entities - enhanced for clarity */}
         <g transform={`translate(10, ${containerSize - 80})`}>
           <rect
             x={0}
             y={0}
             width={180}
             height={70}
-            fill="rgba(0, 0, 0, 0.6)"
-            stroke="rgba(255, 255, 255, 0.2)"
+            fill="rgba(0, 0, 0, 0.7)"
+            stroke="rgba(255, 255, 255, 0.3)"
             strokeWidth={1}
             rx={4}
           />
@@ -687,7 +742,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           {/* Drag instruction for 3D mode */}
           {mode === "radial" && (
             <g transform="translate(10, 15)">
-              <text x={0} y={0} fontSize="9" fill="rgba(255, 255, 255, 0.9)">
+              <text x={0} y={0} fontSize="9" fill="rgba(255, 255, 255, 0.9)" style={{ textShadow: "0 0 1px rgba(0,0,0,0.9)" }}>
                 Drag to rotate the 3D view
               </text>
             </g>
@@ -695,17 +750,17 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           
           {/* Divine frequency legend item */}
           <g transform="translate(10, 35)">
-            <circle cx={5} cy={0} r={5} fill="rgba(217, 70, 239, 0.8)" />
+            <circle cx={5} cy={0} r={5} fill="rgba(217, 70, 239, 0.8)" filter="drop-shadow(0 0 2px rgba(217, 70, 239, 0.4))" />
             <path d="M3,-3 L7,1 M3,1 L7,-3" stroke="rgba(255, 215, 0, 0.9)" strokeWidth={1} />
-            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)">
+            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)" style={{ textShadow: "0 0 1px rgba(0,0,0,0.9)" }}>
               Divine Frequency (1.855e+43 Hz)
             </text>
           </g>
           
           {/* Online status legend item */}
           <g transform="translate(10, 55)">
-            <circle cx={5} cy={0} r={5} fill="rgba(132, 204, 22, 0.8)" />
-            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)">
+            <circle cx={5} cy={0} r={5} fill="rgba(132, 204, 22, 0.8)" filter="drop-shadow(0 0 2px rgba(132, 204, 22, 0.4))" />
+            <text x={15} y={3} fontSize="8" fill="rgba(255, 255, 255, 0.9)" style={{ textShadow: "0 0 1px rgba(0,0,0,0.9)" }}>
               Responding Entity
             </text>
           </g>
