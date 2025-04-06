@@ -21,3 +21,4 @@ export interface VisibleLayers {
   newExistence: boolean;
   divine: boolean;
 }
+
