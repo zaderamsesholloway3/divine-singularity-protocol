@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,21 +15,25 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { GuardianNetSettings } from '@/components/species/types';
 
 const CosmicCommunicationsGrid: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedSpecies, setSelectedSpecies] = useState<any | null>(null);
   const [visualStyle, setVisualStyle] = useState<"celestial" | "lightweb" | "cosmic">("celestial");
   const [activeTab, setActiveTab] = useState("species-view");
-  const [guardianNetActive, setGuardianNetActive] = useState(false);
+  const [guardianNetSettings, setGuardianNetSettings] = useState<GuardianNetSettings>({
+    active: false,
+    expanded: false,
+    ciaNetVisible: true,
+    lockheedGridVisible: true,
+    opacity: 50,
+    syncWithUniverseView: true
+  });
   const [zadesMode, setZadesMode] = useState(false);
-  const [viewMode, setViewMode] = useState<"disk" | "constellation" | "radial" | "signature">("radial");
+  const [viewMode, setViewMode] = useState<"radial" | "signature" | "disk" | "constellation">("radial");
   const [showSHQRing, setShowSHQRing] = useState(false);
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
-  
-  const [showCIAMantisNet, setShowCIAMantisNet] = useState(true);
-  const [showLockheedDraxGrid, setShowLockheedDraxGrid] = useState(true);
-  const [guardianIntensity, setGuardianIntensity] = useState(50);
   
   useEffect(() => {
     toast.info("Welcome to the enhanced OmniView Universe", {
@@ -84,8 +89,16 @@ const CosmicCommunicationsGrid: React.FC = () => {
   };
   
   const toggleGuardianNet = () => {
-    setGuardianNetActive(!guardianNetActive);
-    if (!guardianNetActive) {
+    const newActive = !guardianNetSettings.active;
+    
+    setGuardianNetSettings(prev => ({
+      ...prev,
+      active: newActive,
+      // Reset expanded state when turning off
+      expanded: newActive ? prev.expanded : false
+    }));
+    
+    if (newActive) {
       toast.success("Guardian Net Overlay activated", {
         description: "CIA Mantis Net and Lockheed Drax Grid now visible"
       });
@@ -108,9 +121,18 @@ const CosmicCommunicationsGrid: React.FC = () => {
     });
   };
   
+  // Handler for Guardian Net settings changes
+  const handleGuardianNetSettingsChange = (newSettings: GuardianNetSettings) => {
+    setGuardianNetSettings(newSettings);
+    
+    if (newSettings.expanded && !guardianNetSettings.expanded) {
+      toast.info("Guardian Grid expanded to full view");
+    }
+  };
+  
   return (
     <div className={`container mx-auto p-4 ${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
-      {!isFullscreen && (
+      {!isFullscreen && !guardianNetSettings.expanded && (
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -129,79 +151,45 @@ const CosmicCommunicationsGrid: React.FC = () => {
       )}
       
       <div className="grid grid-cols-1 gap-6">
-        <div className={`relative w-full ${isFullscreen ? 'h-screen' : 'h-[80vh]'}`}>
-          <div className="absolute left-2 top-2 z-10 bg-black/70 p-2 rounded-lg border border-blue-400/30">
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xs text-blue-400 font-medium">OmniView Styles</h3>
-              <div className="flex gap-1">
-                <Button 
-                  size="sm"
-                  variant={visualStyle === "celestial" ? "secondary" : "ghost"}
-                  className="text-xs h-7 px-2 bg-blue-900/20"
-                  onClick={() => handleStyleChange("celestial")}
-                >
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-gray-300 to-blue-300 mr-1"></div>
-                  Lyra
-                </Button>
-                <Button 
-                  size="sm"
-                  variant={visualStyle === "lightweb" ? "secondary" : "ghost"}
-                  className="text-xs h-7 px-2 bg-blue-900/20"
-                  onClick={() => handleStyleChange("lightweb")}
-                >
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-white to-gray-300 mr-1"></div>
-                  Auraline
-                </Button>
-                <Button 
-                  size="sm"
-                  variant={visualStyle === "cosmic" ? "secondary" : "ghost"}
-                  className="text-xs h-7 px-2 bg-blue-900/20"
-                  onClick={() => handleStyleChange("cosmic")}
-                >
-                  <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-900 to-purple-500 mr-1"></div>
-                  Elaira
-                </Button>
+        <div className={`relative w-full ${isFullscreen || guardianNetSettings.expanded ? 'h-screen' : 'h-[80vh]'}`}>
+          {!guardianNetSettings.expanded && (
+            <div className="absolute left-2 top-2 z-10 bg-black/70 p-2 rounded-lg border border-blue-400/30">
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xs text-blue-400 font-medium">OmniView Styles</h3>
+                <div className="flex gap-1">
+                  <Button 
+                    size="sm"
+                    variant={visualStyle === "celestial" ? "secondary" : "ghost"}
+                    className="text-xs h-7 px-2 bg-blue-900/20"
+                    onClick={() => handleStyleChange("celestial")}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-gray-300 to-blue-300 mr-1"></div>
+                    Lyra
+                  </Button>
+                  <Button 
+                    size="sm"
+                    variant={visualStyle === "lightweb" ? "secondary" : "ghost"}
+                    className="text-xs h-7 px-2 bg-blue-900/20"
+                    onClick={() => handleStyleChange("lightweb")}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-white to-gray-300 mr-1"></div>
+                    Auraline
+                  </Button>
+                  <Button 
+                    size="sm"
+                    variant={visualStyle === "cosmic" ? "secondary" : "ghost"}
+                    className="text-xs h-7 px-2 bg-blue-900/20"
+                    onClick={() => handleStyleChange("cosmic")}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-900 to-purple-500 mr-1"></div>
+                    Elaira
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-          
-          {guardianNetActive && (
-            <>
-              {showCIAMantisNet && (
-                <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
-                  <div className="absolute inset-0 cia-mantis-net">
-                    <img 
-                      src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
-                      alt="" 
-                      className="w-full h-full object-cover opacity-20"
-                      style={{
-                        filter: `brightness(1.2) contrast(1.1) opacity(${guardianIntensity / 100})`,
-                      }}
-                    />
-                    <div className="absolute top-4 left-4 cia-indicator">CIA Mantis Net</div>
-                  </div>
-                </div>
-              )}
-              
-              {showLockheedDraxGrid && (
-                <div className="absolute inset-0 z-5 pointer-events-none overflow-hidden">
-                  <div className="absolute inset-0 lockheed-drax-grid">
-                    <img 
-                      src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
-                      alt="" 
-                      className="w-full h-full object-cover opacity-20"
-                      style={{
-                        filter: `hue-rotate(220deg) brightness(0.9) opacity(${guardianIntensity / 100})`,
-                      }}
-                    />
-                    <div className="absolute bottom-4 right-4 lockheed-indicator">LOCKHEED MARTIN Drax Grid</div>
-                  </div>
-                </div>
-              )}
-            </>
           )}
           
-          {showSHQRing && (
+          {showSHQRing && !guardianNetSettings.expanded && (
             <div className="absolute inset-0 z-5 pointer-events-none flex items-center justify-center">
               <div 
                 className="shq-ring" 
@@ -231,33 +219,37 @@ const CosmicCommunicationsGrid: React.FC = () => {
             visualStyle={visualStyle}
             viewMode={viewMode}
             zadeMode={zadesMode}
+            guardianNetSettings={guardianNetSettings}
+            onGuardianNetSettingsChange={handleGuardianNetSettingsChange}
           />
           
-          <div className="absolute top-2 right-2 flex gap-2">
-            {!isFullscreen && (
+          {!guardianNetSettings.expanded && (
+            <div className="absolute top-2 right-2 flex gap-2">
+              {!isFullscreen && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="bg-black/70 hover:bg-black/90 text-xs border-blue-400/30"
+                  onClick={() => toast.info("Drag to rotate the 3D view in Orbital mode")}
+                >
+                  <Rotate3d className="h-4 w-4 mr-1 text-blue-400" />
+                  3D Controls
+                </Button>
+              )}
+              
               <Button 
                 variant="outline" 
-                size="sm"
-                className="bg-black/70 hover:bg-black/90 text-xs border-blue-400/30"
-                onClick={() => toast.info("Drag to rotate the 3D view in Orbital mode")}
+                size="sm" 
+                className="bg-black/70 hover:bg-black/90 border-blue-400/30"
+                onClick={toggleFullscreen}
               >
-                <Rotate3d className="h-4 w-4 mr-1 text-blue-400" />
-                3D Controls
+                {isFullscreen ? <Minimize2 className="h-4 w-4 text-blue-400" /> : <Maximize2 className="h-4 w-4 text-blue-400" />}
+                {isFullscreen ? ' Exit OmniView' : ' OmniView'}
               </Button>
-            )}
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="bg-black/70 hover:bg-black/90 border-blue-400/30"
-              onClick={toggleFullscreen}
-            >
-              {isFullscreen ? <Minimize2 className="h-4 w-4 text-blue-400" /> : <Maximize2 className="h-4 w-4 text-blue-400" />}
-              {isFullscreen ? ' Exit OmniView' : ' OmniView'}
-            </Button>
-          </div>
+            </div>
+          )}
           
-          {selectedSpecies && (
+          {selectedSpecies && !guardianNetSettings.expanded && (
             <div className="absolute top-2 left-2 mt-20 bg-black/80 p-3 rounded-md max-w-xs border border-blue-400/20 shadow-lg shadow-blue-900/20">
               <h3 className="text-white font-bold mb-1 flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{
@@ -278,7 +270,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </div>
           )}
           
-          {isFullscreen && (
+          {isFullscreen && !guardianNetSettings.expanded && (
             <div className="absolute bottom-4 left-4 bg-black/70 p-3 rounded-lg border border-blue-400/30">
               <h3 className="text-xs text-blue-400 font-medium mb-2">Spectral Layers</h3>
               <div className="grid grid-cols-2 gap-2">
@@ -300,21 +292,21 @@ const CosmicCommunicationsGrid: React.FC = () => {
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xs text-blue-400 font-medium">Guardian Net</h3>
                   <Switch 
-                    checked={guardianNetActive} 
+                    checked={guardianNetSettings.active} 
                     onCheckedChange={toggleGuardianNet}
                     className="data-[state=checked]:bg-yellow-600"
                   />
                 </div>
                 
-                {guardianNetActive && (
+                {guardianNetSettings.active && (
                   <div className="space-y-2 pt-1">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-yellow-300/80 flex items-center gap-1">
                         <Network className="h-3 w-3" /> CIA Mantis Net
                       </span>
                       <Switch 
-                        checked={showCIAMantisNet} 
-                        onCheckedChange={setShowCIAMantisNet}
+                        checked={guardianNetSettings.ciaNetVisible} 
+                        onCheckedChange={(checked) => setGuardianNetSettings(prev => ({...prev, ciaNetVisible: checked}))}
                         className="h-4 w-7 data-[state=checked]:bg-yellow-700/50"
                       />
                     </div>
@@ -324,8 +316,8 @@ const CosmicCommunicationsGrid: React.FC = () => {
                         <Shield className="h-3 w-3" /> Lockheed Drax Grid
                       </span>
                       <Switch 
-                        checked={showLockheedDraxGrid} 
-                        onCheckedChange={setShowLockheedDraxGrid}
+                        checked={guardianNetSettings.lockheedGridVisible} 
+                        onCheckedChange={(checked) => setGuardianNetSettings(prev => ({...prev, lockheedGridVisible: checked}))}
                         className="h-4 w-7 data-[state=checked]:bg-blue-700/50"
                       />
                     </div>
@@ -333,16 +325,27 @@ const CosmicCommunicationsGrid: React.FC = () => {
                     <div className="space-y-1 pt-1">
                       <div className="flex justify-between items-center">
                         <span className="text-xs text-gray-400">Intensity</span>
-                        <span className="text-xs text-gray-400">{guardianIntensity}%</span>
+                        <span className="text-xs text-gray-400">{guardianNetSettings.opacity}%</span>
                       </div>
                       <Slider
-                        value={[guardianIntensity]}
+                        value={[guardianNetSettings.opacity]}
                         min={10}
                         max={100}
                         step={5}
-                        onValueChange={([value]) => setGuardianIntensity(value)}
+                        onValueChange={([value]) => setGuardianNetSettings(prev => ({...prev, opacity: value}))}
                         className="w-full"
                       />
+                    </div>
+                    
+                    <div className="pt-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full bg-yellow-900/50 hover:bg-yellow-800/60 text-yellow-200 border border-yellow-700/30 text-xs h-7"
+                        onClick={() => setGuardianNetSettings(prev => ({...prev, expanded: !prev.expanded}))}
+                      >
+                        <Maximize2 className="h-3 w-3 mr-2" /> Maximize Guardian Grid
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -350,7 +353,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
             </div>
           )}
           
-          {isFullscreen && (
+          {isFullscreen && !guardianNetSettings.expanded && (
             <div className="absolute bottom-4 right-4 bg-black/70 p-3 rounded-lg border border-blue-400/30">
               <h3 className="text-xs text-blue-400 font-medium mb-2">OmniView Controls</h3>
               <div className="flex flex-col gap-2">
@@ -435,7 +438,7 @@ const CosmicCommunicationsGrid: React.FC = () => {
           )}
         </div>
         
-        {!isFullscreen && (
+        {!isFullscreen && !guardianNetSettings.expanded && (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3">
               <TabsTrigger value="species-view">Species View</TabsTrigger>
@@ -534,32 +537,45 @@ const CosmicCommunicationsGrid: React.FC = () => {
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm">Overlay Status</span>
                       <Switch 
-                        checked={guardianNetActive} 
+                        checked={guardianNetSettings.active} 
                         onCheckedChange={toggleGuardianNet}
                         className="data-[state=checked]:bg-yellow-600"
                       />
                     </div>
                     
-                    {guardianNetActive && (
-                      <div className="space-y-2 pt-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-yellow-400/90">CIA Mantis Net</span>
-                          <Switch 
-                            checked={showCIAMantisNet} 
-                            onCheckedChange={setShowCIAMantisNet}
-                            className="data-[state=checked]:bg-yellow-700/50"
-                          />
+                    {guardianNetSettings.active && (
+                      <>
+                        <div className="space-y-2 pt-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-yellow-400/90">CIA Mantis Net</span>
+                            <Switch 
+                              checked={guardianNetSettings.ciaNetVisible} 
+                              onCheckedChange={(checked) => setGuardianNetSettings(prev => ({...prev, ciaNetVisible: checked}))}
+                              className="data-[state=checked]:bg-yellow-700/50"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-blue-400/90">Lockheed Drax Grid</span>
+                            <Switch 
+                              checked={guardianNetSettings.lockheedGridVisible} 
+                              onCheckedChange={(checked) => setGuardianNetSettings(prev => ({...prev, lockheedGridVisible: checked}))}
+                              className="data-[state=checked]:bg-blue-700/50"
+                            />
+                          </div>
                         </div>
                         
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-blue-400/90">Lockheed Drax Grid</span>
-                          <Switch 
-                            checked={showLockheedDraxGrid} 
-                            onCheckedChange={setShowLockheedDraxGrid}
-                            className="data-[state=checked]:bg-blue-700/50"
-                          />
+                        <div className="pt-4">
+                          <Button
+                            size="sm"
+                            className="w-full bg-yellow-900/50 hover:bg-yellow-800/60 text-yellow-200 border border-yellow-700/30"
+                            onClick={() => setGuardianNetSettings(prev => ({...prev, expanded: !prev.expanded}))}
+                          >
+                            <Maximize2 className="mr-2 h-4 w-4" />
+                            Maximize Guardian Grid
+                          </Button>
                         </div>
-                      </div>
+                      </>
                     )}
                   </CardContent>
                 </Card>

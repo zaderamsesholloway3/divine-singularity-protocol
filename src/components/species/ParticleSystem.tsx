@@ -1,151 +1,139 @@
 
-import React, { useRef, useEffect } from 'react';
-import { Species } from './types';
+import React, { useState, useEffect } from 'react';
+import { Species, VisualStyle } from './types';
 
 interface ParticleSystemProps {
-  species: Species | null;
+  species: Species;
   active: boolean;
-  particleCount?: number;
-  duration?: number;
   containerSize: number;
-  visualStyle: "celestial" | "lightweb" | "cosmic";
+  visualStyle: VisualStyle;
 }
 
 interface Particle {
+  id: number;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  life: number;
-  maxLife: number;
   size: number;
+  opacity: number;
+  speed: number;
+  angle: number;
   color: string;
 }
 
-const ParticleSystem: React.FC<ParticleSystemProps> = ({
-  species,
-  active,
-  particleCount = 40,
-  duration = 2000,
-  containerSize,
-  visualStyle
-}) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const animationRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
+const ParticleSystem: React.FC<ParticleSystemProps> = ({ species, active, containerSize, visualStyle }) => {
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const particleCount = 30;
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
   
-  // Reset and create new particles when activated
-  useEffect(() => {
-    if (!active || !species) return;
+  // Get color based on realm
+  const getParticleColor = () => {
+    if (species.color) return species.color;
     
-    const createParticles = () => {
-      const center = containerSize / 2;
-      const particles: Particle[] = [];
-      
-      // Get particle color based on species realm and visual style
-      const getParticleColor = () => {
-        if (species.realm === "existence") {
-          return visualStyle === "cosmic" ? "rgba(90, 30, 160, 0.7)" :
-                 visualStyle === "lightweb" ? "rgba(255, 255, 255, 0.7)" :
-                 "rgba(56, 189, 248, 0.7)";
-        } else if (species.realm === "non-existence") {
-          return visualStyle === "cosmic" ? "rgba(130, 36, 227, 0.7)" :
-                 visualStyle === "lightweb" ? "rgba(209, 250, 229, 0.7)" :
-                 "rgba(132, 204, 22, 0.7)";
-        } else {
-          return visualStyle === "cosmic" ? "rgba(168, 85, 247, 0.7)" :
-                 visualStyle === "lightweb" ? "rgba(230, 232, 250, 0.7)" :
-                 "rgba(138, 43, 226, 0.7)";
-        }
-      };
-      
-      // Create particles
-      for (let i = 0; i < particleCount; i++) {
-        // Random angle for radial emission
-        const angle = Math.random() * Math.PI * 2;
-        // Random speed
-        const speed = 0.5 + Math.random() * 2;
-        // Random life span
-        const life = Math.random() * 0.5 + 0.5;
-        
-        particles.push({
-          x: center,
-          y: center,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          life: 1.0,
-          maxLife: life,
-          size: Math.random() * 3 + 1,
-          color: getParticleColor()
-        });
-      }
-      
-      particlesRef.current = particles;
-      startTimeRef.current = Date.now();
-    };
-    
-    createParticles();
-    animate();
-    
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-    };
-  }, [active, species, containerSize, visualStyle, particleCount]);
-  
-  // Animation loop
-  const animate = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Check if animation should end
-    const elapsed = Date.now() - startTimeRef.current;
-    if (elapsed > duration) {
-      cancelAnimationFrame(animationRef.current);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      return;
+    // Colors based on realm
+    if (species.realm === "Existence") {
+      return visualStyle === "cosmic" ? "#3b82f6" : "#60a5fa";
+    } else if (species.realm === "Non-Existence") {
+      return visualStyle === "cosmic" ? "#8b5cf6" : "#a78bfa";
+    } else if (species.realm === "New-Existence") {
+      return visualStyle === "cosmic" ? "#06b6d4" : "#67e8f9";
+    } else if (species.realm === "Divine") {
+      return visualStyle === "cosmic" ? "#eab308" : "#fde047";
     }
     
-    // Update and render particles
-    const particles = particlesRef.current;
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-      
-      // Update position
-      p.x += p.vx;
-      p.y += p.vy;
-      
-      // Update life
-      p.life = Math.max(0, p.life - 0.01);
-      
-      // Skip dead particles
-      if (p.life <= 0) continue;
-      
-      // Draw particle
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    
-    animationRef.current = requestAnimationFrame(animate);
+    return "#60a5fa"; // Default
   };
   
+  // Initialize particles
+  useEffect(() => {
+    if (!active) return;
+    
+    const newParticles: Particle[] = [];
+    const baseColor = getParticleColor();
+    
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 0.5 + Math.random() * 2.5;
+      const distance = Math.random() * 30;
+      
+      newParticles.push({
+        id: i,
+        x: centerX + Math.cos(angle) * distance,
+        y: centerY + Math.sin(angle) * distance,
+        size: 1 + Math.random() * 3,
+        opacity: 0.3 + Math.random() * 0.7,
+        speed,
+        angle,
+        color: baseColor,
+      });
+    }
+    
+    setParticles(newParticles);
+    
+    // Cleanup
+    return () => {
+      setParticles([]);
+    };
+  }, [active, species.realm, visualStyle]);
+  
+  // Animate particles
+  useEffect(() => {
+    if (!active || particles.length === 0) return;
+    
+    const animationId = requestAnimationFrame(() => {
+      setParticles(prevParticles => 
+        prevParticles.map(particle => {
+          // Move particle outward from center
+          const x = particle.x + Math.cos(particle.angle) * particle.speed;
+          const y = particle.y + Math.sin(particle.angle) * particle.speed;
+          
+          // Fade out as it moves away
+          const distance = Math.sqrt(
+            Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+          );
+          
+          const opacity = Math.max(0, particle.opacity - (distance / 200));
+          
+          // If faded out completely, reset position to center
+          if (opacity <= 0) {
+            const newAngle = Math.random() * Math.PI * 2;
+            return {
+              ...particle,
+              x: centerX + Math.cos(newAngle) * 5,
+              y: centerY + Math.sin(newAngle) * 5,
+              opacity: 0.7 + Math.random() * 0.3,
+              angle: newAngle
+            };
+          }
+          
+          return { ...particle, x, y, opacity };
+        })
+      );
+    });
+    
+    return () => cancelAnimationFrame(animationId);
+  }, [particles, active]);
+  
+  if (!active) return null;
+  
   return (
-    <canvas 
-      ref={canvasRef}
-      width={containerSize}
-      height={containerSize}
-      className="absolute top-0 left-0 pointer-events-none"
-      style={{ zIndex: 10 }}
-    />
+    <div className="absolute inset-0 pointer-events-none">
+      <svg width={containerSize} height={containerSize} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        {particles.map((particle) => (
+          <circle
+            key={particle.id}
+            cx={particle.x}
+            cy={particle.y}
+            r={particle.size}
+            fill={particle.color}
+            opacity={particle.opacity}
+            style={{
+              filter: visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255, 255, 255, 0.5))" : undefined
+            }}
+          />
+        ))}
+      </svg>
+    </div>
   );
 };
 

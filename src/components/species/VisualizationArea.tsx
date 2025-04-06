@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Species, VisibleLayers, VisualStyle, ViewMode } from './types';
+import { Species, VisibleLayers, VisualStyle, ViewMode, GuardianNetSettings } from './types';
 import { generateStars } from './utils/visualUtils';
+import GuardianNetOverlay from './GuardianNetOverlay';
 
 interface VisualizationAreaProps {
   species: Species[];
@@ -20,6 +20,8 @@ interface VisualizationAreaProps {
   zoomLevel: number;
   setZoomLevel: (value: number) => void;
   welcomeMessage?: string;
+  guardianNetSettings?: GuardianNetSettings;
+  onToggleGuardianNetExpanded?: () => void;
 }
 
 const VisualizationArea: React.FC<VisualizationAreaProps> = ({
@@ -35,9 +37,12 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   rotate3dHint,
   zoomLevel,
   setZoomLevel,
-  welcomeMessage
+  welcomeMessage,
+  guardianNetSettings,
+  onToggleGuardianNetExpanded
 }) => {
   const [isFullScreen, setIsFullScreen] = React.useState(false);
+  const [rotation, setRotation] = React.useState({ x: 15, y: 0, z: 0 });
   
   // Helper function to get visual style class name based on current style
   const getVisualStyleClass = () => {
@@ -84,6 +89,22 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       document.removeEventListener('fullscreenchange', handleFullScreenChange);
     };
   }, []);
+
+  // Update rotation from SpeciesGateway
+  React.useEffect(() => {
+    if (speciesGatewayRef.current && 'getRotation' in speciesGatewayRef.current) {
+      const updateRotation = () => {
+        if (speciesGatewayRef.current && 'getRotation' in speciesGatewayRef.current) {
+          const currentRotation = speciesGatewayRef.current.getRotation();
+          if (currentRotation) {
+            setRotation(currentRotation);
+          }
+        }
+      };
+      const interval = setInterval(updateRotation, 100);
+      return () => clearInterval(interval);
+    }
+  }, [speciesGatewayRef]);
 
   // Observable Universe concentric rings
   const renderObservableUniverse = () => {
@@ -157,11 +178,14 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
+  // Check if Guardian Net is in expanded mode
+  const isGuardianNetExpanded = guardianNetSettings?.expanded || false;
+
   return (
     <div className="relative" id="species-visualization-container">
       {renderObservableUniverse()}
       <div 
-        className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} flex items-center justify-center ${getVisualStyleClass()}`}
+        className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} flex items-center justify-center ${getVisualStyleClass()} ${isGuardianNetExpanded ? 'opacity-30' : ''}`}
         style={{ transform: `scale(${zoomLevel})` }}
       >
         {renderCosmicFlow()}
@@ -181,7 +205,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         />
         
         {/* Welcome message display */}
-        {welcomeMessage && (
+        {welcomeMessage && !isGuardianNetExpanded && (
           <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm px-6 py-3 rounded-full text-white text-center max-w-[80%] animate-fade-in-up">
             <p className="text-sm md:text-base font-semibold">
               {welcomeMessage}
@@ -190,13 +214,24 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         )}
       </div>
       
+      {/* Guardian Net Overlay */}
+      {guardianNetSettings && (
+        <GuardianNetOverlay
+          settings={guardianNetSettings}
+          onToggleExpanded={onToggleGuardianNetExpanded || (() => {})}
+          rotation={rotation}
+          zoomLevel={zoomLevel}
+        />
+      )}
+      
       {/* Zoom controls */}
-      <div className="absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2">
+      <div className={`absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
         <Button
           variant="ghost"
           size="sm"
           className="h-8 w-8 p-0 text-white"
           onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
+          disabled={isGuardianNetExpanded}
         >
           -
         </Button>
@@ -208,6 +243,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           size="sm"
           className="h-8 w-8 p-0 text-white"
           onClick={() => setZoomLevel(Math.min(2.0, zoomLevel + 0.1))}
+          disabled={isGuardianNetExpanded}
         >
           +
         </Button>
@@ -219,13 +255,14 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           className="h-8 w-8 p-0 text-white ml-2"
           onClick={toggleFullScreen}
           title={isFullScreen ? "Exit full screen" : "Enter full screen"}
+          disabled={isGuardianNetExpanded}
         >
           {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
         </Button>
       </div>
       
       {/* 3D rotation hint overlay */}
-      {viewMode === "radial" && rotate3dHint && (
+      {viewMode === "radial" && rotate3dHint && !isGuardianNetExpanded && (
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg text-center pointer-events-none animate-fade-in">
           <Rotate3d className="h-12 w-12 mx-auto mb-2 text-blue-400" />
           <p className="text-white font-medium">Drag to rotate the 3D view</p>
@@ -234,7 +271,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       )}
       
       {/* Show ping trail animation when active */}
-      {showPingTrail && (
+      {showPingTrail && !isGuardianNetExpanded && (
         <div className="absolute inset-0 pointer-events-none">
           <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full
             ${visualStyle === "celestial" ? "bg-blue-500/10" : 

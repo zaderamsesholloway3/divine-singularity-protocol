@@ -26,6 +26,7 @@ interface SpeciesGatewayProps {
 // Define ref interface for external access
 export interface SpeciesGatewayRef {
   toggleTargetLock: () => boolean;
+  getRotation?: () => { x: number; y: number; z: number };
 }
 
 // Main component wrapped with forwardRef
@@ -76,9 +77,15 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return newLockedState;
   };
   
+  // Add a method to get the current rotation
+  const getRotation = () => {
+    return { ...rotation, z: 0 };
+  };
+  
   // Expose methods to parent through ref
   useImperativeHandle(ref, () => ({
-    toggleTargetLock
+    toggleTargetLock,
+    getRotation
   }));
 
   // Sort species by z-depth for proper 3D rendering (only matters for radial mode)

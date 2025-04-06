@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
 import { SpeciesGatewayRef } from '@/components/species/SpeciesGateway';
 import { mockSpecies } from '@/components/species/mockData';
-import { Species, VisibleLayers, ViewMode, VisualStyle } from '@/components/species/types';
+import { Species, VisibleLayers, ViewMode, VisualStyle, GuardianNetSettings } from '@/components/species/types';
 import PingHeader from '@/components/species/PingHeader';
 import ControlsPanel from '@/components/species/ControlsPanel';
 import ActiveSignaturesPanel from '@/components/species/ActiveSignaturesPanel';
@@ -20,6 +21,8 @@ interface UniversalSpeciesPingProps {
   visualStyle?: VisualStyle;
   viewMode?: ViewMode;
   zadeMode?: boolean;
+  guardianNetSettings?: GuardianNetSettings;
+  onGuardianNetSettingsChange?: (settings: GuardianNetSettings) => void;
 }
 
 const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
@@ -29,7 +32,9 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     selectedSpecies, 
     visualStyle = "celestial",
     viewMode: externalViewMode,
-    zadeMode = false
+    zadeMode = false,
+    guardianNetSettings,
+    onGuardianNetSettingsChange
   } = props;
   
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -59,6 +64,19 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [connectedSpecies, setConnectedSpecies] = useState<ConnectedSpecies[]>([]);
   const [newcomerCount, setNewcomerCount] = useState<number>(0);
   const [lastPingTime, setLastPingTime] = useState<number | null>(null);
+  
+  // Add local Guardian Net settings state if not provided from props
+  const [localGuardianNetSettings, setLocalGuardianNetSettings] = useState<GuardianNetSettings>({
+    active: false,
+    expanded: false,
+    ciaNetVisible: true,
+    lockheedGridVisible: true,
+    opacity: 70,
+    syncWithUniverseView: true
+  });
+  
+  // Use either prop settings or local settings
+  const currentGuardianNetSettings = guardianNetSettings || localGuardianNetSettings;
   
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   const pingTrailTimeoutRef = useRef<number | null>(null);
@@ -276,10 +294,27 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     });
   };
   
+  // Handle toggling Guardian Net expansion
+  const toggleGuardianNetExpanded = () => {
+    const newSettings = {
+      ...currentGuardianNetSettings,
+      expanded: !currentGuardianNetSettings.expanded
+    };
+    
+    if (onGuardianNetSettingsChange) {
+      onGuardianNetSettingsChange(newSettings);
+    } else {
+      setLocalGuardianNetSettings(newSettings);
+    }
+  };
+  
+  // Is Guardian Net in expanded mode?
+  const isGuardianGridExpanded = currentGuardianNetSettings.expanded && currentGuardianNetSettings.active;
+  
   return (
     <div className={`w-full ${fullPageMode ? 'h-full' : ''}`}>
       <Card className={`border-none shadow-none ${fullPageMode ? 'h-full' : ''}`}>
-        <CardHeader className={`pb-0 ${fullPageMode ? 'pt-2' : ''}`}>
+        <CardHeader className={`pb-0 ${fullPageMode ? 'pt-2' : ''} ${isGuardianGridExpanded ? 'opacity-50' : ''}`}>
           <PingHeader
             pingActive={pingActive}
             soundEnabled={soundEnabled}
@@ -291,7 +326,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
         </CardHeader>
         <CardContent className={`${fullPageMode ? 'h-[calc(100%-80px)]' : 'pt-4'}`}>
           <div className={`grid grid-cols-1 ${fullPageMode ? 'lg:grid-cols-5 h-full' : ''} gap-4`}>
-            <div className={`${fullPageMode ? 'lg:col-span-4' : ''} relative`}>
+            <div className={`${fullPageMode ? 'lg:col-span-4' : ''} relative ${isGuardianGridExpanded ? 'opacity-30' : ''}`}>
               <VisualizationArea
                 species={mockSpecies}
                 viewMode={viewMode}
@@ -306,6 +341,8 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 zoomLevel={zoomLevel}
                 setZoomLevel={setZoomLevel}
                 welcomeMessage={welcomeMessage || undefined}
+                guardianNetSettings={currentGuardianNetSettings}
+                onToggleGuardianNetExpanded={toggleGuardianNetExpanded}
               />
               
               <ConnectionTracker
@@ -319,12 +356,12 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                   species={particleSpecies}
                   active={activeParticleEffects}
                   containerSize={500}
-                  visualStyle={visualStyle || "celestial"}
+                  visualStyle={visualStyle}
                 />
               )}
             </div>
             
-            <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4`}>
+            <div className={`${fullPageMode ? 'lg:col-span-1 h-full' : ''} flex flex-col gap-4 ${isGuardianGridExpanded ? 'opacity-30' : ''}`}>
               <ControlsPanel
                 frequency={frequency}
                 setFrequency={setFrequency}

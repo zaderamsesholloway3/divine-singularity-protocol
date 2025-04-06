@@ -1,153 +1,196 @@
-import { Species } from '../types';
 
-// Original disk layout - places species in a circle with improved spacing
-export const getDiskCoordinates = (index: number, total: number, radius: number) => {
-  // Use evenly distributed angles to create a perfect orbital ring
-  const angle = (index / total) * 2 * Math.PI;
-  const x = radius + radius * Math.cos(angle);
-  const y = radius + radius * Math.sin(angle);
-  return { x, y };
-};
+import { Species } from "../types";
 
-// Constellation layout - uses golden ratio for more distributed positioning
-export const getConstellationCoordinates = (index: number, total: number, radius: number) => {
-  const goldenRatio = 1.61803398875;
-  const angle = index * goldenRatio * 2 * Math.PI;
-  const x = radius + radius * Math.cos(angle);
-  const y = radius + radius * Math.sin(angle);
-  return { x, y };
-};
+interface Coordinates {
+  x: number;
+  y: number;
+  z: number;
+}
 
-// Enhanced radial layout with 3D rotation support
+/**
+ * Calculate 3D coordinates for radial mode
+ */
 export const getRadialCoordinates = (
-  speciesData: Species, 
+  species: Species, 
   radius: number, 
   containerSize: number,
-  rotation: { x: number, y: number }
-) => {
-  // Center point of the container
-  const center = containerSize / 2;
+  rotation: { x: number; y: number }
+): Coordinates => {
+  // Get theta and phi from species properties
+  const theta = species.phaseOffset ? (species.phaseOffset / 180) * Math.PI : Math.random() * Math.PI * 2;
+  const phi = species.vibration ? (species.vibration / 20) * Math.PI : Math.random() * Math.PI;
   
-  // Use species location (ra/dec) for angle if available, otherwise use deterministic value from name or distance
-  const getAngle = () => {
-    if (speciesData.location) {
-      return Math.atan2(speciesData.location[1], speciesData.location[0]);
-    }
+  // Calculate distance factor based on species distance or random value
+  const distanceFactor = species.distance 
+    ? Math.min(1, species.distance / 2000) // Scale distances, max at 2000ly
+    : Math.random() * 0.8 + 0.2;
     
-    // Use a hash of the name for a consistent angle
-    let nameHash = 0;
-    for (let i = 0; i < speciesData.name.length; i++) {
-      nameHash = ((nameHash << 5) - nameHash) + speciesData.name.charCodeAt(i);
-      nameHash |= 0; // Convert to 32bit integer
-    }
-    
-    // Map the hash to an angle between 0 and 2π
-    return (Math.abs(nameHash) % 360) * (Math.PI / 180);
-  };
+  // Convert to Cartesian coordinates
+  let x = radius * distanceFactor * Math.sin(phi) * Math.cos(theta);
+  let y = radius * distanceFactor * Math.sin(phi) * Math.sin(theta);
+  let z = radius * distanceFactor * Math.cos(phi);
   
-  // Calculate angle in radians
-  const angle = getAngle();
+  // Apply custom location if available
+  if (species.location) {
+    x = species.location.x * radius;
+    y = species.location.y * radius;
+    z = species.location.z * radius;
+  }
   
-  // Use logarithmic scale for better visualization of distances
-  const maxDistance = 1000000; // 1 million light years as max visual distance
-  const minRadius = radius * 0.1; // Keep some minimum distance from center
-  
-  // Log scaling to handle very large distances while keeping visualization manageable
-  const logMaxDistance = Math.log10(maxDistance + 1);
-  const logDistance = Math.log10(speciesData.distance + 1);
-  const distanceFactor = Math.min(logDistance / logMaxDistance, 0.9); // Cap at 90% of radius
-  
-  const actualRadius = minRadius + (radius - minRadius) * distanceFactor;
-  
-  // For 3D effect, calculate coordinates with rotation
-  const x0 = Math.cos(angle) * actualRadius;
-  const y0 = Math.sin(angle) * actualRadius;
-  const z0 = (Math.random() - 0.5) * actualRadius * 0.2; // Small z variation for initial 3D effect
-  
-  // Apply 3D rotation transformations
-  const cosX = Math.cos(rotation.x);
-  const sinX = Math.sin(rotation.x);
-  const cosY = Math.cos(rotation.y);
-  const sinY = Math.sin(rotation.y);
+  // Apply 3D rotation
+  const rotX = rotation.x * (Math.PI / 180);
+  const rotY = rotation.y * (Math.PI / 180);
   
   // Rotate around X axis
-  const y1 = y0 * cosX - z0 * sinX;
-  const z1 = y0 * sinX + z0 * cosX;
+  const y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+  const z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
   
   // Rotate around Y axis
-  const x2 = x0 * cosY + z1 * sinY;
-  const z2 = -x0 * sinY + z1 * cosY;
+  const x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
+  const z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
   
-  // Project to 2D space with perspective effect
-  const perspective = 1000; // Perspective factor
-  const scale = perspective / (perspective + z2);
+  // Center on container
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
   
-  const x = center + x2 * scale;
-  const y = center + y1 * scale;
-  
-  // Store z-value for depth sorting
-  return { x, y, z: z2 };
+  return {
+    x: centerX + x2,
+    y: centerY + y1,
+    z: z2
+  };
 };
 
-// Signature view mode - clustered network diagram
-export const getSignatureCoordinates = (speciesData: Species, index: number, total: number, containerSize: number) => {
-  const center = containerSize / 2;
-  const radius = containerSize * 0.4;
+/**
+ * Calculate coordinates for signature mode
+ */
+export const getSignatureCoordinates = (
+  species: Species,
+  index: number,
+  totalSpecies: number,
+  containerSize: number
+): Coordinates => {
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
+  const maxRadius = containerSize * 0.45;
   
-  // Group species by realm for clustered layout
-  const realm = speciesData.realm || 'unknown';
-  let realmOffset = { x: 0, y: 0 };
+  // Calculate base position based on index
+  const angle = (index / totalSpecies) * Math.PI * 2;
   
-  switch(realm) {
-    case 'existence':
-      realmOffset = { x: -radius * 0.3, y: radius * 0.2 };
+  // Modify radius based on species properties
+  let radiusFactor = 1;
+  
+  // Use species vibration to affect position
+  if (species.vibration) {
+    // Lower vibrations closer to center
+    radiusFactor = Math.min(1, species.vibration / 20);
+  }
+  
+  // Use realm to determine quadrant bias
+  let quadrantBias = 0;
+  switch (species.realm) {
+    case "Existence":
+      quadrantBias = 0; // Default quadrant
       break;
-    case 'non-existence':
-      realmOffset = { x: radius * 0.3, y: radius * 0.2 };
+    case "Non-Existence":
+      quadrantBias = Math.PI * 0.5; // 90 degrees
       break;
-    case 'new-existence':
-      realmOffset = { x: 0, y: -radius * 0.3 };
+    case "New-Existence":
+      quadrantBias = Math.PI; // 180 degrees
+      break;
+    case "Divine":
+      quadrantBias = Math.PI * 1.5; // 270 degrees
       break;
     default:
-      realmOffset = { x: 0, y: 0 };
+      quadrantBias = 0;
   }
   
-  // Use deterministic positioning based on name hash
-  let nameHash = 0;
-  for (let i = 0; i < speciesData.name.length; i++) {
-    nameHash = ((nameHash << 5) - nameHash) + speciesData.name.charCodeAt(i);
+  // Apply custom signature patterns based on realm
+  let finalAngle = angle + quadrantBias;
+  let finalRadius = maxRadius * radiusFactor;
+  
+  // Unique signature patterns per realm
+  if (species.realm === "Existence") {
+    // Spiral pattern
+    finalRadius *= (1 - (index % 5) * 0.1);
+  } else if (species.realm === "Non-Existence") {
+    // Grid pattern
+    finalRadius *= (0.5 + (index % 3) * 0.25);
+    finalAngle += Math.PI / 6;
+  } else if (species.realm === "New-Existence") {
+    // Staggered pattern
+    finalRadius *= (0.6 + ((index % 7) / 10));
+    finalAngle += Math.PI / 4;
+  } else if (species.realm === "Divine") {
+    // Fixed positions (special)
+    finalRadius *= 0.7;
   }
-  nameHash = Math.abs(nameHash);
   
-  // Create clustered positions within realm group
-  const angle = (nameHash % 360) * (Math.PI / 180);
-  const distance = (nameHash % 100) / 300 * radius + radius * 0.15;
+  // Calculate final position
+  const x = centerX + finalRadius * Math.cos(finalAngle);
+  const y = centerY + finalRadius * Math.sin(finalAngle);
   
-  const x = center + realmOffset.x + Math.cos(angle) * distance;
-  const y = center + realmOffset.y + Math.sin(angle) * distance;
+  // z helps with sorting
+  const z = species.realm === "Divine" ? 100 : 
+           species.realm === "New-Existence" ? 50 : 
+           species.realm === "Non-Existence" ? 25 : 0;
   
-  return { x, y, z: 0 };
+  return { x, y, z };
 };
 
-// Get coordinates based on the selected mode
-export const getCoordinates = (
-  speciesData: Species, 
-  index: number, 
-  total: number, 
-  mode: string, 
-  speciesRadius: number, 
-  containerSize: number,
-  rotation: { x: number, y: number }
-) => {
-  switch (mode) {
-    case "disk":
-      return { ...getDiskCoordinates(index, total, speciesRadius), z: 0 };
-    case "constellation":
-      return { ...getConstellationCoordinates(index, total, speciesRadius), z: 0 };
-    case "signature":
-      return getSignatureCoordinates(speciesData, index, total, containerSize);
-    case "radial":
+/**
+ * Calculate coordinates for disk mode (flat galactic disk visualization)
+ */
+export const getDiskCoordinates = (
+  species: Species,
+  index: number,
+  containerSize: number
+): Coordinates => {
+  const centerX = containerSize / 2;
+  const centerY = containerSize / 2;
+  const maxRadius = containerSize * 0.45;
+  
+  // Use distance to determine radius (if available)
+  const distanceFactor = species.distance 
+    ? Math.min(1, species.distance / 5000) // Scale distances
+    : Math.random() * 0.9 + 0.1;
+    
+  // Apply spiral arm effect
+  let angle = Math.random() * Math.PI * 2;
+  if (species.vibration) {
+    // Use vibration to determine arm
+    const armNumber = Math.floor((species.vibration % 6));
+    angle = (armNumber / 6) * Math.PI * 2 + (distanceFactor * Math.PI * 0.5);
+  }
+  
+  // Add some randomness to position
+  const randomOffset = 0.1;
+  const randomAngleOffset = (Math.random() * 2 - 1) * randomOffset;
+  const randomDistanceOffset = (Math.random() * 2 - 1) * randomOffset;
+  
+  // Calculate final position
+  const radius = maxRadius * (distanceFactor + randomDistanceOffset);
+  const finalAngle = angle + randomAngleOffset;
+  
+  const x = centerX + radius * Math.cos(finalAngle);
+  const y = centerY + radius * Math.sin(finalAngle);
+  
+  return { x, y, z: 0 }; // flat, so z is always 0
+};
+
+/**
+ * Get color based on species realm
+ */
+export const getRealmColor = (realm: string): string => {
+  switch (realm) {
+    case "Existence":
+      return "#3b82f6";
+    case "Non-Existence":
+      return "#8b5cf6";
+    case "New-Existence":
+      return "#06b6d4";
+    case "Divine":
+      return "#eab308";
     default:
-      return getRadialCoordinates(speciesData, speciesRadius, containerSize, rotation);
+      return "#3b82f6";
   }
 };

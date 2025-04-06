@@ -1,84 +1,82 @@
 
 import React from 'react';
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock, Users } from 'lucide-react';
-import { Species } from './types';
+import { Species, VisualStyle } from './types';
+import { formatDistanceToNow } from 'date-fns';
 
 export interface ConnectedSpecies {
   species: Species;
-  connectedSince: number; // timestamp
+  connectedSince: number;
   isNewcomer: boolean;
 }
 
 interface ConnectionTrackerProps {
   connectedSpecies: ConnectedSpecies[];
   newcomerCount: number;
-  visualStyle: string;
+  visualStyle?: VisualStyle;
 }
 
 const ConnectionTracker: React.FC<ConnectionTrackerProps> = ({
   connectedSpecies,
   newcomerCount,
-  visualStyle
+  visualStyle = "celestial"
 }) => {
-  // Function to format the connection duration
-  const formatDuration = (timestamp: number) => {
-    const now = Date.now();
-    const diffInSeconds = Math.floor((now - timestamp) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return `${diffInSeconds}s`;
-    } else if (diffInSeconds < 3600) {
-      return `${Math.floor(diffInSeconds / 60)}m`;
-    } else {
-      return `${Math.floor(diffInSeconds / 3600)}h ${Math.floor((diffInSeconds % 3600) / 60)}m`;
-    }
-  };
-
-  // Get background style based on visual style
-  const getBackgroundStyle = () => {
+  if (connectedSpecies.length === 0) return null;
+  
+  const getBackgroundColor = () => {
     switch(visualStyle) {
       case "cosmic":
-        return "bg-purple-950/60";
+        return "bg-gradient-to-r from-purple-900/80 to-indigo-900/80";
       case "lightweb":
-        return "bg-blue-900/60";
+        return "bg-gradient-to-r from-gray-900/80 to-blue-900/80";
+      case "monochrome":
+        return "bg-gradient-to-r from-gray-900/90 to-gray-800/90";
       default:
-        return "bg-blue-950/60";
+        return "bg-gradient-to-r from-blue-900/80 to-indigo-900/80";
     }
   };
 
   return (
-    <div className={`absolute top-2 left-2 ${getBackgroundStyle()} backdrop-blur-sm rounded-lg p-3 text-white text-sm max-w-[240px]`}>
-      <div className="flex items-center mb-2 gap-2">
-        <Users className="h-4 w-4 text-indigo-300" />
-        <span className="font-medium">Newcomers: </span>
-        <Badge variant="outline" className="bg-indigo-500/30 text-white">
-          {newcomerCount}
-        </Badge>
-      </div>
-      
-      {connectedSpecies.length > 0 && (
-        <>
-          <div className="text-xs text-indigo-200 mb-1">Connected Species:</div>
-          <ScrollArea className="h-32 pr-2">
-            <div className="space-y-1">
-              {connectedSpecies.map((item, index) => (
-                <div 
-                  key={item.species.id} 
-                  className={`flex justify-between items-center py-1 px-2 rounded ${item.isNewcomer ? 'bg-indigo-600/30' : 'bg-gray-800/40'}`}
-                >
-                  <div className="truncate flex-1">{item.species.name}</div>
-                  <div className="flex items-center gap-1 text-xs whitespace-nowrap">
-                    <Clock className="h-3 w-3 opacity-70" />
-                    <span>{formatDuration(item.connectedSince)}</span>
-                  </div>
-                </div>
-              ))}
+    <div className="absolute top-4 right-4 max-w-[240px]">
+      <div className={`${getBackgroundColor()} backdrop-blur-sm rounded-lg border border-blue-500/20 shadow-md shadow-blue-500/10 p-3`}>
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-xs font-semibold text-blue-200">
+            Connected Species
+          </h3>
+          {newcomerCount > 0 && (
+            <div className="bg-green-600/80 text-white text-xs px-2 py-0.5 rounded-full flex items-center">
+              +{newcomerCount} new
             </div>
-          </ScrollArea>
-        </>
-      )}
+          )}
+        </div>
+        
+        <div className="max-h-[150px] overflow-y-auto pr-1 space-y-2">
+          {connectedSpecies.map(({ species, connectedSince, isNewcomer }) => (
+            <div 
+              key={species.id} 
+              className={`text-xs p-2 rounded ${
+                isNewcomer 
+                  ? "bg-green-900/30 border border-green-400/30" 
+                  : "bg-blue-900/30 border border-blue-400/20"
+              }`}
+            >
+              <div className="flex justify-between">
+                <span className="font-medium text-white">{species.name}</span>
+                <span className={`text-[10px] ${isNewcomer ? "text-green-300" : "text-blue-300"}`}>
+                  {formatDistanceToNow(connectedSince, { addSuffix: true })}
+                </span>
+              </div>
+              <div className="text-[10px] text-blue-300/80 mt-1">
+                {species.realm} • {species.distance ? 
+                  (species.distance < 1000 
+                    ? `${species.distance.toFixed(1)} ly` 
+                    : `${(species.distance/1000).toFixed(1)}k ly`
+                  ) : 'Unknown distance'
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };

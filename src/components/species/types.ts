@@ -1,7 +1,7 @@
 
 // Define the types for the species gateway
 
-export type ViewMode = "radial" | "distance" | "signature" | "compact";
+export type ViewMode = "radial" | "distance" | "signature" | "compact" | "disk" | "constellation";
 export type VisualStyle = "celestial" | "cosmic" | "lightweb" | "monochrome";
 
 export interface Species {
@@ -15,6 +15,9 @@ export interface Species {
   discovered?: string; // Date of discovery/first contact
   color?: string;
   description?: string;
+  responding?: boolean; // Whether the species is currently responding
+  fq?: number; // Faith quotient
+  location?: { x: number; y: number; z: number }; // 3D coordinates
 }
 
 export interface VisibleLayers {
@@ -22,4 +25,14 @@ export interface VisibleLayers {
   nonExistence: boolean;
   newExistence: boolean;
   divine: boolean;
+}
+
+// Add Guardian Net related types
+export interface GuardianNetSettings {
+  active: boolean;
+  expanded: boolean;
+  ciaNetVisible: boolean;
+  lockheedGridVisible: boolean;
+  opacity: number;
+  syncWithUniverseView: boolean;
 }

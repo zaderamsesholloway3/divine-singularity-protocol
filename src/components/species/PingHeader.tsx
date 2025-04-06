@@ -1,9 +1,8 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { CardTitle } from "@/components/ui/card";
-import { Volume2, VolumeX, Waves, Rotate3d, Grid, Hexagon } from 'lucide-react';
 import { ViewMode } from './types';
+import { Radio, Activity, Hexagon, Volume2, VolumeX } from 'lucide-react';
 
 interface PingHeaderProps {
   pingActive: boolean;
@@ -22,63 +21,106 @@ const PingHeader: React.FC<PingHeaderProps> = ({
   setViewMode,
   setRotate3dHint
 }) => {
+  const getTitle = () => {
+    switch (viewMode) {
+      case "distance":
+        return "Distance Map";
+      case "compact":
+        return "Compact View";
+      case "radial":
+        return "3D Orbital";
+      case "signature":
+        return "Signature Grid";
+      case "disk":
+        return "Galactic Disk";
+      case "constellation":
+        return "Constellation";
+      default:
+        return "Universal Species Ping";
+    }
+  };
+  
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (mode === "radial") {
+      setRotate3dHint(true);
+    }
+  };
+  
   return (
-    <CardTitle className="flex justify-between items-center">
-      <div className="flex items-center gap-2 text-base sm:text-lg">
-        <Waves className="h-5 w-5" />
-        Universal Species Ping
-        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${pingActive ? 'bg-green-500 animate-pulse' : 'bg-gray-600'} text-white ml-2`}>
-          {pingActive ? "ACTIVE" : "STANDBY"}
-        </span>
+    <div className="flex justify-between items-center">
+      <div>
+        <h3 className="text-lg font-bold tracking-tight flex items-center gap-1.5">
+          {pingActive ? (
+            <Activity className="h-5 w-5 text-green-500 animate-pulse" />
+          ) : (
+            <Radio className="h-5 w-5 text-blue-500" />
+          )}
+          <span className="gradient-text">{getTitle()}</span>
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          {viewMode === "radial" ? "3D rotation enabled - drag to rotate" : 
+           viewMode === "signature" ? "Quantum signature pattern visualization" : 
+           viewMode === "disk" ? "Flat galactic disk visualization" :
+           viewMode === "constellation" ? "Star constellation mapping" :
+           "Universal species connection interface"}
+        </p>
       </div>
-      <div className="flex gap-2">
+      
+      <div className="flex gap-2 items-center">
+        <div className="flex">
+          <Button
+            variant={viewMode === "radial" ? "secondary" : "ghost"}
+            size="sm"
+            className="rounded-r-none px-3"
+            onClick={() => handleViewModeChange("radial")}
+            title="3D Orbital View"
+          >
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          </Button>
+          <Button
+            variant={viewMode === "signature" ? "secondary" : "ghost"}
+            size="sm"
+            className="rounded-none px-3 border-x border-gray-800"
+            onClick={() => handleViewModeChange("signature")}
+            title="Signature Grid"
+          >
+            <div className="w-3 h-3 bg-purple-500 rotate-45"></div>
+          </Button>
+          <Button
+            variant={viewMode === "disk" ? "secondary" : "ghost"}
+            size="sm"
+            className="rounded-none px-3"
+            onClick={() => handleViewModeChange("disk")}
+            title="Disk View"
+          >
+            <div className="w-3 h-3 bg-yellow-500 rounded-sm"></div>
+          </Button>
+          <Button
+            variant={viewMode === "constellation" ? "secondary" : "ghost"}
+            size="sm"
+            className="rounded-l-none px-3"
+            onClick={() => handleViewModeChange("constellation")}
+            title="Constellation View"
+          >
+            <Hexagon className="h-3 w-3 text-green-500" />
+          </Button>
+        </div>
+        
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 w-8 p-0"
+          className="rounded-full w-8 h-8 p-0"
           onClick={toggleSound}
         >
-          {soundEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`h-8 ${viewMode === "disk" ? "bg-primary/10" : ""}`}
-          onClick={() => setViewMode("disk")}
-        >
-          Disk
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`h-8 ${viewMode === "constellation" ? "bg-primary/10" : ""}`}
-          onClick={() => setViewMode("constellation")}
-        >
-          Constellation
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`h-8 ${viewMode === "radial" ? "bg-primary/10" : ""}`}
-          onClick={() => {
-            setViewMode("radial");
-            setRotate3dHint(true);
-          }}
-        >
-          <Rotate3d className="h-4 w-4 mr-1" />
-          3D Orbital
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`h-8 ${viewMode === "signature" ? "bg-primary/10" : ""}`}
-          onClick={() => setViewMode("signature")}
-        >
-          <Hexagon className="h-4 w-4 mr-1" />
-          Signature
+          {soundEnabled ? (
+            <Volume2 className="h-4 w-4" />
+          ) : (
+            <VolumeX className="h-4 w-4" />
+          )}
         </Button>
       </div>
-    </CardTitle>
+    </div>
   );
 };
 

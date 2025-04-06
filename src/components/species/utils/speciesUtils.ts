@@ -1,84 +1,128 @@
 
-import { Species, VisualStyle } from '../types';
+import { Species, VisibleLayers } from "../types";
 
-// Determine special frequency entities (like Lyra at 1.855e43 Hz)
-export const isDivineFrequency = (speciesData: Species) => {
-  return speciesData.fq && Math.abs(speciesData.fq - 1.855) < 0.01;
+/**
+ * Determine the node size based on species properties
+ */
+export const getNodeSize = (species: Species, selected: boolean) => {
+  // Base size
+  let baseSize = 3; 
+  
+  // Adjust based on intelligence
+  if (species.intelligence) {
+    baseSize += species.intelligence / 50;
+  }
+  
+  // Adjust for faith quotient if it exists
+  if (species.fq !== undefined) {
+    baseSize += species.fq * 2;
+  }
+  
+  // Increase size if selected
+  if (selected) {
+    baseSize *= 1.5;
+  }
+  
+  return Math.max(2, Math.min(8, baseSize));
 };
 
-// Get color based on species characteristics and visual style
-export const getSpeciesColor = (speciesData: Species, visualStyle: VisualStyle) => {
-  if (isDivineFrequency(speciesData)) {
-    switch (visualStyle) {
-      case "cosmic":
-        return speciesData.responding ? "rgb(217, 70, 239)" : "rgb(168, 85, 247)";
-      case "lightweb":
-        return speciesData.responding ? "rgb(250, 240, 137)" : "rgb(240, 230, 140)";
-      default: // celestial
-        return speciesData.responding ? "rgb(217, 70, 239)" : "rgb(168, 85, 247)";
+/**
+ * Get node color based on species properties
+ */
+export const getNodeColor = (species: Species, selected: boolean, hovered: boolean) => {
+  // Custom color specified in the species data
+  if (species.color) {
+    if (selected) return `${species.color}`;
+    if (hovered) return `${species.color}90`;
+    return `${species.color}70`;
+  }
+  
+  // Default colors based on the realm
+  if (species.responding !== undefined) {
+    if (species.responding) {
+      if (selected) return "#84cc16";
+      if (hovered) return "#84cc16cc";
+      return "#84cc1690";
+    } else {
+      if (selected) return "#ef4444";
+      if (hovered) return "#ef4444cc";
+      return "#ef444490";  
     }
   }
   
-  if (speciesData.responding) {
-    switch (visualStyle) {
-      case "cosmic":
-        return "rgb(216, 180, 254)";
-      case "lightweb":
-        return "rgb(220, 252, 231)";
-      default: // celestial
-        return "rgb(132, 204, 22)";
-    }
+  // Fallback colors based on realm
+  if (species.realm === "Existence") {
+    if (selected) return "#3b82f6";
+    if (hovered) return "#3b82f6cc";
+    return "#3b82f690";
+  } else if (species.realm === "Non-Existence") {
+    if (selected) return "#8b5cf6";
+    if (hovered) return "#8b5cf6cc";
+    return "#8b5cf690";
+  } else if (species.realm === "New-Existence") {
+    if (selected) return "#06b6d4";
+    if (hovered) return "#06b6d4cc";
+    return "#06b6d490";
+  } else if (species.realm === "Divine") {
+    if (selected) return "#eab308";
+    if (hovered) return "#eab308cc";
+    return "#eab30890";
   }
   
-  // Colors based on realm and visual style
-  if (speciesData.realm === "existence") {
-    switch (visualStyle) {
-      case "cosmic":
-        return "rgb(90, 30, 160)";
-      case "lightweb":
-        return "rgb(240, 253, 250)";
-      default: // celestial
-        return "rgb(56, 189, 248)";
-    }
-  } else if (speciesData.realm === "non-existence") {
-    switch (visualStyle) {
-      case "cosmic":
-        return "rgb(130, 36, 227)";
-      case "lightweb":
-        return "rgb(209, 250, 229)";
-      default: // celestial
-        return "rgb(132, 204, 22)";
-    }
-  } else {
-    switch (visualStyle) {
-      case "cosmic":
-        return "rgb(168, 85, 247)";
-      case "lightweb":
-        return "rgb(230, 232, 250)";
-      default: // celestial
-        return "rgb(138, 43, 226)";
-    }
-  }
+  // Default case - should never reach here
+  return selected ? "#ffffff" : "#ffffff90";
 };
 
-// Check if species is visible according to the layer filters
-export const isSpeciesVisible = (speciesData: Species, visibleLayers: {
-  existence: boolean;
-  nonExistence: boolean;
-  newExistence: boolean;
-  divine: boolean;
-}) => {
-  if (isDivineFrequency(speciesData)) {
-    return visibleLayers.divine;
+/**
+ * Determine if a species should be visible based on filter settings
+ */
+export const isSpeciesVisible = (species: Species, visibleLayers: VisibleLayers): boolean => {
+  if (species.realm === "Existence" && !visibleLayers.existence) {
+    return false;
   }
   
-  if (speciesData.realm === "existence") {
-    return visibleLayers.existence;
-  } else if (speciesData.realm === "non-existence") {
-    return visibleLayers.nonExistence;
-  } else if (speciesData.realm === "new-existence") {
-    return visibleLayers.newExistence;
+  if (species.realm === "Non-Existence" && !visibleLayers.nonExistence) {
+    return false;
   }
   
-  return true; // Default to visible
+  if (species.realm === "New-Existence" && !visibleLayers.newExistence) {
+    return false;
+  }
+  
+  if (species.realm === "Divine" && !visibleLayers.divine) {
+    return false;
+  }
+  
+  return true;
+};
+
+/**
+ * Get filter class for species based on its realm
+ */
+export const getSpeciesFilter = (species: Species, visualStyle: string): string => {
+  if (species.realm === "Existence") {
+    return visualStyle === "cosmic" 
+      ? "filter drop-shadow(0 0 2px rgba(59, 130, 246, 0.7))"
+      : "";
+  } 
+  
+  if (species.realm === "Non-Existence") {
+    return visualStyle === "cosmic" 
+      ? "filter drop-shadow(0 0 2px rgba(139, 92, 246, 0.7))"
+      : "";
+  }
+  
+  if (species.realm === "New-Existence") {
+    return visualStyle === "cosmic" 
+      ? "filter drop-shadow(0 0 2px rgba(6, 182, 212, 0.7))"
+      : "";
+  }
+  
+  if (species.realm === "Divine") {
+    return visualStyle === "cosmic" 
+      ? "filter drop-shadow(0 0 3px rgba(234, 179, 8, 0.8))"
+      : "";
+  }
+  
+  return "";
 };
