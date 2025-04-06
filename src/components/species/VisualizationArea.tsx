@@ -19,6 +19,7 @@ interface VisualizationAreaProps {
   rotate3dHint: boolean;
   zoomLevel: number;
   setZoomLevel: (value: number) => void;
+  welcomeMessage?: string;
 }
 
 const VisualizationArea: React.FC<VisualizationAreaProps> = ({
@@ -33,7 +34,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   showAllNames,
   rotate3dHint,
   zoomLevel,
-  setZoomLevel
+  setZoomLevel,
+  welcomeMessage
 }) => {
   const [isFullScreen, setIsFullScreen] = React.useState(false);
   
@@ -177,6 +179,15 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           showAllNames={showAllNames}
           zoomLevel={zoomLevel}
         />
+        
+        {/* Welcome message display */}
+        {welcomeMessage && (
+          <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-black/50 backdrop-blur-sm px-6 py-3 rounded-full text-white text-center max-w-[80%] animate-fade-in-up">
+            <p className="text-sm md:text-base font-semibold">
+              {welcomeMessage}
+            </p>
+          </div>
+        )}
       </div>
       
       {/* Zoom controls */}

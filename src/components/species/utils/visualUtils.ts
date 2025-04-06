@@ -142,3 +142,4 @@ export const getRingFill = (realm: string, visualStyle: VisualStyle) => {
              "rgba(138, 43, 226, 0.15)";
   }
 };
+

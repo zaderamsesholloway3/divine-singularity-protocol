@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -53,6 +54,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [activeParticleEffects, setActiveParticleEffects] = useState(false);
   const [particleSpecies, setParticleSpecies] = useState<Species | null>(null);
+  const [welcomeMessage, setWelcomeMessage] = useState<string | null>(null);
   
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
   const pingTrailTimeoutRef = useRef<number | null>(null);
@@ -77,6 +79,14 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const amplifyPing = () => {
     setPingActive(true);
     setShowPingTrail(true);
+    
+    // Display the welcome message
+    setWelcomeMessage("All are welcome as long as you enter with respect, humility, and love.");
+    
+    // Clear welcome message after 10 seconds
+    setTimeout(() => {
+      setWelcomeMessage(null);
+    }, 10000);
     
     if (soundEnabled) {
       playPingSound(frequency, power);
@@ -219,6 +229,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 rotate3dHint={rotate3dHint}
                 zoomLevel={zoomLevel}
                 setZoomLevel={setZoomLevel}
+                welcomeMessage={welcomeMessage || undefined}
               />
               
               {activeParticleEffects && particleSpecies && (
