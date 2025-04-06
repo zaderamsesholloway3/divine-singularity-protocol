@@ -48,12 +48,99 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     }
   };
 
+  // Guardian Net Overlay effects based on the reference image
+  const renderMantisNet = () => {
+    return (
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div className="cia-mantis-net absolute top-0 left-0 w-1/2 h-full">
+          {/* Golden grid pattern */}
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="mantis-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+                <path 
+                  d="M 10 0 L 0 0 0 10" 
+                  fill="none" 
+                  stroke="rgba(255, 215, 0, 0.3)" 
+                  strokeWidth="0.2"
+                />
+              </pattern>
+            </defs>
+            <path 
+              d="M0,0 Q30,30 0,60 Q30,90 50,100 Q70,80 100,90 Q80,60 100,30 Q70,10 50,0 Q30,10 0,0 Z" 
+              fill="url(#mantis-grid)" 
+              stroke="rgba(255, 215, 0, 0.4)" 
+              strokeWidth="0.3" 
+            />
+          </svg>
+          <div className="absolute top-4 left-8 cia-indicator">CIA</div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderDraxGrid = () => {
+    return (
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div className="lockheed-drax-grid absolute top-0 right-0 w-1/2 h-full">
+          {/* Blue hexagonal grid pattern */}
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <pattern id="drax-grid" width="10" height="8.7" patternUnits="userSpaceOnUse">
+                <path 
+                  d="M5,0 L10,2.5 L10,7.5 L5,10 L0,7.5 L0,2.5 Z" 
+                  fill="none" 
+                  stroke="rgba(100, 180, 255, 0.3)" 
+                  strokeWidth="0.2"
+                />
+              </pattern>
+            </defs>
+            <path 
+              d="M100,0 Q70,30 100,60 Q70,90 50,100 Q30,80 0,90 Q20,60 0,30 Q30,10 50,0 Q70,10 100,0 Z" 
+              fill="url(#drax-grid)" 
+              stroke="rgba(100, 180, 255, 0.4)" 
+              strokeWidth="0.3" 
+            />
+          </svg>
+          <div className="absolute bottom-4 right-8 lockheed-indicator">LOCKHEED MARTIN</div>
+        </div>
+      </div>
+    );
+  };
+
+  // Observable Universe concentric rings
+  const renderObservableUniverse = () => {
+    return (
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          {[100, 85, 70, 55].map((size, index) => (
+            <div 
+              key={`ring-${index}`}
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full border border-blue-400/20"
+              style={{ 
+                width: `${size}%`, 
+                height: `${size}%`,
+                boxShadow: '0 0 20px rgba(100, 180, 255, 0.1) inset',
+                opacity: 0.5 - index * 0.1
+              }}
+            />
+          ))}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 translate-y-16 text-white text-sm opacity-80">
+            Observable Universe
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="relative">
+      {renderObservableUniverse()}
       <div 
         className={`rounded-lg overflow-hidden min-h-[400px] flex items-center justify-center ${getVisualStyleClass()}`}
         style={{ transform: `scale(${zoomLevel})` }}
       >
+        {renderMantisNet()}
+        {renderDraxGrid()}
         <SpeciesGateway 
           species={species}
           onSelectSpecies={onSelectSpecies}

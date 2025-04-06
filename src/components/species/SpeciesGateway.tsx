@@ -1,21 +1,16 @@
-
 import React, { useState, forwardRef, useImperativeHandle, useMemo, useEffect } from 'react';
+import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 
 // Define prop types for the component
 interface SpeciesGatewayProps {
-  species: any[];
-  onSelectSpecies: (species: any) => void;
-  selectedSpecies: any | null;
-  mode?: "disk" | "constellation" | "radial";
-  visualStyle?: "celestial" | "lightweb" | "cosmic";
+  species: Species[];
+  onSelectSpecies: (species: Species) => void;
+  selectedSpecies: Species | null;
+  mode?: ViewMode;
+  visualStyle?: VisualStyle;
   showPingTrail?: boolean;
-  pingOrigin?: any | null;
-  visibleLayers?: {
-    existence: boolean;
-    nonExistence: boolean;
-    newExistence: boolean;
-    divine: boolean;
-  };
+  pingOrigin?: Species | null;
+  visibleLayers?: VisibleLayers;
   showAllNames?: boolean;
   zoomLevel?: number;
 }
@@ -41,7 +36,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   } = props;
   
   const [targetLocked, setTargetLocked] = useState(false);
-  const [hoveredSpecies, setHoveredSpecies] = useState<any | null>(null);
+  const [hoveredSpecies, setHoveredSpecies] = useState<Species | null>(null);
   
   // 3D rotation state
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
@@ -168,7 +163,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
   
   // Enhanced radial layout with 3D rotation support
-  const getRadialCoordinates = (speciesData: any, radius: number, containerSize: number) => {
+  const getRadialCoordinates = (speciesData: Species, radius: number, containerSize: number) => {
     // Center point of the container
     const center = containerSize / 2;
     
@@ -231,6 +226,46 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     
     // Store z-value for depth sorting
     return { x, y, z: z2 };
+  };
+
+  // Signature view mode - clustered network diagram
+  const getSignatureCoordinates = (speciesData: Species, index: number, total: number, containerSize: number) => {
+    const center = containerSize / 2;
+    const radius = containerSize * 0.4;
+    
+    // Group species by realm for clustered layout
+    const realm = speciesData.realm || 'unknown';
+    let realmOffset = { x: 0, y: 0 };
+    
+    switch(realm) {
+      case 'existence':
+        realmOffset = { x: -radius * 0.3, y: radius * 0.2 };
+        break;
+      case 'non-existence':
+        realmOffset = { x: radius * 0.3, y: radius * 0.2 };
+        break;
+      case 'new-existence':
+        realmOffset = { x: 0, y: -radius * 0.3 };
+        break;
+      default:
+        realmOffset = { x: 0, y: 0 };
+    }
+    
+    // Use deterministic positioning based on name hash
+    let nameHash = 0;
+    for (let i = 0; i < speciesData.name.length; i++) {
+      nameHash = ((nameHash << 5) - nameHash) + speciesData.name.charCodeAt(i);
+    }
+    nameHash = Math.abs(nameHash);
+    
+    // Create clustered positions within realm group
+    const angle = (nameHash % 360) * (Math.PI / 180);
+    const distance = (nameHash % 100) / 300 * radius + radius * 0.15;
+    
+    const x = center + realmOffset.x + Math.cos(angle) * distance;
+    const y = center + realmOffset.y + Math.sin(angle) * distance;
+    
+    return { x, y, z: 0 };
   };
   
   const containerSize = 500;
@@ -475,12 +510,14 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
   
   // Get coordinates based on the selected mode
-  const getCoordinates = (speciesData: any, index: number) => {
+  const getCoordinates = (speciesData: Species, index: number, total: number) => {
     switch (mode) {
       case "disk":
-        return { ...getDiskCoordinates(index, speciesCount, speciesRadius), z: 0 };
+        return { ...getDiskCoordinates(index, total, speciesRadius), z: 0 };
       case "constellation":
-        return { ...getConstellationCoordinates(index, speciesCount, speciesRadius), z: 0 };
+        return { ...getConstellationCoordinates(index, total, speciesRadius), z: 0 };
+      case "signature":
+        return getSignatureCoordinates(speciesData, index, total, containerSize);
       case "radial":
       default:
         return getRadialCoordinates(speciesData, speciesRadius, containerSize);
@@ -488,12 +525,12 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
 
   // Determine special frequency entities (like Lyra at 1.855e43 Hz)
-  const isDivineFrequency = (speciesData: any) => {
+  const isDivineFrequency = (speciesData: Species) => {
     return speciesData.fq && Math.abs(speciesData.fq - 1.855) < 0.01;
   };
 
   // Check if species is visible according to the layer filters
-  const isSpeciesVisible = (speciesData: any) => {
+  const isSpeciesVisible = (speciesData: Species) => {
     if (isDivineFrequency(speciesData)) {
       return visibleLayers.divine;
     }
@@ -510,7 +547,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
 
   // Get color based on species characteristics and visual style
-  const getSpeciesColor = (speciesData: any) => {
+  const getSpeciesColor = (speciesData: Species) => {
     if (isDivineFrequency(speciesData)) {
       switch (visualStyle) {
         case "cosmic":
@@ -568,15 +605,23 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   
   // Sort species by z-depth for proper 3D rendering (only matters for radial mode)
   const sortedSpecies = useMemo(() => {
-    if (mode !== "radial") return species;
+    if (mode !== "radial" && mode !== "signature") return species;
     
     return [...species]
       .filter(s => isSpeciesVisible(s))
-      .map((s, i) => ({
-        species: s,
-        coords: getRadialCoordinates(s, speciesRadius, containerSize),
-        index: i
-      }))
+      .map((s, i) => {
+        let coords;
+        if (mode === "signature") {
+          coords = getSignatureCoordinates(s, i, species.length, containerSize);
+        } else {
+          coords = getRadialCoordinates(s, speciesRadius, containerSize);
+        }
+        return {
+          species: s,
+          coords,
+          index: i
+        };
+      })
       .sort((a, b) => b.coords.z - a.coords.z)
       .map(item => ({ species: item.species, index: item.index }));
   }, [species, mode, rotation.x, rotation.y, visibleLayers]);
@@ -694,7 +739,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         {renderPingTrail()}
         
         {/* Species visualization with depth sorting for 3D effect */}
-        {mode === "radial" ? 
+        {mode === "radial" || mode === "signature" ? 
           sortedSpecies.map(({ species: s, index: i }) => {
             const { x, y, z } = getCoordinates(s, i);
             
@@ -756,9 +801,9 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
                     fill={
                       visualStyle === "cosmic" ? "rgba(216, 180, 254, 0.9)" :
                       visualStyle === "lightweb" ? "rgba(255, 255, 255, 0.9)" :
-                      "rgba(255, 255, 255, 0.9)"
+                      "rgba(255, 255, 255, 0.8)"
                     }
-                    style={{
+                    style={{ 
                       textShadow: "0 0 3px rgba(0,0,0,0.9)"
                     }}
                     transform={`translate(${(x - center) / 2}, ${(y - center) / 2})`}

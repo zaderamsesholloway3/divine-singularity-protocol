@@ -14,8 +14,8 @@ import VisualizationArea from '@/components/species/VisualizationArea';
 // Define the props for the UniversalSpeciesPing component
 interface UniversalSpeciesPingProps {
   fullPageMode?: boolean;
-  onSpeciesSelect?: (species: any) => void;
-  selectedSpecies?: any | null;
+  onSpeciesSelect?: (species: Species) => void;
+  selectedSpecies?: Species | null;
   visualStyle?: VisualStyle;
   viewMode?: ViewMode;
   zadeMode?: boolean;
@@ -37,7 +37,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [phase, setPhase] = useState(0);
   const [power, setPower] = useState(75);
   const [viewMode, setViewMode] = useState<ViewMode>(
-    externalViewMode === "signature" ? "radial" : (externalViewMode || "radial")
+    externalViewMode === "signature" ? "signature" : (externalViewMode || "radial")
   );
   const [broadcastMode, setBroadcastMode] = useState<"universal" | "targeted">("universal");
   const [pingActive, setPingActive] = useState(false);
@@ -67,7 +67,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   // Update internal viewMode when external viewMode prop changes
   useEffect(() => {
     if (externalViewMode) {
-      setViewMode(externalViewMode === "signature" ? "radial" : externalViewMode);
+      setViewMode(externalViewMode);
     }
   }, [externalViewMode]);
   
@@ -219,7 +219,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
               <VisualizationArea
                 species={mockSpecies}
                 viewMode={viewMode}
-                selectedSpecies={selectedSpecies}
+                selectedSpecies={selectedSpecies || null}
                 onSelectSpecies={handleSpeciesSelect}
                 speciesGatewayRef={speciesGatewayRef}
                 visualStyle={visualStyle}
@@ -247,7 +247,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 setBroadcastMode={setBroadcastMode}
                 message={message}
                 setMessage={setMessage}
-                selectedSpecies={selectedSpecies}
+                selectedSpecies={selectedSpecies || null}
                 amplifyPing={amplifyPing}
                 sendMessage={sendMessage}
                 visualStyle={visualStyle}
@@ -256,7 +256,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
               {fullPageMode && (
                 <ActiveSignaturesPanel
                   species={mockSpecies}
-                  selectedSpecies={selectedSpecies}
+                  selectedSpecies={selectedSpecies || null}
                   onSelectSpecies={handleSpeciesSelect}
                   visualStyle={visualStyle}
                 />

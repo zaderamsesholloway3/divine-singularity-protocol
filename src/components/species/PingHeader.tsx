@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { CardTitle } from "@/components/ui/card";
-import { Volume2, VolumeX, Waves, Rotate3d } from 'lucide-react';
+import { Volume2, VolumeX, Waves, Rotate3d, Grid, Hexagon } from 'lucide-react';
 import { ViewMode } from './types';
 
 interface PingHeaderProps {
@@ -67,6 +67,15 @@ const PingHeader: React.FC<PingHeaderProps> = ({
         >
           <Rotate3d className="h-4 w-4 mr-1" />
           3D Orbital
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className={`h-8 ${viewMode === "signature" ? "bg-primary/10" : ""}`}
+          onClick={() => setViewMode("signature")}
+        >
+          <Hexagon className="h-4 w-4 mr-1" />
+          Signature
         </Button>
       </div>
     </CardTitle>
