@@ -50,8 +50,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [showRotateHint, setShowRotateHint] = useState(rotate3dHint);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const displaySpecies = species && species.length > 0 ? species : mockSpecies;
-  console.log("VisualizationArea species count:", displaySpecies.length);
+  const displaySpecies = (species && species.length > 0) ? species : mockSpecies;
   
   const getVisualStyleClass = () => {
     switch(visualStyle) {

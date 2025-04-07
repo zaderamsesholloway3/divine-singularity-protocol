@@ -1,5 +1,5 @@
 
-import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
 import usePingAnimation from './hooks/usePingAnimation';
@@ -79,14 +79,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     getRotation
   }));
 
-  // Debugging logs to identify issues with species data
-  console.log("SpeciesGateway received species count:", species?.length || 0);
-  
-  if (!species || species.length === 0) {
-    console.warn("No species data provided to SpeciesGateway or empty array");
-  }
-
-  // Continue with the component rendering
   return (
     <div 
       className="relative w-full h-full flex justify-center"
@@ -128,7 +120,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         />
         
         <SpeciesNodes 
-          species={species || []}
+          species={species}
           selectedSpecies={selectedSpecies}
           hoveredSpecies={hoveredSpecies}
           setHoveredSpecies={setHoveredSpecies}
