@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
@@ -8,6 +9,7 @@ import PingTrail from './PingTrail';
 import SpeciesNodes from './SpeciesNodes';
 import { getCoordinates } from './utils/coordinateUtils';
 import { mockSpecies } from './mockData';
+import SolarSystem from './SolarSystem';
 
 interface SpeciesGatewayProps {
   species: Species[];
@@ -86,6 +88,10 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     getRotation
   }));
 
+  // Determine which view to show based on zoom level
+  const showSolarSystem = zoomLevel >= 1.5;
+  const showSpeciesNodes = zoomLevel < 1.5;
+
   return (
     <div 
       className="relative w-full h-full flex justify-center"
@@ -110,9 +116,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           boxShadow: visualStyle === "cosmic" ? "0 0 30px rgba(130, 0, 255, 0.1)" :
                     visualStyle === "lightweb" ? "0 0 30px rgba(255, 255, 255, 0.1)" :
                     "0 0 20px rgba(180, 180, 255, 0.2)",
-          transform: `scale(${zoomLevel})`,
-          transformOrigin: 'center center',
-          transition: 'transform 0.3s ease-out',
         }}
         className={visualStyle === "lightweb" ? "bg-gradient-to-b from-gray-900/60 to-blue-900/40" : ""}
       >
@@ -131,20 +134,32 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           visualStyle={visualStyle}
         />
         
-        <SpeciesNodes 
-          species={displaySpecies}
-          selectedSpecies={selectedSpecies}
-          hoveredSpecies={hoveredSpecies}
-          setHoveredSpecies={setHoveredSpecies}
-          onSelectSpecies={onSelectSpecies}
-          mode={mode}
-          speciesRadius={speciesRadius}
-          containerSize={containerSize}
-          rotation={rotation}
-          visualStyle={visualStyle}
-          visibleLayers={visibleLayers}
-          showAllNames={showAllNames}
-        />
+        {showSolarSystem && (
+          <SolarSystem
+            containerSize={containerSize}
+            zoomLevel={zoomLevel}
+            visualStyle={visualStyle}
+            rotation={rotation}
+          />
+        )}
+        
+        {showSpeciesNodes && (
+          <SpeciesNodes 
+            species={displaySpecies}
+            selectedSpecies={selectedSpecies}
+            hoveredSpecies={hoveredSpecies}
+            setHoveredSpecies={setHoveredSpecies}
+            onSelectSpecies={onSelectSpecies}
+            mode={mode}
+            speciesRadius={speciesRadius}
+            containerSize={containerSize}
+            rotation={rotation}
+            visualStyle={visualStyle}
+            visibleLayers={visibleLayers}
+            showAllNames={showAllNames}
+            zoomLevel={zoomLevel}
+          />
+        )}
       </svg>
     </div>
   );

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -143,10 +144,11 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   };
   
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto">
+    <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-auto">
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => onToggleExpanded()}
+        style={{ opacity: opacityPercent }}
       ></div>
       
       <div 
@@ -158,9 +160,10 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           viewBox={`0 0 ${gridSize * cellSize} ${gridSize * cellSize}`} 
           preserveAspectRatio="xMidYMid meet"
           style={{ 
-            transform: `rotateX(${rotation.x*0.7}deg) rotateY(${rotation.y*0.7}deg) scale(${zoomLevel})`,
+            transform: `rotateX(${rotation.x*0.7}deg) rotateY(${rotation.y*0.7}deg)`,
             transformOrigin: 'center center',
-            transition: 'transform 0.3s ease-out' 
+            transition: 'transform 0.3s ease-out',
+            pointerEvents: 'none'
           }}
         >
           {/* Background */}
@@ -264,7 +267,7 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           </h2>
         </div>
         
-        <Card className="absolute bottom-6 right-6 w-64 bg-black/80 border-yellow-500/30">
+        <Card className="absolute bottom-6 right-6 w-64 bg-black/80 border-yellow-500/30 z-30">
           <CardContent className="pt-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -336,7 +339,7 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           </CardContent>
         </Card>
         
-        <Card className="absolute bottom-6 left-6 w-64 bg-black/80 border-blue-500/30">
+        <Card className="absolute bottom-6 left-6 w-64 bg-black/80 border-blue-500/30 z-30">
           <CardContent className="p-4">
             <div className="space-y-4">
               <div className="flex justify-between items-center">

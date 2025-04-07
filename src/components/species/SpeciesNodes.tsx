@@ -22,6 +22,7 @@ interface SpeciesNodesProps {
     divine: boolean;
   };
   showAllNames?: boolean;
+  zoomLevel?: number;
 }
 
 const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
@@ -36,7 +37,8 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   rotation,
   visualStyle,
   visibleLayers,
-  showAllNames = false
+  showAllNames = false,
+  zoomLevel = 1.0
 }) => {
   useEffect(() => {
     console.log("SpeciesNodes rendering with species count:", species.length);
@@ -54,39 +56,68 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
     (s.realm === "Divine" && visibleLayers.divine)
   );
   
-  console.log("Visible species count:", visibleSpecies.length);
+  // Only show species at certain zoom levels
+  const zoomedSpecies = visibleSpecies.filter(s => {
+    if (zoomLevel >= 1.5) {
+      // Only show very close species when zoomed in (showing solar system)
+      return s.distance < 30;
+    }
+    if (zoomLevel >= 1.0) {
+      // Show nearby species when at normal zoom
+      return s.distance < 10000;
+    }
+    // Show all species when zoomed out
+    return true;
+  });
+  
+  console.log("Visible species count:", zoomedSpecies.length);
+  
+  // Calculate node size based on zoom level
+  const getNodeSize = (isSelected: boolean, isHovered: boolean) => {
+    const baseSize = isSelected ? 8 : isHovered ? 7 : 6;
+    
+    // Increase size when zoomed out, decrease when zoomed in
+    if (zoomLevel < 1.0) {
+      return baseSize * (1 / zoomLevel) * 0.8; // Enlarge when zoomed out
+    }
+    return baseSize * Math.max(0.7, 1 / zoomLevel); // Shrink when zoomed in
+  };
   
   return (
     <>
-      {/* Central Origin Point - Cary, NC */}
+      {/* Central Origin Point - Solar System */}
       <g className="origin-point" transform={`translate(${originX}, ${originY})`}>
-        <circle
-          r={4}
-          fill="white"
-          opacity={0.8}
-          filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255,255,255,0.7))" : ""}
-        />
-        <text
-          y={16}
-          fontSize="8"
-          textAnchor="middle"
-          fill="white"
-          opacity={0.9}
-          style={{ 
-            filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
-            textShadow: "0 0 2px rgba(0,0,0,0.9)"
-          }}
-        >
-          Cary, NC 27511
-        </text>
+        {zoomLevel < 1.5 && (
+          <>
+            <circle
+              r={4}
+              fill="white"
+              opacity={0.8}
+              filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255,255,255,0.7))" : ""}
+            />
+            <text
+              y={16}
+              fontSize="8"
+              textAnchor="middle"
+              fill="white"
+              opacity={0.9}
+              style={{ 
+                filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
+                textShadow: "0 0 2px rgba(0,0,0,0.9)"
+              }}
+            >
+              {zoomLevel < 1.0 ? "Milky Way Galaxy" : "Solar System"}
+            </text>
+          </>
+        )}
       </g>
 
       {/* Connection Lines from Origin to Species */}
-      {visibleSpecies.map((s, i) => {
+      {zoomedSpecies.map((s, i) => {
         const { x, y } = getCoordinates(
           s,
           i,
-          visibleSpecies.length,
+          zoomedSpecies.length,
           mode,
           speciesRadius,
           containerSize,
@@ -111,11 +142,11 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       })}
 
       {/* Individual Species Nodes */}
-      {visibleSpecies.map((s, i) => {
+      {zoomedSpecies.map((s, i) => {
         const { x, y, z } = getCoordinates(
           s,
           i,
-          visibleSpecies.length,
+          zoomedSpecies.length,
           mode,
           speciesRadius,
           containerSize,
@@ -126,7 +157,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
         const isHovered = hoveredSpecies?.id === s.id;
         const speciesColor = getSpeciesColor(s, visualStyle);
         const shouldShowName = showAllNames || isSelected || isHovered;
-        const nodeSize = isSelected ? 8 : isHovered ? 7 : 6;
+        const nodeSize = getNodeSize(isSelected, isHovered);
         
         return (
           <g 
@@ -136,6 +167,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
             onMouseEnter={() => setHoveredSpecies(s)}
             onMouseLeave={() => setHoveredSpecies(null)}
             style={{ cursor: 'pointer' }}
+            className="species-marker"
           >
             <circle
               r={nodeSize}
@@ -174,12 +206,13 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
             {shouldShowName && (
               <text
                 y={nodeSize + 10}
-                fontSize="8"
+                fontSize={Math.max(7, 8 / zoomLevel)}
                 textAnchor="middle"
                 fill="white"
                 style={{ 
                   filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
-                  textShadow: "0 0 2px rgba(0,0,0,0.9)"
+                  textShadow: "0 0 2px rgba(0,0,0,0.9)",
+                  pointerEvents: "none"
                 }}
               >
                 {s.name}
@@ -188,6 +221,29 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
           </g>
         );
       })}
+
+      {/* Milky Way Indicator (shown when zoomed out) */}
+      {zoomLevel < 0.8 && (
+        <g className="milky-way-indicator" transform={`translate(${originX}, ${originY})`}>
+          <ellipse 
+            rx={200 * (1/zoomLevel) * 0.3}
+            ry={70 * (1/zoomLevel) * 0.3}
+            fill="rgba(255,255,255,0.05)"
+            stroke="rgba(120,180,255,0.15)"
+            strokeWidth={1}
+            transform={`rotate(${45 + rotation.x * 0.2}, 0, 0)`}
+          />
+          <ellipse 
+            rx={180 * (1/zoomLevel) * 0.3}
+            ry={60 * (1/zoomLevel) * 0.3}
+            fill="none"
+            stroke="rgba(180,220,255,0.1)"
+            strokeWidth={0.5}
+            strokeDasharray="2,3"
+            transform={`rotate(${45 + rotation.x * 0.2}, 0, 0)`}
+          />
+        </g>
+      )}
     </>
   );
 };

@@ -65,6 +65,25 @@
   }
 }
 
+/* Solar system animations */
+@keyframes orbit {
+  from {
+    transform: rotate(0deg) translateX(70px) rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) translateX(70px) rotate(-360deg);
+  }
+}
+
+@keyframes sunGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255,180,0,0.7));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255,200,0,0.9));
+  }
+}
+
 /* New animation for zoom indicator */
 @keyframes fade-in-out {
   0% {
@@ -113,6 +132,20 @@
 .celestial-coordinate-line:hover {
   opacity: 0.6;
   stroke-dasharray: none;
+}
+
+/* Solar System styling */
+.solar-system-orbit {
+  transition: all 0.5s ease;
+}
+
+.solar-system-planet {
+  transition: transform 0.3s ease;
+}
+
+/* Solar system star glow animation */
+.solar-system-sun {
+  animation: sunGlow 4s infinite ease-in-out;
 }
 
 /* Zoom transition smoothing */
@@ -214,4 +247,13 @@
 .origin-marker {
   z-index: 10;
   pointer-events: none;
+}
+
+/* Create SHQ ring effect for Zade Mode */
+.shq-ring {
+  position: absolute;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+  animation: pulse 10s infinite ease-in-out;
 }
