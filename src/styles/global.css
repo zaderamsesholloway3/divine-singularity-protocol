@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -150,7 +149,7 @@
 
 /* Zoom transition smoothing */
 .zoom-transition {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Zoom container for smoother handling */
@@ -256,4 +255,18 @@
   border-radius: 50%;
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
   animation: pulse 10s infinite ease-in-out;
+}
+
+/* Improve Solar System visibility */
+.solar-system text {
+  font-family: sans-serif;
+  pointer-events: none;
+  text-shadow: 0 0 3px black, 0 0 2px black;
+}
+
+/* Ensure planets stand out */
+.solar-system-planet:hover {
+  filter: brightness(1.2);
+  stroke-width: 0.6;
+  stroke: white;
 }

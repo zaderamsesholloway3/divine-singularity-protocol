@@ -11,7 +11,7 @@ export const getRadialCoordinates = (
   species: Species, 
   radius: number,
   containerSize: number,
-  rotation: { x: number; y: number }
+  rotation: { x: number; y: number; z: number }
 ): Coordinates => {
   // The center point of the container
   const centerX = containerSize / 2;
@@ -46,10 +46,16 @@ export const getRadialCoordinates = (
   const rotatedX = baseX * cosY + rotatedZ1 * sinY;
   const rotatedZ = -baseX * sinY + rotatedZ1 * cosY;
   
+  // Apply Z rotation if specified
+  const cosZ = Math.cos(rotation.z * Math.PI / 180);
+  const sinZ = Math.sin(rotation.z * Math.PI / 180);
+  const finalX = rotatedX * cosZ - rotatedY1 * sinZ;
+  const finalY = rotatedX * sinZ + rotatedY1 * cosZ;
+  
   // Set final coordinates with center offset
   return {
-    x: centerX + rotatedX,
-    y: centerY + rotatedY1,
+    x: centerX + finalX,
+    y: centerY + finalY,
     z: rotatedZ
   };
 };
@@ -151,7 +157,7 @@ export const getCoordinates = (
   mode: string,
   radius: number,
   containerSize: number,
-  rotation: { x: number; y: number }
+  rotation: { x: number; y: number; z: number }
 ): Coordinates => {
   // Select the appropriate coordinate system based on view mode
   switch (mode) {

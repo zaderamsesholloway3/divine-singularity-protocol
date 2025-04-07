@@ -13,7 +13,7 @@ interface SpeciesNodesProps {
   mode: string;
   speciesRadius: number;
   containerSize: number;
-  rotation: { x: number, y: number };
+  rotation: { x: number, y: number, z: number };
   visualStyle: VisualStyle;
   visibleLayers: {
     existence: boolean;
@@ -42,7 +42,8 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
 }) => {
   useEffect(() => {
     console.log("SpeciesNodes rendering with species count:", species.length);
-  }, [species]);
+    console.log("Current zoom level in SpeciesNodes:", zoomLevel);
+  }, [species, zoomLevel]);
   
   // Origin point location (center of the container)
   const originX = containerSize / 2;
@@ -60,7 +61,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   const zoomedSpecies = visibleSpecies.filter(s => {
     if (zoomLevel >= 1.5) {
       // Only show very close species when zoomed in (showing solar system)
-      return s.distance < 30;
+      return s.distance < 50; // Increased this value to show more nearby species
     }
     if (zoomLevel >= 1.0) {
       // Show nearby species when at normal zoom
@@ -83,34 +84,35 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
     return baseSize * Math.max(0.7, 1 / zoomLevel); // Shrink when zoomed in
   };
   
+  // Determine if we should show the origin marker
+  const showOriginMarker = zoomLevel < 1.8;
+  
   return (
     <>
       {/* Central Origin Point - Solar System */}
-      <g className="origin-point" transform={`translate(${originX}, ${originY})`}>
-        {zoomLevel < 1.5 && (
-          <>
-            <circle
-              r={4}
-              fill="white"
-              opacity={0.8}
-              filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255,255,255,0.7))" : ""}
-            />
-            <text
-              y={16}
-              fontSize="8"
-              textAnchor="middle"
-              fill="white"
-              opacity={0.9}
-              style={{ 
-                filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
-                textShadow: "0 0 2px rgba(0,0,0,0.9)"
-              }}
-            >
-              {zoomLevel < 1.0 ? "Milky Way Galaxy" : "Solar System"}
-            </text>
-          </>
-        )}
-      </g>
+      {showOriginMarker && (
+        <g className="origin-point" transform={`translate(${originX}, ${originY})`}>
+          <circle
+            r={4}
+            fill="white"
+            opacity={0.8}
+            filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(255,255,255,0.7))" : ""}
+          />
+          <text
+            y={16}
+            fontSize="8"
+            textAnchor="middle"
+            fill="white"
+            opacity={0.9}
+            style={{ 
+              filter: visualStyle === "lightweb" ? "drop-shadow(0 0 1px rgba(255,255,255,0.5))" : "",
+              textShadow: "0 0 2px rgba(0,0,0,0.9)"
+            }}
+          >
+            {zoomLevel < 1.0 ? "Milky Way Galaxy" : "Solar System"}
+          </text>
+        </g>
+      )}
 
       {/* Connection Lines from Origin to Species */}
       {zoomedSpecies.map((s, i) => {

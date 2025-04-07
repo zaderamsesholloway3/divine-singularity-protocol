@@ -1,55 +1,68 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-const useDragRotation = (initialRotation = { x: 0, y: 0 }) => {
-  const [rotation, setRotation] = useState(initialRotation);
+interface Rotation {
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface UseDragRotationOptions {
+  initialRotation?: Rotation;
+  sensitivity?: number;
+}
+
+const useDragRotation = (initialRotation: Rotation = { x: 0, y: 0, z: 0 }, options: UseDragRotationOptions = {}) => {
+  const { sensitivity = 0.3 } = options;
+  const [rotation, setRotation] = useState<Rotation>(initialRotation);
   const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastPosition, setLastPosition] = useState({ x: 0, y: 0 });
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
     setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    setLastPosition({ x: event.clientX, y: event.clientY });
   }, []);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const handleMouseMove = useCallback((event: React.MouseEvent) => {
     if (!isDragging) return;
-    
-    // Calculate rotation based on mouse movement
-    const deltaX = e.clientX - dragStart.x;
-    const deltaY = e.clientY - dragStart.y;
-    
+
+    const dx = (event.clientX - lastPosition.x) * sensitivity;
+    const dy = (event.clientY - lastPosition.y) * sensitivity;
+
     setRotation(prev => ({
-      x: prev.x + (deltaY * 0.01),
-      y: prev.y + (deltaX * 0.01)
+      x: Math.max(-45, Math.min(45, prev.x + dy)), // Limit x rotation
+      y: prev.y + dx,
+      z: prev.z // Keep z unchanged
     }));
-    
-    setDragStart({ x: e.clientX, y: e.clientY });
-  }, [isDragging, dragStart]);
+
+    setLastPosition({ x: event.clientX, y: event.clientY });
+  }, [isDragging, lastPosition, sensitivity]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 1) {
+  const handleTouchStart = useCallback((event: React.TouchEvent) => {
+    if (event.touches.length === 1) {
       setIsDragging(true);
-      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      setLastPosition({ x: event.touches[0].clientX, y: event.touches[0].clientY });
     }
   }, []);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!isDragging || e.touches.length !== 1) return;
-    
-    const deltaX = e.touches[0].clientX - dragStart.x;
-    const deltaY = e.touches[0].clientY - dragStart.y;
-    
+  const handleTouchMove = useCallback((event: React.TouchEvent) => {
+    if (!isDragging || event.touches.length !== 1) return;
+
+    const dx = (event.touches[0].clientX - lastPosition.x) * sensitivity;
+    const dy = (event.touches[0].clientY - lastPosition.y) * sensitivity;
+
     setRotation(prev => ({
-      x: prev.x + (deltaY * 0.01),
-      y: prev.y + (deltaX * 0.01)
+      x: Math.max(-45, Math.min(45, prev.x + dy)), // Limit x rotation
+      y: prev.y + dx,
+      z: prev.z // Keep z unchanged
     }));
-    
-    setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-  }, [isDragging, dragStart]);
+
+    setLastPosition({ x: event.touches[0].clientX, y: event.touches[0].clientY });
+  }, [isDragging, lastPosition, sensitivity]);
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
@@ -57,14 +70,14 @@ const useDragRotation = (initialRotation = { x: 0, y: 0 }) => {
 
   return {
     rotation,
+    setRotation,
     isDragging,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
     handleTouchStart,
     handleTouchMove,
-    handleTouchEnd,
-    setRotation
+    handleTouchEnd
   };
 };
 

@@ -55,7 +55,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd
-  } = useDragRotation({ x: 15, y: 0 });
+  } = useDragRotation({ x: 15, y: 0, z: 0 }); // Added z value to fix TypeScript error
   
   const pingAnimationProgress = usePingAnimation(showPingTrail);
   
@@ -80,7 +80,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   };
   
   const getRotation = () => {
-    return { ...rotation, z: 0 };
+    return { ...rotation };
   };
   
   useImperativeHandle(ref, () => ({
@@ -90,7 +90,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
 
   // Determine which view to show based on zoom level
   const showSolarSystem = zoomLevel >= 1.5;
-  const showSpeciesNodes = zoomLevel < 1.5;
+  const showSpeciesNodes = zoomLevel < 2.0; // Increased threshold to allow overlap during transition
 
   return (
     <div 

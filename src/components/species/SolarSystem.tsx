@@ -26,6 +26,8 @@ const SolarSystem: React.FC<SolarSystemProps> = ({ containerSize, zoomLevel, vis
   const centerY = containerSize / 2;
   const solarSystemScale = Math.min(3.0, zoomLevel) - 0.5; // Scale based on zoom level
   
+  console.log("Rendering Solar System with zoom level:", zoomLevel);
+  
   // Define planets with their properties
   const planets: Planet[] = [
     { name: "Mercury", distance: 20, size: 2, color: "#c6c6c6", orbitColor: "#555555", orbitalPeriod: 88, rotationOffset: 0 },
@@ -79,6 +81,7 @@ const SolarSystem: React.FC<SolarSystemProps> = ({ containerSize, zoomLevel, vis
         r={sunSize}
         fill="url(#sunGradient)"
         style={{ filter: sunGlow }}
+        className="solar-system-sun"
       />
       
       {/* Planets */}
