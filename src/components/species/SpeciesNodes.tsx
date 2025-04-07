@@ -47,9 +47,13 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   const originY = containerSize / 2;
 
   // Filter visible species based on layers
-  // Ensure we're showing ALL species by making the filter more lenient
-  // or bypassing it when all dimensional markers should be visible
-  const visibleSpecies = species;
+  const visibleSpecies = species.filter(s => 
+    (s.realm === "Existence" && visibleLayers.existence) ||
+    (s.realm === "Non-Existence" && visibleLayers.nonExistence) ||
+    (s.realm === "New Existence" && visibleLayers.newExistence) ||
+    (s.realm === "Divine" && visibleLayers.divine)
+  );
+  
   console.log("Visible species count:", visibleSpecies.length);
   
   return (
@@ -151,7 +155,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
                   strokeWidth={1}
                   opacity={0.6}
                   style={{
-                    animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite'
+                    animation: 'pulse 1.5s cubic-bezier(0,0,0.2,1) infinite'
                   }}
                 />
                 <circle
@@ -161,7 +165,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
                   strokeWidth={0.5}
                   opacity={0.4}
                   style={{
-                    animation: 'ping 2s cubic-bezier(0,0,0.2,1) 0.3s infinite'
+                    animation: 'pulse 2s cubic-bezier(0,0,0.2,1) 0.3s infinite'
                   }}
                 />
               </>

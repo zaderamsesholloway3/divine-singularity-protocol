@@ -1,4 +1,3 @@
-
 import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
@@ -61,12 +60,12 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   const containerSize = 500;
   const speciesRadius = containerSize / 2.5;
   
-  // Use mockSpecies if no species are provided or if the array is empty
   const displaySpecies = species && species.length > 0 ? species : mockSpecies;
   
   useEffect(() => {
     console.log("SpeciesGateway received species count:", displaySpecies.length);
-  }, [displaySpecies]);
+    console.log("Current zoom level:", zoomLevel);
+  }, [displaySpecies, zoomLevel]);
   
   const toggleTargetLock = () => {
     if (!selectedSpecies) {
@@ -102,13 +101,18 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       <svg 
         width={containerSize} 
         height={containerSize} 
+        viewBox={`0 0 ${containerSize} ${containerSize}`}
+        preserveAspectRatio="xMidYMid meet"
         style={{ 
           filter: visualStyle === "cosmic" ? "brightness(1.1) contrast(1.2)" :
                  visualStyle === "lightweb" ? "brightness(1.15) contrast(1.05)" :
                  "brightness(1.05) contrast(1.1)",
           boxShadow: visualStyle === "cosmic" ? "0 0 30px rgba(130, 0, 255, 0.1)" :
                     visualStyle === "lightweb" ? "0 0 30px rgba(255, 255, 255, 0.1)" :
-                    "0 0 20px rgba(180, 180, 255, 0.2)"
+                    "0 0 20px rgba(180, 180, 255, 0.2)",
+          transform: `scale(${zoomLevel})`,
+          transformOrigin: 'center center',
+          transition: 'transform 0.3s ease-out',
         }}
         className={visualStyle === "lightweb" ? "bg-gradient-to-b from-gray-900/60 to-blue-900/40" : ""}
       >

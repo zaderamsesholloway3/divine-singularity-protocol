@@ -115,6 +115,17 @@
   stroke-dasharray: none;
 }
 
+/* Zoom transition smoothing */
+.zoom-transition {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Zoom container for smoother handling */
+.cosmic-zoom-container {
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Enhanced connection animations */
 @keyframes quantum-pulse {
   0% {
@@ -179,4 +190,28 @@
 
 .realm-filter.active {
   box-shadow: 0 0 10px currentColor;
+}
+
+/* Fix for visualization area bounds */
+.visualization-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+.visualization-svg {
+  overflow: visible !important;
+}
+
+/* Ensure species are visible even at extreme zoom levels */
+.species-node {
+  pointer-events: bounding-box;
+}
+
+.species-marker {
+  pointer-events: visible;
+}
+
+.origin-marker {
+  z-index: 10;
+  pointer-events: none;
 }

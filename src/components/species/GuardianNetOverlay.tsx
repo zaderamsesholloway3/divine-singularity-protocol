@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -159,7 +158,9 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           viewBox={`0 0 ${gridSize * cellSize} ${gridSize * cellSize}`} 
           preserveAspectRatio="xMidYMid meet"
           style={{ 
-            transform: `rotateX(${rotation.x*0.7}deg) rotateY(${rotation.y*0.7}deg) scale(${zoomLevel})` 
+            transform: `rotateX(${rotation.x*0.7}deg) rotateY(${rotation.y*0.7}deg) scale(${zoomLevel})`,
+            transformOrigin: 'center center',
+            transition: 'transform 0.3s ease-out' 
           }}
         >
           {/* Background */}
@@ -263,7 +264,6 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           </h2>
         </div>
         
-        {/* Control panel for Guardian Net */}
         <Card className="absolute bottom-6 right-6 w-64 bg-black/80 border-yellow-500/30">
           <CardContent className="pt-4">
             <div className="space-y-4">
@@ -336,7 +336,6 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           </CardContent>
         </Card>
         
-        {/* Status panel */}
         <Card className="absolute bottom-6 left-6 w-64 bg-black/80 border-blue-500/30">
           <CardContent className="p-4">
             <div className="space-y-4">
