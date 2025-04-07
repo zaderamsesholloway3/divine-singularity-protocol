@@ -62,7 +62,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   const speciesRadius = containerSize / 2.5;
   
   // Use mockSpecies if no species are provided or if the array is empty
-  const displaySpecies = species.length > 0 ? species : mockSpecies;
+  const displaySpecies = species && species.length > 0 ? species : mockSpecies;
   
   useEffect(() => {
     console.log("SpeciesGateway received species count:", displaySpecies.length);

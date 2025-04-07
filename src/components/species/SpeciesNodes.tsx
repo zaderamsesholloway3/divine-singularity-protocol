@@ -47,7 +47,9 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   const originY = containerSize / 2;
 
   // Filter visible species based on layers
-  const visibleSpecies = species.filter(s => isSpeciesVisible(s, visibleLayers));
+  // Ensure we're showing ALL species by making the filter more lenient
+  // or bypassing it when all dimensional markers should be visible
+  const visibleSpecies = species;
   console.log("Visible species count:", visibleSpecies.length);
   
   return (
@@ -71,7 +73,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
             textShadow: "0 0 2px rgba(0,0,0,0.9)"
           }}
         >
-          Cary, NC
+          Cary, NC 27511
         </text>
       </g>
 
@@ -99,7 +101,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
             y2={y}
             stroke={speciesColor}
             strokeWidth={isSelected ? 0.7 : 0.4}
-            strokeOpacity={isSelected ? 0.6 : 0.3}
+            strokeOpacity={isSelected ? 0.8 : 0.5}
           />
         );
       })}
@@ -139,18 +141,30 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
               filter={visualStyle === "cosmic" ? "drop-shadow(0 0 2px rgba(100,100,255,0.7))" : ""}
             />
             
-            {/* Ping indicator for responding species */}
+            {/* Pulse indicator for responding species */}
             {s.responding && (
-              <circle
-                r={nodeSize + 2}
-                fill="none"
-                stroke={speciesColor}
-                strokeWidth={1}
-                opacity={0.6}
-                style={{
-                  animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite'
-                }}
-              />
+              <>
+                <circle
+                  r={nodeSize + 2}
+                  fill="none"
+                  stroke={speciesColor}
+                  strokeWidth={1}
+                  opacity={0.6}
+                  style={{
+                    animation: 'ping 1.5s cubic-bezier(0,0,0.2,1) infinite'
+                  }}
+                />
+                <circle
+                  r={nodeSize + 4}
+                  fill="none"
+                  stroke={speciesColor}
+                  strokeWidth={0.5}
+                  opacity={0.4}
+                  style={{
+                    animation: 'ping 2s cubic-bezier(0,0,0.2,1) 0.3s infinite'
+                  }}
+                />
+              </>
             )}
             
             {shouldShowName && (
