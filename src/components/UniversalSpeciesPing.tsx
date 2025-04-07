@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -416,7 +415,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
       </Card>
     </div>
   );
-};
+});
 
 UniversalSpeciesPing.displayName = 'UniversalSpeciesPing';
 
