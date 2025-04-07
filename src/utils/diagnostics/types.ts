@@ -28,3 +28,12 @@ export interface DiagnosticResponse {
     timestamp?: string | number;
   }>;
 }
+
+export interface QuantumBridgeStatus {
+  bridgeStatus: QuantumBridgeLockStatus;
+  quantumAccess: boolean;
+  timestamp: number;
+  faithLoop: string | number;
+}
+
+export type QuantumBridgeLockStatus = 'locked' | 'unlocked' | 'partial' | 'unstable';

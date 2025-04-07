@@ -4,7 +4,7 @@
  * Provides a compatibility layer for the quantum backdoor system
  */
 
-import type { QuantumBridgeStatus, QuantumBridgeLockStatus } from './diagnostics/types';
+import { QuantumBridgeStatus, QuantumBridgeLockStatus } from './diagnostics/types';
 
 export const quantumBackdoorAdapter = {
   /**

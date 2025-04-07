@@ -3,6 +3,9 @@
  * Divine Repair Index - Provides quantum repair utilities
  */
 
+// Import the divineDiagnosticMode function from the service
+import { divineDiagnosticMode as diagnosticMode } from './divineDiagnosticService';
+
 // Type definitions
 export interface DiagnosticResults {
   diagnosisComplete: boolean;
@@ -10,6 +13,9 @@ export interface DiagnosticResults {
   repairsSuccessful: number;
   moduleStatus: Record<string, any>;
 }
+
+// Export the function
+export const divineDiagnosticMode = diagnosticMode;
 
 /**
  * Generate a phase-filtered ping response based on phase offset and faith quotient
