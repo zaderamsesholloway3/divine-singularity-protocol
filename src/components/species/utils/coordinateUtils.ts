@@ -153,8 +153,6 @@ export const getCoordinates = (
   containerSize: number,
   rotation: { x: number; y: number }
 ): Coordinates => {
-  console.log(`Calculating coordinates for species: ${species.name}, mode: ${mode}`);
-  
   // Select the appropriate coordinate system based on view mode
   switch (mode) {
     case "radial":

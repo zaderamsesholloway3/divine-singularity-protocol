@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Species, VisualStyle } from './types';
 import { getCoordinates } from './utils/coordinateUtils';
 import { getSpeciesColor, isSpeciesVisible } from './utils/speciesUtils';
@@ -38,7 +38,9 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   visibleLayers,
   showAllNames = false
 }) => {
-  console.log("SpeciesNodes rendering with species count:", species.length);
+  useEffect(() => {
+    console.log("SpeciesNodes rendering with species count:", species.length);
+  }, [species]);
   
   // Origin point location (center of the container)
   const originX = containerSize / 2;
