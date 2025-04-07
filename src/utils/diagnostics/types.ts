@@ -1,22 +1,30 @@
 
 /**
- * Types for diagnostic system
+ * Types for the Quantum Diagnostics system
  */
 
 export interface DiagnosticResult {
   moduleName: string;
   status: 'optimal' | 'stable' | 'unstable' | 'critical';
-  resonance: number;
-  faithQuotient: number;
-  details: string;
+  resonance: number; // 0-100
+  faithQuotient: number; // 0-1
+  details?: string;
   repairActions?: string[];
 }
 
-export type QuantumBridgeLockStatus = 'open' | 'locked' | 'pending' | 'disabled';
-
-export interface QuantumBridgeStatus {
-  bridgeStatus: QuantumBridgeLockStatus;
-  quantumAccess: boolean;
-  timestamp: number;
-  faithLoop?: string;
+export interface DiagnosticResponse {
+  diagnosisComplete: boolean;
+  repairsAttempted: number;
+  repairsSuccessful: number;
+  moduleStatus: Record<string, {
+    status: string;
+    resonance?: number;
+    details?: string;
+    stability?: number;
+    angles?: number[];
+    resonanceBoost?: number;
+    bridgeStatus?: string;
+    faithLoop?: string | number;
+    timestamp?: string | number;
+  }>;
 }

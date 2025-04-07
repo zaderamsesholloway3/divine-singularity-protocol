@@ -64,7 +64,6 @@
   }
 }
 
-/* Solar system animations */
 @keyframes orbit {
   from {
     transform: rotate(0deg) translateX(70px) rotate(0deg);
@@ -83,7 +82,6 @@
   }
 }
 
-/* New animation for zoom indicator */
 @keyframes fade-in-out {
   0% {
     opacity: 0;
@@ -101,6 +99,12 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+}
+
+@keyframes divine-glow {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
 }
 
 .animate-fade-in-out {
@@ -121,7 +125,6 @@
   box-shadow: 0 0 10px theme(colors.blue.500);
 }
 
-/* New celestial coordinate styling */
 .celestial-coordinate-line {
   stroke-dasharray: 4, 4;
   opacity: 0.3;
@@ -133,7 +136,6 @@
   stroke-dasharray: none;
 }
 
-/* Solar System styling */
 .solar-system-orbit {
   transition: all 0.5s ease;
 }
@@ -142,24 +144,20 @@
   transition: transform 0.3s ease;
 }
 
-/* Solar system star glow animation */
 .solar-system-sun {
   animation: sunGlow 4s infinite ease-in-out;
 }
 
-/* Zoom transition smoothing */
 .zoom-transition {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Zoom container for smoother handling */
 .cosmic-zoom-container {
   transform-origin: center;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Enhanced connection animations */
-@keyframes quantum-pulse {
+.quantum-pulse {
   0% {
     stroke-width: 0.5;
     stroke-opacity: 0.3;
@@ -178,8 +176,7 @@
   animation: quantum-pulse 3s infinite;
 }
 
-/* Species highlight animation */
-@keyframes species-highlight {
+.species-highlight {
   0% {
     filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
   }
@@ -195,22 +192,11 @@
   animation: species-highlight 2s infinite;
 }
 
-/* Radio wave animation */
-@keyframes radio-wave {
-  0% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: 100;
-  }
-}
-
 .radio-wave {
   stroke-dasharray: 5, 5;
   animation: radio-wave 20s linear infinite;
 }
 
-/* Realm filter styling */
 .realm-filter {
   transition: all 0.3s ease;
 }
@@ -224,7 +210,6 @@
   box-shadow: 0 0 10px currentColor;
 }
 
-/* Fix for visualization area bounds */
 .visualization-container {
   overflow: visible !important;
   position: relative;
@@ -234,7 +219,6 @@
   overflow: visible !important;
 }
 
-/* Ensure species are visible even at extreme zoom levels */
 .species-node {
   pointer-events: bounding-box;
 }
@@ -248,7 +232,6 @@
   pointer-events: none;
 }
 
-/* Create SHQ ring effect for Zade Mode */
 .shq-ring {
   position: absolute;
   border: 1px solid rgba(255, 215, 0, 0.2);
@@ -257,16 +240,96 @@
   animation: pulse 10s infinite ease-in-out;
 }
 
-/* Improve Solar System visibility */
 .solar-system text {
   font-family: sans-serif;
   pointer-events: none;
   text-shadow: 0 0 3px black, 0 0 2px black;
 }
 
-/* Ensure planets stand out */
 .solar-system-planet:hover {
   filter: brightness(1.2);
   stroke-width: 0.6;
   stroke: white;
+}
+
+.divine-glow-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.divine-glow-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.1), transparent 60%);
+  pointer-events: none;
+}
+
+.divine-glow-track {
+  background-color: hsl(var(--background));
+  position: relative;
+}
+
+.divine-glow-indicator {
+  background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.7) 100%);
+  position: relative;
+}
+
+.divine-glow-indicator::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(8px);
+  opacity: 0.4;
+}
+
+.pulse-glow {
+  animation: divine-glow 2s ease-in-out infinite;
+}
+
+.complete-glow {
+  animation: divine-glow 1s ease-in-out infinite;
+  color: hsl(142 71% 45%);
+}
+
+.divine-glow-button {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.divine-glow-button:hover {
+  box-shadow: 0 0 20px hsl(var(--primary)/0.3);
+}
+
+.repair-status-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.repair-status-indicator:hover {
+  background-color: hsl(var(--accent));
+}
+
+.repair-status-indicator::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.repair-status-optimal::before {
+  background-color: hsl(142 71% 45%);
+}
+
+.repair-status-stable::before {
+  background-color: hsl(48 96% 53%);
+}
+
+.repair-status-unstable::before {
+  background-color: hsl(0 84% 60%);
 }
