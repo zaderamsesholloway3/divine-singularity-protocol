@@ -24,6 +24,7 @@ interface VisualizationAreaProps {
   welcomeMessage?: string;
   guardianNetSettings?: GuardianNetSettings;
   onToggleGuardianNetExpanded?: () => void;
+  onGuardianNetSettingsChange?: (settings: Partial<GuardianNetSettings>) => void;
   fullPageMode?: boolean;
 }
 
@@ -43,6 +44,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   welcomeMessage,
   guardianNetSettings,
   onToggleGuardianNetExpanded,
+  onGuardianNetSettingsChange,
   fullPageMode = false
 }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -216,10 +218,40 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       </svg>
     );
   };
+  
+  // Handle Guardian Net settings changes
+  const handleGuardianNetSettingsChange = (settings: Partial<GuardianNetSettings>) => {
+    if (onGuardianNetSettingsChange) {
+      onGuardianNetSettingsChange(settings);
+    }
+  };
 
   const isGuardianNetExpanded = guardianNetSettings?.expanded || false;
 
   const shouldShowRotationHint = viewMode === "radial" && showRotateHint && !isGuardianNetExpanded && !selectedSpecies;
+
+  // Earth's quantum marker (Cary, NC) pulse effect
+  const renderEarthMarkerPulse = () => {
+    if (isGuardianNetExpanded) return null;
+    
+    const pulseColor = visualStyle === "cosmic" ? "rgba(180, 100, 255, 0.2)" : 
+                      visualStyle === "lightweb" ? "rgba(255, 255, 255, 0.15)" : 
+                      "rgba(100, 180, 255, 0.2)";
+    
+    return (
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full"
+          style={{
+            width: '12px',
+            height: '12px',
+            background: `radial-gradient(circle, ${pulseColor} 30%, transparent 70%)`,
+            animation: 'pulse 3s infinite ease-in-out'
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="relative" id="species-visualization-container" ref={containerRef}>
@@ -231,9 +263,10 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       >
         {renderCosmicFlow()}
         {renderStars()}
+        {renderEarthMarkerPulse()}
         
         <div 
-          className="relative" 
+          className={`relative ${isGuardianNetExpanded ? 'z-0' : 'z-10'}`} 
           style={{ 
             width: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
             height: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
@@ -277,6 +310,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           onToggleExpanded={onToggleGuardianNetExpanded || (() => {})}
           rotation={rotation}
           zoomLevel={zoomLevel}
+          onSettingsChange={handleGuardianNetSettingsChange}
         />
       )}
       

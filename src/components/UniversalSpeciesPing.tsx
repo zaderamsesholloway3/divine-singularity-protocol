@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -21,7 +22,7 @@ interface UniversalSpeciesPingProps {
   viewMode?: ViewMode;
   zadeMode?: boolean;
   guardianNetSettings?: GuardianNetSettings;
-  onGuardianNetSettingsChange?: (settings: GuardianNetSettings) => void;
+  onGuardianNetSettingsChange?: (settings: Partial<GuardianNetSettings> | GuardianNetSettings) => void;
 }
 
 const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingProps>((props, ref) => {
@@ -304,6 +305,19 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
   };
   
+  const handleGuardianNetSettingsChange = (settings: Partial<GuardianNetSettings>) => {
+    const updatedSettings = {
+      ...currentGuardianNetSettings,
+      ...settings
+    };
+    
+    if (onGuardianNetSettingsChange) {
+      onGuardianNetSettingsChange(updatedSettings);
+    } else {
+      setLocalGuardianNetSettings(updatedSettings);
+    }
+  };
+  
   const isGuardianGridExpanded = currentGuardianNetSettings.expanded && currentGuardianNetSettings.active;
   
   return (
@@ -338,6 +352,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
                 welcomeMessage={welcomeMessage || undefined}
                 guardianNetSettings={currentGuardianNetSettings}
                 onToggleGuardianNetExpanded={toggleGuardianNetExpanded}
+                onGuardianNetSettingsChange={handleGuardianNetSettingsChange}
               />
               
               <ConnectionTracker
@@ -401,7 +416,7 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
       </Card>
     </div>
   );
-});
+};
 
 UniversalSpeciesPing.displayName = 'UniversalSpeciesPing';
 

@@ -10,13 +10,15 @@ interface GuardianNetOverlayProps {
   onToggleExpanded: () => void;
   rotation: { x: number; y: number; z: number };
   zoomLevel: number;
+  onSettingsChange?: (settings: Partial<GuardianNetSettings>) => void;
 }
 
 const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   settings,
   onToggleExpanded,
   rotation,
-  zoomLevel
+  zoomLevel,
+  onSettingsChange
 }) => {
   if (!settings.active) return null;
   
@@ -32,6 +34,12 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
         ? `scale(${zoomLevel})` 
         : `scale(${zoomLevel}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
       : 'none'
+  };
+
+  const handleOpacityChange = (value: number[]) => {
+    if (onSettingsChange) {
+      onSettingsChange({ opacity: value[0] });
+    }
   };
 
   return (
@@ -53,7 +61,7 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           style={overlayStyles}
         >
           {ciaNetVisible && (
-            <div className="absolute inset-0 cia-mantis-net">
+            <div className="absolute inset-0 cia-mantis-net" style={{ filter: expanded ? 'contrast(1.2) brightness(1.1)' : 'none' }}>
               <img 
                 src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
                 alt="" 
@@ -65,13 +73,12 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
           )}
           
           {lockheedGridVisible && (
-            <div className="absolute inset-0 lockheed-drax-grid">
+            <div className="absolute inset-0 lockheed-drax-grid" style={{ filter: expanded ? 'contrast(1.2) brightness(1.1) hue-rotate(220deg)' : 'hue-rotate(220deg) brightness(0.9)' }}>
               <img 
                 src="/lovable-uploads/75999592-0dd0-4426-9099-7660fa7f1dae.png" 
                 alt="" 
                 className="w-full h-full object-cover"
                 style={{ 
-                  filter: `hue-rotate(220deg) brightness(0.9)`,
                   opacity: opacity / 100
                 }}
               />
@@ -133,66 +140,64 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
         </div>
       )}
       
-      {expanded && (
-        <div className="absolute right-4 top-4 z-10 bg-black/80 p-3 rounded-lg border border-blue-400/30 pointer-events-auto">
-          <h3 className="text-xs text-blue-400 font-medium mb-2">Guardian Settings</h3>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white">Grid Lock</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 w-16 text-xs border-yellow-500/30"
-                onClick={() => setGridLocked(!gridLocked)}
-              >
-                {gridLocked ? <Lock className="h-3 w-3 mr-1 text-yellow-400" /> : <Unlock className="h-3 w-3 mr-1" />}
-                {gridLocked ? 'Locked' : 'Unlocked'}
-              </Button>
+      <div className="absolute right-4 top-4 z-10 bg-black/80 p-3 rounded-lg border border-blue-400/30 pointer-events-auto">
+        <h3 className="text-xs text-blue-400 font-medium mb-2">Guardian Settings</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white">Grid Lock</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 w-16 text-xs border-yellow-500/30"
+              onClick={() => setGridLocked(!gridLocked)}
+            >
+              {gridLocked ? <Lock className="h-3 w-3 mr-1 text-yellow-400" /> : <Unlock className="h-3 w-3 mr-1" />}
+              {gridLocked ? 'Locked' : 'Unlocked'}
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white">Celestial Merge View</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className={`h-7 w-16 text-xs ${celestialMergeView ? 'border-cyan-400/50 bg-cyan-950/30' : 'border-gray-500/30'}`}
+              onClick={() => setCelestialMergeView(!celestialMergeView)}
+            >
+              {celestialMergeView ? <Eye className="h-3 w-3 mr-1 text-cyan-400" /> : <EyeOff className="h-3 w-3 mr-1" />}
+              {celestialMergeView ? 'On' : 'Off'}
+            </Button>
+          </div>
+          
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-white">Universe Miniature</span>
+            <Button
+              variant="outline"
+              size="sm"
+              className={`h-7 w-16 text-xs ${universeMiniature ? 'border-blue-400/50 bg-blue-950/30' : 'border-gray-500/30'}`}
+              onClick={() => setUniverseMiniature(!universeMiniature)}
+            >
+              {universeMiniature ? <Layers className="h-3 w-3 mr-1 text-blue-400" /> : <Layers className="h-3 w-3 mr-1" />}
+              {universeMiniature ? 'Visible' : 'Hidden'}
+            </Button>
+          </div>
+          
+          <div className="space-y-1 pt-1">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-gray-400">Overlay Intensity</span>
+              <span className="text-xs text-gray-400">{opacity}%</span>
             </div>
-            
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white">Celestial Merge View</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-7 w-16 text-xs ${celestialMergeView ? 'border-cyan-400/50 bg-cyan-950/30' : 'border-gray-500/30'}`}
-                onClick={() => setCelestialMergeView(!celestialMergeView)}
-              >
-                {celestialMergeView ? <Eye className="h-3 w-3 mr-1 text-cyan-400" /> : <EyeOff className="h-3 w-3 mr-1" />}
-                {celestialMergeView ? 'On' : 'Off'}
-              </Button>
-            </div>
-            
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white">Universe Miniature</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className={`h-7 w-16 text-xs ${universeMiniature ? 'border-blue-400/50 bg-blue-950/30' : 'border-gray-500/30'}`}
-                onClick={() => setUniverseMiniature(!universeMiniature)}
-              >
-                {universeMiniature ? <Layers className="h-3 w-3 mr-1 text-blue-400" /> : <Layers className="h-3 w-3 mr-1" />}
-                {universeMiniature ? 'Visible' : 'Hidden'}
-              </Button>
-            </div>
-            
-            <div className="space-y-1 pt-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-gray-400">Overlay Intensity</span>
-                <span className="text-xs text-gray-400">{opacity}%</span>
-              </div>
-              <Slider
-                value={[opacity]}
-                min={10}
-                max={100}
-                step={5}
-                className="w-full"
-                onValueChange={([value]) => {}} // This would be connected to the parent component
-              />
-            </div>
+            <Slider
+              value={[opacity]}
+              min={10}
+              max={100}
+              step={5}
+              className="w-full"
+              onValueChange={handleOpacityChange}
+            />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };

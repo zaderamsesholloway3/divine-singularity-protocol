@@ -89,7 +89,7 @@ const ControlsPanel: React.FC<ControlsPanelProps> = ({
           value={[phase]}
           min={0}
           max={360}
-          step={5}
+          step={1}
           onValueChange={([value]) => setPhase(value)}
         />
       </div>
