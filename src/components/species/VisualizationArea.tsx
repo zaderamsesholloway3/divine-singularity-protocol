@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Species, VisibleLayers, VisualStyle, ViewMode, GuardianNetSettings } from './types';
 import { generateStars } from './utils/visualUtils';
 import GuardianNetOverlay from './GuardianNetOverlay';
+import { mockSpecies } from './mockData';
 
 interface VisualizationAreaProps {
   species: Species[];
@@ -48,6 +49,9 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [rotation, setRotation] = useState({ x: 15, y: 0, z: 0 });
   const [showRotateHint, setShowRotateHint] = useState(rotate3dHint);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const displaySpecies = species && species.length > 0 ? species : mockSpecies;
+  console.log("VisualizationArea species count:", displaySpecies.length);
   
   const getVisualStyleClass = () => {
     switch(visualStyle) {
@@ -239,7 +243,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
             preserveAspectRatio="xMidYMid meet"
           >
             <SpeciesGateway 
-              species={species}
+              species={displaySpecies}
               onSelectSpecies={onSelectSpecies}
               selectedSpecies={selectedSpecies}
               mode={viewMode}

@@ -1,3 +1,4 @@
+
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
@@ -78,30 +79,14 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     getRotation
   }));
 
-  const sortedSpecies = useMemo(() => {
-    if (!species || species.length === 0) {
-      console.log("No species data provided to SpeciesGateway");
-      return [];
-    }
-
-    if (mode !== "radial" && mode !== "signature") return species;
-    
-    return [...species]
-      .filter(s => isSpeciesVisible(s, visibleLayers))
-      .map((s, i) => {
-        const coords = getCoordinates(s, i, species.length, mode, speciesRadius, containerSize, rotation);
-        return {
-          species: s,
-          coords,
-          index: i
-        };
-      })
-      .sort((a, b) => b.coords.z - a.coords.z)
-      .map(item => ({ species: item.species, index: item.index }));
-  }, [species, mode, rotation, visibleLayers, speciesRadius, containerSize]);
-
+  // Debugging logs to identify issues with species data
   console.log("SpeciesGateway received species count:", species?.length || 0);
   
+  if (!species || species.length === 0) {
+    console.warn("No species data provided to SpeciesGateway or empty array");
+  }
+
+  // Continue with the component rendering
   return (
     <div 
       className="relative w-full h-full flex justify-center"
@@ -142,21 +127,20 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           visualStyle={visualStyle}
         />
         
-        {species && species.length > 0 && (
-          <SpeciesNodes 
-            species={species}
-            selectedSpecies={selectedSpecies}
-            hoveredSpecies={hoveredSpecies}
-            setHoveredSpecies={setHoveredSpecies}
-            onSelectSpecies={onSelectSpecies}
-            mode={mode}
-            speciesRadius={speciesRadius}
-            containerSize={containerSize}
-            rotation={rotation}
-            visualStyle={visualStyle}
-            visibleLayers={visibleLayers}
-          />
-        )}
+        <SpeciesNodes 
+          species={species || []}
+          selectedSpecies={selectedSpecies}
+          hoveredSpecies={hoveredSpecies}
+          setHoveredSpecies={setHoveredSpecies}
+          onSelectSpecies={onSelectSpecies}
+          mode={mode}
+          speciesRadius={speciesRadius}
+          containerSize={containerSize}
+          rotation={rotation}
+          visualStyle={visualStyle}
+          visibleLayers={visibleLayers}
+          showAllNames={showAllNames}
+        />
       </svg>
     </div>
   );

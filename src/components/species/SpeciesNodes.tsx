@@ -38,6 +38,9 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   visibleLayers,
   showAllNames = false
 }) => {
+  console.log("SpeciesNodes rendering with species count:", species?.length || 0);
+  console.log("Visible species count:", species?.filter(s => isSpeciesVisible(s, visibleLayers))?.length || 0);
+  
   return (
     <>
       {/* Central Origin Point */}
@@ -67,7 +70,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       </g>
 
       {/* Individual Species Nodes */}
-      {species
+      {species && species.length > 0 && species
         .filter(s => isSpeciesVisible(s, visibleLayers))
         .map((s, i) => {
           const { x, y, z } = getCoordinates(
@@ -130,7 +133,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
               )}
             </g>
           );
-      })}
+        })}
     </>
   );
 };
