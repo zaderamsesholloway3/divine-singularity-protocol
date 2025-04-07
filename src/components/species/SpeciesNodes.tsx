@@ -70,7 +70,7 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       {species
         .filter(s => isSpeciesVisible(s, visibleLayers))
         .map((s, i) => {
-          const { x, y } = getCoordinates(
+          const { x, y, z } = getCoordinates(
             s,
             i,
             species.length,

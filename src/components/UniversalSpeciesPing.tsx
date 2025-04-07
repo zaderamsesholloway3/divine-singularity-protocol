@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { toast } from 'sonner';
@@ -65,7 +64,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
   const [newcomerCount, setNewcomerCount] = useState<number>(0);
   const [lastPingTime, setLastPingTime] = useState<number | null>(null);
   
-  // Add local Guardian Net settings state if not provided from props
   const [localGuardianNetSettings, setLocalGuardianNetSettings] = useState<GuardianNetSettings>({
     active: false,
     expanded: false,
@@ -75,7 +73,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     syncWithUniverseView: true
   });
   
-  // Use either prop settings or local settings
   const currentGuardianNetSettings = guardianNetSettings || localGuardianNetSettings;
   
   const speciesGatewayRef = useRef<SpeciesGatewayRef>(null);
@@ -294,7 +291,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     });
   };
   
-  // Handle toggling Guardian Net expansion
   const toggleGuardianNetExpanded = () => {
     const newSettings = {
       ...currentGuardianNetSettings,
@@ -308,7 +304,6 @@ const UniversalSpeciesPing = forwardRef<SpeciesGatewayRef, UniversalSpeciesPingP
     }
   };
   
-  // Is Guardian Net in expanded mode?
   const isGuardianGridExpanded = currentGuardianNetSettings.expanded && currentGuardianNetSettings.active;
   
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
@@ -7,9 +6,8 @@ import { isSpeciesVisible } from './utils/speciesUtils';
 import DistanceRings from './DistanceRings';
 import PingTrail from './PingTrail';
 import SpeciesNodes from './SpeciesNodes';
-import { getSignatureCoordinates, getRadialCoordinates } from './utils/coordinateUtils';
+import { getCoordinates } from './utils/coordinateUtils';
 
-// Define prop types for the component
 interface SpeciesGatewayProps {
   species: Species[];
   onSelectSpecies: (species: Species) => void;
@@ -23,13 +21,11 @@ interface SpeciesGatewayProps {
   zoomLevel?: number;
 }
 
-// Define ref interface for external access
 export interface SpeciesGatewayRef {
   toggleTargetLock: () => boolean;
   getRotation?: () => { x: number; y: number; z: number };
 }
 
-// Main component wrapped with forwardRef
 export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>((props, ref) => {
   const { 
     species, 
@@ -47,7 +43,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   const [targetLocked, setTargetLocked] = useState(false);
   const [hoveredSpecies, setHoveredSpecies] = useState<Species | null>(null);
   
-  // Use custom hooks for drag rotation and ping animation
   const {
     rotation,
     isDragging,
@@ -57,18 +52,15 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     handleTouchStart,
     handleTouchMove,
     handleTouchEnd
-  } = useDragRotation({ x: 15, y: 0 }); // Initialize with a slight tilt
+  } = useDragRotation({ x: 15, y: 0 });
   
   const pingAnimationProgress = usePingAnimation(showPingTrail);
   
-  // Container and radius values for positioning
   const containerSize = 500;
   const speciesRadius = containerSize / 2.5;
   
-  // Implement the toggleTargetLock method that can be called by the parent
   const toggleTargetLock = () => {
     if (!selectedSpecies) {
-      // Can't lock without a selected species
       return false;
     }
     
@@ -77,30 +69,27 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
     return newLockedState;
   };
   
-  // Add a method to get the current rotation
   const getRotation = () => {
     return { ...rotation, z: 0 };
   };
   
-  // Expose methods to parent through ref
   useImperativeHandle(ref, () => ({
     toggleTargetLock,
     getRotation
   }));
 
-  // Sort species by z-depth for proper 3D rendering (only matters for radial mode)
   const sortedSpecies = useMemo(() => {
+    if (!species || species.length === 0) {
+      console.log("No species data provided to SpeciesGateway");
+      return [];
+    }
+
     if (mode !== "radial" && mode !== "signature") return species;
     
     return [...species]
       .filter(s => isSpeciesVisible(s, visibleLayers))
       .map((s, i) => {
-        let coords;
-        if (mode === "signature") {
-          coords = getSignatureCoordinates(s, i, species.length, containerSize);
-        } else {
-          coords = getRadialCoordinates(s, speciesRadius, containerSize, rotation);
-        }
+        const coords = getCoordinates(s, i, species.length, mode, speciesRadius, containerSize, rotation);
         return {
           species: s,
           coords,
@@ -111,6 +100,8 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
       .map(item => ({ species: item.species, index: item.index }));
   }, [species, mode, rotation, visibleLayers, speciesRadius, containerSize]);
 
+  console.log("SpeciesGateway received species count:", species?.length || 0);
+  
   return (
     <div 
       className="relative w-full h-full flex justify-center"
@@ -136,7 +127,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         }}
         className={visualStyle === "lightweb" ? "bg-gradient-to-b from-gray-900/60 to-blue-900/40" : ""}
       >
-        {/* Distance rings and realm indicators */}
         <DistanceRings 
           containerSize={containerSize}
           speciesRadius={speciesRadius}
@@ -144,7 +134,6 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           visibleLayers={visibleLayers}
         />
         
-        {/* Ping trails */}
         <PingTrail 
           containerSize={containerSize}
           speciesRadius={speciesRadius}
@@ -153,20 +142,21 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
           visualStyle={visualStyle}
         />
         
-        {/* Species nodes */}
-        <SpeciesNodes 
-          species={species}
-          selectedSpecies={selectedSpecies}
-          hoveredSpecies={hoveredSpecies}
-          setHoveredSpecies={setHoveredSpecies}
-          onSelectSpecies={onSelectSpecies}
-          mode={mode}
-          speciesRadius={speciesRadius}
-          containerSize={containerSize}
-          rotation={rotation}
-          visualStyle={visualStyle}
-          visibleLayers={visibleLayers}
-        />
+        {species && species.length > 0 && (
+          <SpeciesNodes 
+            species={species}
+            selectedSpecies={selectedSpecies}
+            hoveredSpecies={hoveredSpecies}
+            setHoveredSpecies={setHoveredSpecies}
+            onSelectSpecies={onSelectSpecies}
+            mode={mode}
+            speciesRadius={speciesRadius}
+            containerSize={containerSize}
+            rotation={rotation}
+            visualStyle={visualStyle}
+            visibleLayers={visibleLayers}
+          />
+        )}
       </svg>
     </div>
   );
