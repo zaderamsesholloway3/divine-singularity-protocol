@@ -3,7 +3,14 @@ import React, { useState } from 'react';
 import { GuardianNetSettings } from './types';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Eye, EyeOff, Lock, Unlock, Layers } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, Unlock, Layers, Compass, Maximize, Minimize, Settings } from 'lucide-react';
+import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface GuardianNetOverlayProps {
   settings: GuardianNetSettings;
@@ -26,6 +33,7 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   const [gridLocked, setGridLocked] = useState(false);
   const [celestialMergeView, setCelestialMergeView] = useState(false);
   const [universeMiniature, setUniverseMiniature] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   
   const overlayStyles = {
     opacity: opacity / 100,
@@ -39,6 +47,22 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   const handleOpacityChange = (value: number[]) => {
     if (onSettingsChange) {
       onSettingsChange({ opacity: value[0] });
+    }
+  };
+
+  const toggleGridLock = () => {
+    setGridLocked(!gridLocked);
+  };
+
+  const toggleCIANet = () => {
+    if (onSettingsChange) {
+      onSettingsChange({ ciaNetVisible: !ciaNetVisible });
+    }
+  };
+
+  const toggleLockheedGrid = () => {
+    if (onSettingsChange) {
+      onSettingsChange({ lockheedGridVisible: !lockheedGridVisible });
     }
   };
 
@@ -140,64 +164,159 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
         </div>
       )}
       
-      <div className="absolute right-4 top-4 z-10 bg-black/80 p-3 rounded-lg border border-blue-400/30 pointer-events-auto">
-        <h3 className="text-xs text-blue-400 font-medium mb-2">Guardian Settings</h3>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white">Grid Lock</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 w-16 text-xs border-yellow-500/30"
-              onClick={() => setGridLocked(!gridLocked)}
-            >
-              {gridLocked ? <Lock className="h-3 w-3 mr-1 text-yellow-400" /> : <Unlock className="h-3 w-3 mr-1" />}
-              {gridLocked ? 'Locked' : 'Unlocked'}
-            </Button>
-          </div>
+      {/* Settings panel button */}
+      <div className="absolute top-4 right-4 z-10 pointer-events-auto">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="bg-black/70 hover:bg-black/90 text-white"
+          onClick={() => setShowSettings(!showSettings)}
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          {showSettings ? "Hide" : "Settings"}
+        </Button>
+      </div>
+      
+      {/* Expanded settings panel */}
+      {showSettings && (
+        <div className="absolute right-4 top-16 z-10 bg-black/80 p-4 rounded-lg border border-blue-400/30 pointer-events-auto" style={{ width: '240px' }}>
+          <h3 className="text-sm text-blue-400 font-medium mb-3">Guardian Settings</h3>
           
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white">Celestial Merge View</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`h-7 w-16 text-xs ${celestialMergeView ? 'border-cyan-400/50 bg-cyan-950/30' : 'border-gray-500/30'}`}
-              onClick={() => setCelestialMergeView(!celestialMergeView)}
-            >
-              {celestialMergeView ? <Eye className="h-3 w-3 mr-1 text-cyan-400" /> : <EyeOff className="h-3 w-3 mr-1" />}
-              {celestialMergeView ? 'On' : 'Off'}
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-white">Universe Miniature</span>
-            <Button
-              variant="outline"
-              size="sm"
-              className={`h-7 w-16 text-xs ${universeMiniature ? 'border-blue-400/50 bg-blue-950/30' : 'border-gray-500/30'}`}
-              onClick={() => setUniverseMiniature(!universeMiniature)}
-            >
-              {universeMiniature ? <Layers className="h-3 w-3 mr-1 text-blue-400" /> : <Layers className="h-3 w-3 mr-1" />}
-              {universeMiniature ? 'Visible' : 'Hidden'}
-            </Button>
-          </div>
-          
-          <div className="space-y-1 pt-1">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">Overlay Intensity</span>
-              <span className="text-xs text-gray-400">{opacity}%</span>
+          <div className="space-y-4">
+            {/* Grid opacity control - Accessible regardless of expansion state */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <label className="text-xs text-white">Grid Opacity</label>
+                <span className="text-xs text-white/80">{opacity}%</span>
+              </div>
+              <Slider
+                value={[opacity]}
+                min={10}
+                max={100}
+                step={5}
+                onValueChange={handleOpacityChange}
+                className="z-20"
+              />
             </div>
-            <Slider
-              value={[opacity]}
-              min={10}
-              max={100}
-              step={5}
-              className="w-full"
-              onValueChange={handleOpacityChange}
-            />
+            
+            {/* Visibility toggles */}
+            <div className="space-y-2">
+              <h4 className="text-xs text-white/80">Grid Visibility</h4>
+              
+              <div className="flex justify-between items-center">
+                <label className="text-xs text-white">CIA Mantis Net</label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={toggleCIANet}
+                      >
+                        {ciaNetVisible ? 
+                          <Eye className="h-4 w-4 text-yellow-400" /> : 
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        }
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      <p className="text-xs">{ciaNetVisible ? "Hide" : "Show"} CIA Mantis Net</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <label className="text-xs text-white">Lockheed Drax Grid</label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={toggleLockheedGrid}
+                      >
+                        {lockheedGridVisible ? 
+                          <Eye className="h-4 w-4 text-blue-400" /> : 
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        }
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="left">
+                      <p className="text-xs">{lockheedGridVisible ? "Hide" : "Show"} Lockheed Grid</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </div>
+            
+            {/* Additional toggles visible in expanded mode */}
+            {expanded && (
+              <>
+                <div className="space-y-2">
+                  <h4 className="text-xs text-white/80">Grid Mode</h4>
+                  
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs text-white">Grid Lock</label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 w-7 p-0"
+                            onClick={toggleGridLock}
+                          >
+                            {gridLocked ? 
+                              <Lock className="h-4 w-4 text-orange-400" /> : 
+                              <Unlock className="h-4 w-4 text-gray-400" />
+                            }
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                          <p className="text-xs">{gridLocked ? "Unlock" : "Lock"} Grid Orientation</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs text-white">Celestial Merge</label>
+                    <Switch 
+                      checked={celestialMergeView}
+                      onCheckedChange={setCelestialMergeView}
+                      size="sm"
+                    />
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs text-white">Universe Miniature</label>
+                    <Switch 
+                      checked={universeMiniature}
+                      onCheckedChange={setUniverseMiniature}
+                      size="sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs border-blue-400/30"
+                    onClick={onToggleExpanded}
+                  >
+                    <Minimize className="h-3 w-3 mr-2" />
+                    Minimize Grid View
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

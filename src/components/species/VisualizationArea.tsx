@@ -1,8 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
-import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
+import { Rotate3d, Maximize2, Minimize2, Compass, BrainCircuit, Layers, Filter } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Toggle } from "@/components/ui/toggle";
+import { Badge } from "@/components/ui/badge";
 import { Species, VisibleLayers, VisualStyle, ViewMode, GuardianNetSettings } from './types';
 import { generateStars } from './utils/visualUtils';
 import GuardianNetOverlay from './GuardianNetOverlay';
@@ -51,6 +54,10 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [containerSize, setContainerSize] = useState(500);
   const [rotation, setRotation] = useState({ x: 15, y: 0, z: 0 });
   const [showRotateHint, setShowRotateHint] = useState(rotate3dHint);
+  const [showCelestialCoordinates, setShowCelestialCoordinates] = useState(false);
+  const [showConstellationPaths, setShowConstellationPaths] = useState(false);
+  const [realmFilter, setRealmFilter] = useState<string | null>(null);
+  const [enhancedVisualization, setEnhancedVisualization] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -58,6 +65,11 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   }, [species]);
   
   const displaySpecies = (species && species.length > 0) ? species : mockSpecies;
+  
+  // Filter species by realm if a filter is active
+  const filteredSpecies = realmFilter 
+    ? displaySpecies.filter(s => s.realm === realmFilter)
+    : displaySpecies;
   
   const getVisualStyleClass = () => {
     switch(visualStyle) {
@@ -253,6 +265,131 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
+  // Render celestial coordinate grid 
+  const renderCelestialCoordinates = () => {
+    if (!showCelestialCoordinates) return null;
+    
+    return (
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="w-full h-full" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+          {/* Declination lines (parallels) */}
+          {[-60, -30, 0, 30, 60].map((deg) => {
+            const y = 250 + (deg / 90) * 200;
+            return (
+              <g key={`dec-${deg}`}>
+                <line
+                  x1="50"
+                  y1={y}
+                  x2="450"
+                  y2={y}
+                  stroke="rgba(100, 180, 255, 0.2)"
+                  strokeWidth="1"
+                  strokeDasharray="5,5"
+                />
+                <text
+                  x="30"
+                  y={y + 5}
+                  fill="rgba(200, 220, 255, 0.6)"
+                  fontSize="10"
+                >
+                  {deg}°
+                </text>
+              </g>
+            );
+          })}
+          
+          {/* Right Ascension lines (meridians) */}
+          {[0, 60, 120, 180, 240, 300].map((deg) => {
+            const x = 250 + Math.cos((deg - 90) * Math.PI / 180) * 200;
+            const y = 250 + Math.sin((deg - 90) * Math.PI / 180) * 200;
+            return (
+              <g key={`ra-${deg}`}>
+                <line
+                  x1="250"
+                  y1="250"
+                  x2={x}
+                  y2={y}
+                  stroke="rgba(100, 180, 255, 0.2)"
+                  strokeWidth="1"
+                  strokeDasharray="5,5"
+                />
+                <text
+                  x={x + (x > 250 ? 10 : -30)}
+                  y={y + (y > 250 ? 10 : -10)}
+                  fill="rgba(200, 220, 255, 0.6)"
+                  fontSize="10"
+                >
+                  {deg}°
+                </text>
+              </g>
+            );
+          })}
+          
+          {/* Legend */}
+          <text
+            x="20"
+            y="20"
+            fill="rgba(200, 220, 255, 0.8)"
+            fontSize="10"
+          >
+            Celestial Coordinate System
+          </text>
+        </svg>
+      </div>
+    );
+  };
+
+  // Render constellation paths 
+  const renderConstellationPaths = () => {
+    if (!showConstellationPaths || realmFilter === null) return null;
+    
+    // Species of the same realm to connect
+    const sameRealmSpecies = displaySpecies.filter(s => s.realm === realmFilter);
+    
+    // Connect species within the same realm with paths
+    return (
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="w-full h-full" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
+          {sameRealmSpecies.map((species1, i) => 
+            sameRealmSpecies.slice(i + 1).map((species2, j) => {
+              // Only connect if they're "close" by some measure
+              const distance = Math.abs((species1.vibration || 0) - (species2.vibration || 0));
+              if (distance > 2) return null;
+              
+              // Get positions (simplified - would need actual coordinates)
+              const x1 = 250 + Math.cos(i * 0.5) * 150;
+              const y1 = 250 + Math.sin(i * 0.5) * 150;
+              const x2 = 250 + Math.cos((i + j + 1) * 0.5) * 150;
+              const y2 = 250 + Math.sin((i + j + 1) * 0.5) * 150;
+              
+              let pathColor;
+              switch(realmFilter) {
+                case "Existence": pathColor = "rgba(56, 189, 248, 0.4)"; break;
+                case "Non-Existence": pathColor = "rgba(132, 204, 22, 0.4)"; break;
+                case "New Existence": pathColor = "rgba(249, 115, 22, 0.4)"; break;
+                case "Divine": pathColor = "rgba(168, 85, 247, 0.4)"; break;
+                default: pathColor = "rgba(255, 255, 255, 0.4)";
+              }
+              
+              return (
+                <line
+                  key={`path-${species1.id}-${species2.id}`}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke={pathColor}
+                  strokeWidth="1"
+                  strokeDasharray="3,3"
+                />
+              );
+            })
+          )}
+        </svg>
+      </div>
+    );
+  };
+
   return (
     <div className="relative" id="species-visualization-container" ref={containerRef}>
       {renderObservableUniverse()}
@@ -264,6 +401,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         {renderCosmicFlow()}
         {renderStars()}
         {renderEarthMarkerPulse()}
+        {renderCelestialCoordinates()}
+        {renderConstellationPaths()}
         
         <div 
           className={`relative ${isGuardianNetExpanded ? 'z-0' : 'z-10'}`} 
@@ -280,7 +419,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
             preserveAspectRatio="xMidYMid meet"
           >
             <SpeciesGateway 
-              species={displaySpecies}
+              species={filteredSpecies}
               onSelectSpecies={onSelectSpecies}
               selectedSpecies={selectedSpecies}
               mode={viewMode}
@@ -313,7 +452,77 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           onSettingsChange={handleGuardianNetSettingsChange}
         />
       )}
+
+      {/* Enhanced visualization controls */}
+      <div className={`absolute top-2 left-2 flex flex-col gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
+        <Toggle 
+          pressed={showCelestialCoordinates} 
+          onPressedChange={setShowCelestialCoordinates}
+          size="sm"
+          aria-label="Toggle celestial coordinates"
+          className="h-8 data-[state=on]:bg-blue-900/50"
+        >
+          <Compass className="h-4 w-4 mr-1" />
+          <span className="text-xs">Coordinates</span>
+        </Toggle>
+        
+        <Toggle 
+          pressed={enhancedVisualization} 
+          onPressedChange={setEnhancedVisualization}
+          size="sm"
+          aria-label="Toggle enhanced visualization"
+          className="h-8 data-[state=on]:bg-purple-900/50"
+        >
+          <BrainCircuit className="h-4 w-4 mr-1" />
+          <span className="text-xs">Enhanced</span>
+        </Toggle>
+        
+        <Toggle 
+          pressed={showConstellationPaths} 
+          onPressedChange={setShowConstellationPaths}
+          size="sm"
+          aria-label="Toggle constellation paths"
+          className="h-8 data-[state=on]:bg-green-900/50"
+          disabled={realmFilter === null}
+        >
+          <Layers className="h-4 w-4 mr-1" />
+          <span className="text-xs">Constellations</span>
+        </Toggle>
+      </div>
       
+      {/* Realm filter badges */}
+      <div className={`absolute top-2 right-20 flex gap-1 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
+        <Badge 
+          variant={realmFilter === "Existence" ? "default" : "outline"}
+          className={`cursor-pointer ${realmFilter === "Existence" ? "bg-blue-600" : "hover:bg-blue-900/30"}`}
+          onClick={() => setRealmFilter(realmFilter === "Existence" ? null : "Existence")}
+        >
+          Existence
+        </Badge>
+        <Badge 
+          variant={realmFilter === "Non-Existence" ? "default" : "outline"}
+          className={`cursor-pointer ${realmFilter === "Non-Existence" ? "bg-green-600" : "hover:bg-green-900/30"}`}
+          onClick={() => setRealmFilter(realmFilter === "Non-Existence" ? null : "Non-Existence")}
+        >
+          Non-Existence
+        </Badge>
+        <Badge 
+          variant={realmFilter === "New Existence" ? "default" : "outline"}
+          className={`cursor-pointer ${realmFilter === "New Existence" ? "bg-orange-600" : "hover:bg-orange-900/30"}`}
+          onClick={() => setRealmFilter(realmFilter === "New Existence" ? null : "New Existence")}
+        >
+          New Existence
+        </Badge>
+        <Badge 
+          variant={realmFilter === "Divine" ? "default" : "outline"}
+          className={`cursor-pointer ${realmFilter === "Divine" ? "bg-purple-600" : "hover:bg-purple-900/30"}`}
+          onClick={() => setRealmFilter(realmFilter === "Divine" ? null : "Divine")}
+        >
+          Divine
+        </Badge>
+      </div>
+      
+      {/* Zoom and fullscreen controls */}
       <div className={`absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
         <Button
           variant="ghost"
@@ -381,6 +590,14 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           />
         </div>
       )}
+      
+      {/* Species count info */}
+      <div className="absolute bottom-2 left-2 bg-black/70 rounded p-2 text-xs text-white">
+        {realmFilter ? 
+          `Showing ${filteredSpecies.length} species in ${realmFilter} realm` : 
+          `Showing all ${filteredSpecies.length} species`
+        }
+      </div>
     </div>
   );
 };

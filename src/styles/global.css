@@ -1,0 +1,158 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+    
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+    
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 0 0% 83.1%;
+    
+    --divine-gold: 48 100% 78%;
+    --sacred-blue: 217 91% 60%;
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(50);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sacred-glow {
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.divine-slider .slider-thumb {
+  border: 2px solid theme(colors.purple.500);
+  box-shadow: 0 0 10px theme(colors.purple.500);
+}
+
+.schumann-slider .slider-thumb {
+  border: 2px solid theme(colors.blue.500);
+  box-shadow: 0 0 10px theme(colors.blue.500);
+}
+
+/* New celestial coordinate styling */
+.celestial-coordinate-line {
+  stroke-dasharray: 4, 4;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.celestial-coordinate-line:hover {
+  opacity: 0.6;
+  stroke-dasharray: none;
+}
+
+/* Enhanced connection animations */
+@keyframes quantum-pulse {
+  0% {
+    stroke-width: 0.5;
+    stroke-opacity: 0.3;
+  }
+  50% {
+    stroke-width: 2;
+    stroke-opacity: 0.8;
+  }
+  100% {
+    stroke-width: 0.5;
+    stroke-opacity: 0.3;
+  }
+}
+
+.quantum-connection {
+  animation: quantum-pulse 3s infinite;
+}
+
+/* Species highlight animation */
+@keyframes species-highlight {
+  0% {
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255,255,255,0.8));
+  }
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+  }
+}
+
+.species-highlighted {
+  animation: species-highlight 2s infinite;
+}
+
+/* Radio wave animation */
+@keyframes radio-wave {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 100;
+  }
+}
+
+.radio-wave {
+  stroke-dasharray: 5, 5;
+  animation: radio-wave 20s linear infinite;
+}
+
+/* Realm filter styling */
+.realm-filter {
+  transition: all 0.3s ease;
+}
+
+.realm-filter:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.2);
+}
+
+.realm-filter.active {
+  box-shadow: 0 0 10px currentColor;
+}
