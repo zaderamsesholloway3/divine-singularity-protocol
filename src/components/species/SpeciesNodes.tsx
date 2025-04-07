@@ -38,9 +38,15 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
   visibleLayers,
   showAllNames = false
 }) => {
+  console.log("SpeciesNodes rendering with species count:", species.length);
+  
   // Origin point location (center of the container)
   const originX = containerSize / 2;
   const originY = containerSize / 2;
+
+  // Filter visible species based on layers
+  const visibleSpecies = species.filter(s => isSpeciesVisible(s, visibleLayers));
+  console.log("Visible species count:", visibleSpecies.length);
   
   return (
     <>
@@ -68,13 +74,11 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       </g>
 
       {/* Connection Lines from Origin to Species */}
-      {species && species.map((s, i) => {
-        if (!isSpeciesVisible(s, visibleLayers)) return null;
-        
+      {visibleSpecies.map((s, i) => {
         const { x, y } = getCoordinates(
           s,
           i,
-          species.length,
+          visibleSpecies.length,
           mode,
           speciesRadius,
           containerSize,
@@ -99,13 +103,11 @@ const SpeciesNodes: React.FC<SpeciesNodesProps> = ({
       })}
 
       {/* Individual Species Nodes */}
-      {species && species.map((s, i) => {
-        if (!isSpeciesVisible(s, visibleLayers)) return null;
-        
+      {visibleSpecies.map((s, i) => {
         const { x, y, z } = getCoordinates(
           s,
           i,
-          species.length,
+          visibleSpecies.length,
           mode,
           speciesRadius,
           containerSize,

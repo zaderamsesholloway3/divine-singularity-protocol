@@ -1,5 +1,5 @@
 
-import React, { useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { Species, ViewMode, VisualStyle, VisibleLayers } from './types';
 import useDragRotation from './hooks/useDragRotation';
 import usePingAnimation from './hooks/usePingAnimation';
@@ -8,6 +8,7 @@ import DistanceRings from './DistanceRings';
 import PingTrail from './PingTrail';
 import SpeciesNodes from './SpeciesNodes';
 import { getCoordinates } from './utils/coordinateUtils';
+import { mockSpecies } from './mockData';
 
 interface SpeciesGatewayProps {
   species: Species[];
@@ -29,7 +30,7 @@ export interface SpeciesGatewayRef {
 
 export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>((props, ref) => {
   const { 
-    species, 
+    species = [], 
     onSelectSpecies, 
     selectedSpecies, 
     mode = "radial", 
@@ -59,6 +60,13 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
   
   const containerSize = 500;
   const speciesRadius = containerSize / 2.5;
+  
+  // Use mockSpecies if no species are provided or if the array is empty
+  const displaySpecies = species.length > 0 ? species : mockSpecies;
+  
+  useEffect(() => {
+    console.log("SpeciesGateway received species count:", displaySpecies.length);
+  }, [displaySpecies]);
   
   const toggleTargetLock = () => {
     if (!selectedSpecies) {
@@ -120,7 +128,7 @@ export const SpeciesGateway = forwardRef<SpeciesGatewayRef, SpeciesGatewayProps>
         />
         
         <SpeciesNodes 
-          species={species}
+          species={displaySpecies}
           selectedSpecies={selectedSpecies}
           hoveredSpecies={hoveredSpecies}
           setHoveredSpecies={setHoveredSpecies}

@@ -35,14 +35,14 @@ export const getRadialCoordinates = (
   
   // Apply rotation transformations
   // Rotate around X axis (tilt up/down)
-  const cosX = Math.cos(rotation.x);
-  const sinX = Math.sin(rotation.x);
+  const cosX = Math.cos(rotation.x * Math.PI / 180);
+  const sinX = Math.sin(rotation.x * Math.PI / 180);
   const rotatedY1 = baseY * cosX - baseZ * sinX;
   const rotatedZ1 = baseY * sinX + baseZ * cosX;
   
   // Rotate around Y axis (left/right)
-  const cosY = Math.cos(rotation.y);
-  const sinY = Math.sin(rotation.y);
+  const cosY = Math.cos(rotation.y * Math.PI / 180);
+  const sinY = Math.sin(rotation.y * Math.PI / 180);
   const rotatedX = baseX * cosY + rotatedZ1 * sinY;
   const rotatedZ = -baseX * sinY + rotatedZ1 * cosY;
   
@@ -153,6 +153,8 @@ export const getCoordinates = (
   containerSize: number,
   rotation: { x: number; y: number }
 ): Coordinates => {
+  console.log(`Calculating coordinates for species: ${species.name}, mode: ${mode}`);
+  
   // Select the appropriate coordinate system based on view mode
   switch (mode) {
     case "radial":

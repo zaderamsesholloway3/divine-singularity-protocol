@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2 } from 'lucide-react';
@@ -49,6 +50,10 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [rotation, setRotation] = useState({ x: 15, y: 0, z: 0 });
   const [showRotateHint, setShowRotateHint] = useState(rotate3dHint);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    console.log("VisualizationArea species count:", species?.length || 0);
+  }, [species]);
   
   const displaySpecies = (species && species.length > 0) ? species : mockSpecies;
   
