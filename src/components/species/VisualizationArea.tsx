@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, WheelEvent } from 'react';
 import { SpeciesGateway, SpeciesGatewayRef } from './SpeciesGateway';
 import { Rotate3d, Maximize2, Minimize2, Compass, BrainCircuit, Layers, Filter } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Species, VisibleLayers, VisualStyle, ViewMode, GuardianNetSettings } fr
 import { generateStars } from './utils/visualUtils';
 import GuardianNetOverlay from './GuardianNetOverlay';
 import { mockSpecies } from './mockData';
+import { toast } from 'sonner';
 
 interface VisualizationAreaProps {
   species: Species[];
@@ -60,13 +60,20 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
   const [enhancedVisualization, setEnhancedVisualization] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   
+  const [isZooming, setIsZooming] = useState(false);
+  const zoomTimeout = useRef<number | null>(null);
+  const [zoomDirection, setZoomDirection] = useState<"in" | "out" | null>(null);
+  const MIN_ZOOM = 0.5;
+  const MAX_ZOOM = 2.0;
+  const ZOOM_STEP = 0.1;
+  const SMOOTH_ZOOM_DURATION = 600; // ms
+  
   useEffect(() => {
     console.log("VisualizationArea species count:", species?.length || 0);
   }, [species]);
   
   const displaySpecies = (species && species.length > 0) ? species : mockSpecies;
   
-  // Filter species by realm if a filter is active
   const filteredSpecies = realmFilter 
     ? displaySpecies.filter(s => s.realm === realmFilter)
     : displaySpecies;
@@ -101,6 +108,61 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         setIsFullScreen(false);
       }
     }
+  };
+
+  const handleWheel = (e: WheelEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isGuardianNetExpanded) return;
+    
+    const direction = e.deltaY > 0 ? "out" : "in";
+    setZoomDirection(direction);
+    
+    if (!isZooming) {
+      setIsZooming(true);
+      smoothZoom(direction);
+      
+      if (zoomTimeout.current) clearTimeout(zoomTimeout.current);
+      zoomTimeout.current = window.setTimeout(() => {
+        toast.info(`Zoom level: ${Math.round(zoomLevel * 100)}%`, {
+          duration: 1000,
+          position: "bottom-center"
+        });
+      }, 200) as unknown as number;
+    }
+  };
+
+  const smoothZoom = (direction: "in" | "out") => {
+    const targetZoom = direction === "in" 
+      ? Math.min(MAX_ZOOM, zoomLevel + ZOOM_STEP)
+      : Math.max(MIN_ZOOM, zoomLevel - ZOOM_STEP);
+    
+    setZoomLevel(targetZoom);
+    setIsZooming(false);
+  };
+
+  const zoomIn = () => {
+    const newZoom = Math.min(MAX_ZOOM, zoomLevel + ZOOM_STEP);
+    setZoomLevel(newZoom);
+    
+    if (newZoom === MAX_ZOOM) {
+      toast.info("Maximum zoom level reached", { duration: 1000 });
+    }
+  };
+
+  const zoomOut = () => {
+    const newZoom = Math.max(MIN_ZOOM, zoomLevel - ZOOM_STEP);
+    setZoomLevel(newZoom);
+    
+    if (newZoom === MIN_ZOOM) {
+      toast.info("Minimum zoom level reached", { duration: 1000 });
+    }
+  };
+
+  const resetZoom = () => {
+    setZoomLevel(1.0);
+    toast.info("Zoom reset to 100%", { duration: 1000 });
   };
 
   useEffect(() => {
@@ -230,8 +292,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
       </svg>
     );
   };
-  
-  // Handle Guardian Net settings changes
+
   const handleGuardianNetSettingsChange = (settings: Partial<GuardianNetSettings>) => {
     if (onGuardianNetSettingsChange) {
       onGuardianNetSettingsChange(settings);
@@ -242,7 +303,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
 
   const shouldShowRotationHint = viewMode === "radial" && showRotateHint && !isGuardianNetExpanded && !selectedSpecies;
 
-  // Earth's quantum marker (Cary, NC) pulse effect
   const renderEarthMarkerPulse = () => {
     if (isGuardianNetExpanded) return null;
     
@@ -265,14 +325,12 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
-  // Render celestial coordinate grid 
   const renderCelestialCoordinates = () => {
     if (!showCelestialCoordinates) return null;
     
     return (
       <div className="absolute inset-0 pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
-          {/* Declination lines (parallels) */}
           {[-60, -30, 0, 30, 60].map((deg) => {
             const y = 250 + (deg / 90) * 200;
             return (
@@ -298,7 +356,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
             );
           })}
           
-          {/* Right Ascension lines (meridians) */}
           {[0, 60, 120, 180, 240, 300].map((deg) => {
             const x = 250 + Math.cos((deg - 90) * Math.PI / 180) * 200;
             const y = 250 + Math.sin((deg - 90) * Math.PI / 180) * 200;
@@ -325,7 +382,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
             );
           })}
           
-          {/* Legend */}
           <text
             x="20"
             y="20"
@@ -339,24 +395,19 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
-  // Render constellation paths 
   const renderConstellationPaths = () => {
     if (!showConstellationPaths || realmFilter === null) return null;
     
-    // Species of the same realm to connect
     const sameRealmSpecies = displaySpecies.filter(s => s.realm === realmFilter);
     
-    // Connect species within the same realm with paths
     return (
       <div className="absolute inset-0 pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet">
           {sameRealmSpecies.map((species1, i) => 
             sameRealmSpecies.slice(i + 1).map((species2, j) => {
-              // Only connect if they're "close" by some measure
               const distance = Math.abs((species1.vibration || 0) - (species2.vibration || 0));
               if (distance > 2) return null;
               
-              // Get positions (simplified - would need actual coordinates)
               const x1 = 250 + Math.cos(i * 0.5) * 150;
               const y1 = 250 + Math.sin(i * 0.5) * 150;
               const x2 = 250 + Math.cos((i + j + 1) * 0.5) * 150;
@@ -390,6 +441,20 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
     );
   };
 
+  const renderZoomIndicator = () => {
+    if (!isZooming || !zoomDirection) return null;
+    
+    return (
+      <div className="absolute bottom-20 right-4 bg-black/50 rounded-full px-3 py-1 text-sm text-white flex items-center gap-2 animate-fade-in-out">
+        {zoomDirection === "in" ? (
+          <span>Zooming in {Math.round(zoomLevel * 100)}%</span>
+        ) : (
+          <span>Zooming out {Math.round(zoomLevel * 100)}%</span>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="relative" id="species-visualization-container" ref={containerRef}>
       {renderObservableUniverse()}
@@ -397,6 +462,7 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         className={`rounded-lg overflow-hidden min-h-[400px] ${isFullScreen ? 'h-screen' : ''} 
         ${fullPageMode ? 'w-full h-full' : ''} 
         flex items-center justify-center ${getVisualStyleClass()} ${isGuardianNetExpanded ? 'opacity-30' : ''}`}
+        onWheel={handleWheel}
       >
         {renderCosmicFlow()}
         {renderStars()}
@@ -409,7 +475,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
           style={{ 
             width: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
             height: isFullScreen || fullPageMode ? '100%' : `${containerSize}px`,
-            transform: `scale(${zoomLevel})` 
+            transform: `scale(${zoomLevel})`,
+            transition: 'transform 0.3s ease-out' 
           }}
         >
           <svg 
@@ -441,6 +508,8 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
             </p>
           </div>
         )}
+        
+        {renderZoomIndicator()}
       </div>
       
       {guardianNetSettings && (
@@ -453,7 +522,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         />
       )}
 
-      {/* Enhanced visualization controls */}
       <div className={`absolute top-2 left-2 flex flex-col gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
         <Toggle 
           pressed={showCelestialCoordinates} 
@@ -490,7 +558,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </Toggle>
       </div>
       
-      {/* Realm filter badges */}
       <div className={`absolute top-2 right-20 flex gap-1 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
         <Badge 
           variant={realmFilter === "Existence" ? "default" : "outline"}
@@ -522,40 +589,68 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </Badge>
       </div>
       
-      {/* Zoom and fullscreen controls */}
-      <div className={`absolute bottom-2 right-2 flex gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-white"
-          onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
-          disabled={isGuardianNetExpanded}
-        >
-          -
-        </Button>
-        <span className="inline-flex items-center text-xs text-white">
-          {Math.round(zoomLevel * 100)}%
-        </span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-white"
-          onClick={() => setZoomLevel(Math.min(2.0, zoomLevel + 0.1))}
-          disabled={isGuardianNetExpanded}
-        >
-          +
-        </Button>
+      <div className={`absolute bottom-2 right-2 flex flex-col gap-2 bg-black/70 rounded p-2 ${isGuardianNetExpanded ? 'opacity-50' : ''}`}>
+        <div className="flex items-center gap-1 justify-between px-1">
+          <span className="text-xs text-white opacity-80">Zoom</span>
+          <span className="text-xs font-mono text-white">{Math.round(zoomLevel * 100)}%</span>
+        </div>
         
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-white ml-2"
-          onClick={toggleFullScreen}
-          title={isFullScreen ? "Exit full screen" : "Enter full screen"}
-          disabled={isGuardianNetExpanded}
-        >
-          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-        </Button>
+        <div className="flex gap-1 items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-white hover:bg-blue-900/30"
+            onClick={zoomOut}
+            disabled={isGuardianNetExpanded || zoomLevel <= MIN_ZOOM}
+            title="Zoom out"
+          >
+            -
+          </Button>
+          
+          <Slider
+            value={[zoomLevel * 100]}
+            min={MIN_ZOOM * 100}
+            max={MAX_ZOOM * 100}
+            step={5}
+            onValueChange={([value]) => setZoomLevel(value / 100)}
+            className="w-20"
+            disabled={isGuardianNetExpanded}
+          />
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-white hover:bg-blue-900/30"
+            onClick={zoomIn}
+            disabled={isGuardianNetExpanded || zoomLevel >= MAX_ZOOM}
+            title="Zoom in"
+          >
+            +
+          </Button>
+        </div>
+        
+        <div className="flex justify-between">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2 bg-black/50 border-blue-500/30 text-blue-400 hover:bg-blue-900/30"
+            onClick={resetZoom}
+            disabled={isGuardianNetExpanded}
+          >
+            Reset (100%)
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-white hover:bg-blue-900/30"
+            onClick={toggleFullScreen}
+            title={isFullScreen ? "Exit full screen" : "Enter full screen"}
+            disabled={isGuardianNetExpanded}
+          >
+            {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
       
       {shouldShowRotationHint && (
@@ -591,7 +686,6 @@ const VisualizationArea: React.FC<VisualizationAreaProps> = ({
         </div>
       )}
       
-      {/* Species count info */}
       <div className="absolute bottom-2 left-2 bg-black/70 rounded p-2 text-xs text-white">
         {realmFilter ? 
           `Showing ${filteredSpecies.length} species in ${realmFilter} realm` : 

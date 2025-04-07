@@ -1,216 +1,202 @@
 
-import { Species } from '@/components/species/types';
+import { Species } from '../components/species/types';
 
+// Create audio context on demand to prevent autoplay policy issues
 let audioContext: AudioContext | null = null;
 
 /**
- * Initialize the audio context on user interaction
+ * Initialize the audio context when user first interacts
  */
-export const initializeAudio = (): boolean => {
-  try {
-    if (!audioContext) {
-      audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    return true;
-  } catch (error) {
-    console.error("Failed to initialize audio context", error);
-    return false;
+const getAudioContext = (): AudioContext => {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
+  return audioContext;
 };
 
 /**
  * Play a ping sound at the specified frequency and power
+ * @param frequency The frequency in Hz
+ * @param power The power level as a percentage (0-100)
  */
-export const playPingSound = (frequency: number, power: number) => {
-  if (!audioContext) {
-    if (!initializeAudio()) return;
-  }
-  
-  if (!audioContext) return;
-  
+export const playPingSound = (frequency: number, power: number): void => {
   try {
-    // Create oscillator for the main ping
-    const oscillator = audioContext.createOscillator();
+    const ctx = getAudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    // Normalize power to a reasonable gain value
+    const gain = Math.min(power / 100, 0.4);
+    
+    // Set oscillator properties
     oscillator.type = 'sine';
     oscillator.frequency.value = frequency;
     
-    // Create a gain node for volume control
-    const gainNode = audioContext.createGain();
-    const volume = power / 100 * 0.3; // Max volume of 0.3
-    gainNode.gain.value = volume;
+    // Configure envelope
+    gainNode.gain.value = 0;
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(gain, ctx.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.0);
     
-    // Create a filter for more pleasant sound
-    const filter = audioContext.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
-    filter.Q.value = 1;
+    // Connect nodes
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
     
-    // Connect the audio nodes
-    oscillator.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Schedule the ping sound
+    // Start and stop
     oscillator.start();
-    
-    // Create a smooth fade out
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001, audioContext.currentTime + 1.5
-    );
-    
-    // Stop after the fade out
-    oscillator.stop(audioContext.currentTime + 1.5);
-    
-    // Clean up after the sound is done
-    setTimeout(() => {
-      oscillator.disconnect();
-      gainNode.disconnect();
-      filter.disconnect();
-    }, 1600);
+    oscillator.stop(ctx.currentTime + 2.0);
   } catch (error) {
-    console.error("Error playing ping sound", error);
+    console.error("Error playing ping sound:", error);
   }
 };
 
 /**
- * Play a response tone for a specific species
+ * Play a tone representing a specific species
+ * @param species The species data
  */
-export const playResponseSound = (species: Species) => {
-  if (!audioContext) {
-    if (!initializeAudio()) return;
-  }
-  
-  if (!audioContext) return;
-  
+export const playSpeciesTone = (species: Species): void => {
   try {
-    // Create the main oscillator
-    const oscillator = audioContext.createOscillator();
-    oscillator.type = 'sine';
+    const ctx = getAudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
     
-    // Set frequency based on species vibration
+    // Species-specific sound design
     const baseFreq = species.vibration || 7.83;
+    oscillator.type = species.realm === "Divine" ? "sine" :
+                     species.realm === "Existence" ? "triangle" :
+                     species.realm === "Non-Existence" ? "square" :
+                     "sawtooth";
+    
     oscillator.frequency.value = baseFreq;
     
-    // Create a gain node
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = 0.0;
+    // Configure envelope with short attack and decay
+    gainNode.gain.value = 0;
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
     
-    // Create a filter
-    const filter = audioContext.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.value = baseFreq * 2;
-    filter.Q.value = 2;
+    // Connect nodes
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
     
-    // Connect the audio nodes
-    oscillator.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Start the oscillator
+    // Start and stop
     oscillator.start();
-    
-    // Create a fade in
-    gainNode.gain.linearRampToValueAtTime(
-      0.15, audioContext.currentTime + 0.1
-    );
-    
-    // Create a pulsating effect
-    const pulseCount = 3;
-    const pulseDuration = 0.2;
-    for (let i = 0; i < pulseCount; i++) {
-      const startTime = audioContext.currentTime + (i * pulseDuration);
-      gainNode.gain.linearRampToValueAtTime(0.15, startTime);
-      gainNode.gain.linearRampToValueAtTime(0.05, startTime + (pulseDuration / 2));
-    }
-    
-    // Create a fade out
-    gainNode.gain.linearRampToValueAtTime(
-      0.001, audioContext.currentTime + (pulseCount * pulseDuration + 0.2)
-    );
-    
-    // Stop the oscillator
-    oscillator.stop(audioContext.currentTime + (pulseCount * pulseDuration + 0.3));
-    
-    // Clean up
-    setTimeout(() => {
-      oscillator.disconnect();
-      gainNode.disconnect();
-      filter.disconnect();
-    }, (pulseCount * pulseDuration + 0.4) * 1000);
+    oscillator.stop(ctx.currentTime + 0.5);
   } catch (error) {
-    console.error("Error playing response sound", error);
+    console.error("Error playing species tone:", error);
   }
 };
 
 /**
- * Play a unique tone for a specific species
+ * Play a response sound from a species
+ * @param species The species data
  */
-export const playSpeciesTone = (species: Species) => {
-  if (!audioContext) {
-    if (!initializeAudio()) return;
-  }
-  
-  if (!audioContext) return;
-  
+export const playResponseSound = (species: Species): void => {
   try {
-    // Create primary oscillator
-    const oscillator1 = audioContext.createOscillator();
-    oscillator1.type = 'sine';
+    const ctx = getAudioContext();
     
-    // Create secondary oscillator for harmonics
-    const oscillator2 = audioContext.createOscillator();
-    oscillator2.type = 'triangle';
+    // Create main oscillator and filter
+    const oscillator = ctx.createOscillator();
+    const filter = ctx.createBiquadFilter();
+    const gainNode = ctx.createGain();
     
-    // Set frequencies based on species properties
+    // Species-specific sound design
     const baseFreq = species.vibration || 7.83;
-    const harmonicRatio = species.fq !== undefined ? 1 + species.fq : 1.5;
+    oscillator.type = species.realm === "Divine" ? "sine" :
+                     species.realm === "Existence" ? "triangle" :
+                     species.realm === "Non-Existence" ? "square" :
+                     "sawtooth";
     
-    oscillator1.frequency.value = baseFreq;
-    oscillator2.frequency.value = baseFreq * harmonicRatio;
+    oscillator.frequency.value = baseFreq * 2;
     
-    // Create gain nodes
-    const gain1 = audioContext.createGain();
-    gain1.gain.value = 0.0;
+    filter.type = "lowpass";
+    filter.frequency.value = 1000;
+    filter.Q.value = 8;
     
-    const gain2 = audioContext.createGain();
-    gain2.gain.value = 0.0;
+    // Configure envelope for response sound (longer and more complex)
+    gainNode.gain.value = 0;
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.1);
+    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.2);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
     
-    // Create a master gain
-    const masterGain = audioContext.createGain();
-    masterGain.gain.value = 0.2;
+    // Connect nodes: oscillator -> filter -> gain -> destination
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(ctx.destination);
     
-    // Connect the audio graph
-    oscillator1.connect(gain1);
-    oscillator2.connect(gain2);
-    gain1.connect(masterGain);
-    gain2.connect(masterGain);
-    masterGain.connect(audioContext.destination);
+    // Add filter sweep for interest
+    filter.frequency.setValueAtTime(400, ctx.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(4000, ctx.currentTime + 0.5);
+    filter.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 1.0);
     
-    // Start oscillators
-    oscillator1.start();
-    oscillator2.start();
-    
-    // Create envelope
-    gain1.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.02);
-    gain2.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.03);
-    
-    // Fade out
-    gain1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
-    gain2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.7);
-    
-    // Stop oscillators
-    oscillator1.stop(audioContext.currentTime + 0.71);
-    oscillator2.stop(audioContext.currentTime + 0.71);
-    
-    // Clean up
-    setTimeout(() => {
-      oscillator1.disconnect();
-      oscillator2.disconnect();
-      gain1.disconnect();
-      gain2.disconnect();
-      masterGain.disconnect();
-    }, 800);
+    // Start and stop
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 1.5);
   } catch (error) {
-    console.error("Error playing species tone", error);
+    console.error("Error playing response sound:", error);
+  }
+};
+
+/**
+ * Play a background ambient drone
+ * @param frequency The base frequency
+ * @param duration Duration in seconds
+ * @returns A function to stop the drone
+ */
+export const playAmbientDrone = (frequency: number, duration: number = 30): () => void => {
+  try {
+    const ctx = getAudioContext();
+    
+    // Create oscillators for rich sound
+    const oscillators: OscillatorNode[] = [];
+    const gainNodes: GainNode[] = [];
+    
+    // Create 3 oscillators with slight detune for richness
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = i === 0 ? "sine" : i === 1 ? "triangle" : "sine";
+      osc.frequency.value = frequency * (i === 0 ? 1 : i === 1 ? 0.5 : 2);
+      osc.detune.value = (i - 1) * 10; // Slight detune
+      
+      gain.gain.value = i === 0 ? 0.1 : i === 1 ? 0.05 : 0.03;
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      oscillators.push(osc);
+      gainNodes.push(gain);
+      
+      // Start oscillator
+      osc.start();
+    }
+    
+    // Set end time (if duration is provided)
+    if (duration > 0) {
+      setTimeout(() => {
+        stopDrone();
+      }, duration * 1000);
+    }
+    
+    // Return function to stop the drone
+    const stopDrone = () => {
+      const now = ctx.currentTime;
+      gainNodes.forEach((gain, i) => {
+        gain.gain.setValueAtTime(gain.gain.value, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+        
+        // Stop oscillator after fade out
+        setTimeout(() => {
+          oscillators[i].stop();
+        }, 2000);
+      });
+    };
+    
+    return stopDrone;
+  } catch (error) {
+    console.error("Error playing ambient drone:", error);
+    return () => {};
   }
 };

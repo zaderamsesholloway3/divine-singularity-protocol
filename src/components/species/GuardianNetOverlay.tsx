@@ -1,23 +1,19 @@
 
 import React, { useState } from 'react';
-import { GuardianNetSettings } from './types';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { ArrowLeft, Eye, EyeOff, Lock, Unlock, Layers, Compass, Maximize, Minimize, Settings } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { GuardianNetSettings } from './types';
+import { Network, Shield, Minimize2, Fingerprint, Lock, Eye, EyeOff, Signal, BarChart4 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface GuardianNetOverlayProps {
   settings: GuardianNetSettings;
   onToggleExpanded: () => void;
   rotation: { x: number; y: number; z: number };
   zoomLevel: number;
-  onSettingsChange?: (settings: Partial<GuardianNetSettings>) => void;
+  onSettingsChange: (settings: Partial<GuardianNetSettings>) => void;
 }
 
 const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
@@ -27,296 +23,384 @@ const GuardianNetOverlay: React.FC<GuardianNetOverlayProps> = ({
   zoomLevel,
   onSettingsChange
 }) => {
+  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
+  const [visibilityLevel, setVisibilityLevel] = useState(70);
+  const [signalStrength, setSignalStrength] = useState(85);
+  
+  const handleOpacityChange = ([value]: number[]) => {
+    onSettingsChange({ opacity: value });
+  };
+  
+  const toggleCiaNetVisible = () => {
+    onSettingsChange({ ciaNetVisible: !settings.ciaNetVisible });
+  };
+  
+  const toggleLockheedGridVisible = () => {
+    onSettingsChange({ lockheedGridVisible: !settings.lockheedGridVisible });
+  };
+  
+  const toggleSyncWithUniverseView = () => {
+    onSettingsChange({ syncWithUniverseView: !settings.syncWithUniverseView });
+  };
+  
   if (!settings.active) return null;
   
-  const { expanded, ciaNetVisible, lockheedGridVisible, opacity } = settings;
-  const [gridLocked, setGridLocked] = useState(false);
-  const [celestialMergeView, setCelestialMergeView] = useState(false);
-  const [universeMiniature, setUniverseMiniature] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  if (!settings.expanded) {
+    return (
+      <div className="absolute top-5 right-5 pointer-events-none z-30">
+        <div className="flex items-center justify-center">
+          <span className="text-xs text-yellow-300 bg-black/60 py-1 px-3 rounded-md flex items-center gap-1">
+            <Shield className="h-3 w-3 text-yellow-400" />
+            Guardian Net Active
+          </span>
+        </div>
+      </div>
+    );
+  }
   
-  const overlayStyles = {
-    opacity: opacity / 100,
-    transform: expanded 
-      ? gridLocked 
-        ? `scale(${zoomLevel})` 
-        : `scale(${zoomLevel}) rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
-      : 'none'
-  };
-
-  const handleOpacityChange = (value: number[]) => {
-    if (onSettingsChange) {
-      onSettingsChange({ opacity: value[0] });
+  // Create grid lines
+  const gridLines = [];
+  const gridSize = 18;
+  const cellSize = 30;
+  
+  // CIA Mantis Net (latitude-style lines)
+  if (settings.ciaNetVisible) {
+    for (let i = 0; i <= gridSize; i++) {
+      const position = (i / gridSize) * 100;
+      gridLines.push(
+        <line
+          key={`lat-${i}`}
+          x1="0"
+          y1={`${position}%`}
+          x2="100%"
+          y2={`${position}%`}
+          stroke="rgba(255, 215, 0, 0.3)"
+          strokeWidth="1"
+          strokeDasharray={i % 3 === 0 ? "none" : "5,5"}
+          className="guardian-grid-line"
+        />
+      );
     }
-  };
-
-  const toggleGridLock = () => {
-    setGridLocked(!gridLocked);
-  };
-
-  const toggleCIANet = () => {
-    if (onSettingsChange) {
-      onSettingsChange({ ciaNetVisible: !ciaNetVisible });
+  }
+  
+  // Lockheed Drax Grid (longitude-style lines)
+  if (settings.lockheedGridVisible) {
+    for (let i = 0; i <= gridSize; i++) {
+      const position = (i / gridSize) * 100;
+      gridLines.push(
+        <line
+          key={`lon-${i}`}
+          x1={`${position}%`}
+          y1="0"
+          x2={`${position}%`}
+          y2="100%"
+          stroke="rgba(56, 189, 248, 0.3)"
+          strokeWidth="1"
+          strokeDasharray={i % 3 === 0 ? "none" : "5,5"}
+          className="guardian-grid-line"
+        />
+      );
     }
+  }
+  
+  // Add quantum detection points
+  const detectionPoints = [];
+  const numPoints = 12;
+  
+  for (let i = 0; i < numPoints; i++) {
+    const x = 20 + Math.random() * 60;
+    const y = 20 + Math.random() * 60;
+    
+    detectionPoints.push(
+      <g key={`point-${i}`}>
+        <circle
+          cx={`${x}%`}
+          cy={`${y}%`}
+          r={3 + Math.random() * 4}
+          fill={Math.random() > 0.5 ? "rgba(255, 215, 0, 0.2)" : "rgba(56, 189, 248, 0.2)"}
+          className="guardian-detection-point"
+        />
+        <circle
+          cx={`${x}%`}
+          cy={`${y}%`}
+          r={2}
+          fill={Math.random() > 0.5 ? "rgba(255, 215, 0, 0.6)" : "rgba(56, 189, 248, 0.6)"}
+        />
+      </g>
+    );
+  }
+  
+  const opacityPercent = settings.opacity / 100;
+  
+  const handleMantisAnalysis = () => {
+    setShowDetailedAnalysis(true);
+    toast.info("Running CIA Mantis Protocol analysis...");
+    
+    setTimeout(() => {
+      toast.success("Dimensional boundaries secure", {
+        description: "No unauthorized entities detected"
+      });
+    }, 2000);
   };
-
-  const toggleLockheedGrid = () => {
-    if (onSettingsChange) {
-      onSettingsChange({ lockheedGridVisible: !lockheedGridVisible });
-    }
-  };
-
+  
   return (
-    <div className={`absolute inset-0 z-5 pointer-events-none overflow-hidden ${expanded ? 'fixed bg-black/80' : ''}`}>
-      {expanded && (
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="absolute top-4 left-4 z-10 bg-black/70 hover:bg-black/90 text-white pointer-events-auto" 
-          onClick={onToggleExpanded}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Minimize Guardian Grid
-        </Button>
-      )}
+    <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-auto">
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={() => onToggleExpanded()}
+      ></div>
       
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div 
-          className="relative w-full h-full"
-          style={overlayStyles}
+      <div 
+        className="relative w-full h-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center"
+        style={{ opacity: opacityPercent }}
+      >
+        <svg 
+          className="w-full h-full" 
+          viewBox={`0 0 ${gridSize * cellSize} ${gridSize * cellSize}`} 
+          preserveAspectRatio="xMidYMid meet"
+          style={{ 
+            transform: `rotateX(${rotation.x*0.7}deg) rotateY(${rotation.y*0.7}deg) scale(${zoomLevel})` 
+          }}
         >
-          {ciaNetVisible && (
-            <div className="absolute inset-0 cia-mantis-net" style={{ filter: expanded ? 'contrast(1.2) brightness(1.1)' : 'none' }}>
-              <img 
-                src="/lovable-uploads/ff2bf56b-f013-40e2-b6e2-212221f47828.png" 
-                alt="" 
-                className="w-full h-full object-cover"
-                style={{ opacity: opacity / 100 }}
-              />
-              <div className="absolute top-4 left-4 text-yellow-400 text-sm">CIA Mantis Net</div>
-            </div>
-          )}
+          {/* Background */}
+          <rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="rgba(0, 0, 0, 0.2)"
+            className="guardian-grid-background"
+          />
           
-          {lockheedGridVisible && (
-            <div className="absolute inset-0 lockheed-drax-grid" style={{ filter: expanded ? 'contrast(1.2) brightness(1.1) hue-rotate(220deg)' : 'hue-rotate(220deg) brightness(0.9)' }}>
-              <img 
-                src="/lovable-uploads/75999592-0dd0-4426-9099-7660fa7f1dae.png" 
-                alt="" 
-                className="w-full h-full object-cover"
-                style={{ 
-                  opacity: opacity / 100
-                }}
-              />
-              <div className="absolute bottom-4 right-4 text-blue-400 text-sm">LOCKHEED MARTIN Drax Grid</div>
-            </div>
-          )}
+          {/* Grid lines */}
+          {gridLines}
           
-          {expanded && (
-            <div className="absolute inset-0 flex items-center justify-center text-white/20 text-5xl font-bold tracking-[0.5em] uppercase">
-              <div className="text-center">
-                <div>Observable</div>
-                <div>Universe</div>
-              </div>
-            </div>
-          )}
-
-          {expanded && celestialMergeView && (
-            <div className="absolute inset-0 center-pulse">
-              <div 
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  width: '150px',
-                  height: '150px',
-                  background: 'radial-gradient(circle, rgba(0,255,255,0.2) 0%, transparent 70%)',
-                  borderRadius: '50%',
-                  animation: 'pulse 4s infinite ease-in-out'
-                }}
-              ></div>
-            </div>
-          )}
-
-          {expanded && universeMiniature && (
-            <div className="absolute bottom-20 right-20 pointer-events-auto">
-              <div 
-                className="bg-black/40 backdrop-blur-sm p-1 rounded-lg border border-blue-400/30"
-                style={{ width: '200px', height: '200px' }}
-              >
-                <img 
-                  src="/lovable-uploads/5b3d636e-41a6-4e13-b736-f645c9f7b0bc.png" 
-                  alt="Universe Miniature" 
-                  className="w-full h-full object-cover rounded opacity-80"
+          {/* Detection points */}
+          {detectionPoints}
+          
+          {/* Earth marker at center */}
+          <circle
+            cx="50%"
+            cy="50%"
+            r="8"
+            fill="rgba(56, 189, 248, 0.6)"
+            filter="drop-shadow(0 0 5px rgba(56, 189, 248, 0.8))"
+            className="guardian-earth-marker"
+          />
+          <circle
+            cx="50%"
+            cy="50%"
+            r="12"
+            fill="none"
+            stroke="rgba(56, 189, 248, 0.3)"
+            strokeWidth="1"
+            className="guardian-earth-aura"
+          />
+          <text
+            x="50%"
+            y="55%"
+            textAnchor="middle"
+            fill="rgba(255, 255, 255, 0.8)"
+            fontSize="5"
+            className="guardian-earth-label"
+          >
+            EARTH
+          </text>
+          
+          {/* Guardian Net labels */}
+          <text
+            x="10"
+            y="15"
+            fill="rgba(255, 215, 0, 0.8)"
+            fontSize="5"
+            className="guardian-grid-label"
+          >
+            CIA MANTIS NET
+          </text>
+          
+          <text
+            x="10"
+            y="25"
+            fill="rgba(56, 189, 248, 0.8)"
+            fontSize="5"
+            className="guardian-grid-label"
+          >
+            LOCKHEED DRAX GRID
+          </text>
+          
+          {/* Coordinate markers */}
+          {[0, 3, 6, 9, 12, 15, 18].map(i => (
+            <text
+              key={`marker-x-${i}`}
+              x={i * cellSize}
+              y={gridSize * cellSize + 12}
+              textAnchor="middle"
+              fill="rgba(255, 255, 255, 0.5)"
+              fontSize="5"
+            >
+              {i * 20}°
+            </text>
+          ))}
+          
+          {[0, 3, 6, 9, 12, 15, 18].map(i => (
+            <text
+              key={`marker-y-${i}`}
+              x="-8"
+              y={i * cellSize + 3}
+              textAnchor="end"
+              fill="rgba(255, 255, 255, 0.5)"
+              fontSize="5"
+            >
+              {i * 20}°
+            </text>
+          ))}
+        </svg>
+        
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/80 px-4 py-2 rounded-md border border-yellow-500/30">
+          <h2 className="text-yellow-300 text-lg font-semibold flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Guardian Net Protection System
+          </h2>
+        </div>
+        
+        {/* Control panel for Guardian Net */}
+        <Card className="absolute bottom-6 right-6 w-64 bg-black/80 border-yellow-500/30">
+          <CardContent className="pt-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-yellow-300 flex items-center gap-1">
+                  <Network className="h-4 w-4" /> CIA Mantis Net
+                </span>
+                <Switch 
+                  checked={settings.ciaNetVisible} 
+                  onCheckedChange={toggleCiaNetVisible}
                 />
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {!expanded && (
-        <div className="absolute bottom-4 left-4 z-10 bg-black/70 p-2 rounded pointer-events-auto">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-white text-xs border-blue-400/30"
-            onClick={onToggleExpanded}
-          >
-            Maximize Guardian Grid
-          </Button>
-        </div>
-      )}
-      
-      {/* Settings panel button */}
-      <div className="absolute top-4 right-4 z-10 pointer-events-auto">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="bg-black/70 hover:bg-black/90 text-white"
-          onClick={() => setShowSettings(!showSettings)}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          {showSettings ? "Hide" : "Settings"}
-        </Button>
-      </div>
-      
-      {/* Expanded settings panel */}
-      {showSettings && (
-        <div className="absolute right-4 top-16 z-10 bg-black/80 p-4 rounded-lg border border-blue-400/30 pointer-events-auto" style={{ width: '240px' }}>
-          <h3 className="text-sm text-blue-400 font-medium mb-3">Guardian Settings</h3>
-          
-          <div className="space-y-4">
-            {/* Grid opacity control - Accessible regardless of expansion state */}
-            <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="text-xs text-white">Grid Opacity</label>
-                <span className="text-xs text-white/80">{opacity}%</span>
-              </div>
-              <Slider
-                value={[opacity]}
-                min={10}
-                max={100}
-                step={5}
-                onValueChange={handleOpacityChange}
-                className="z-20"
-              />
-            </div>
-            
-            {/* Visibility toggles */}
-            <div className="space-y-2">
-              <h4 className="text-xs text-white/80">Grid Visibility</h4>
               
-              <div className="flex justify-between items-center">
-                <label className="text-xs text-white">CIA Mantis Net</label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={toggleCIANet}
-                      >
-                        {ciaNetVisible ? 
-                          <Eye className="h-4 w-4 text-yellow-400" /> : 
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        }
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">
-                      <p className="text-xs">{ciaNetVisible ? "Hide" : "Show"} CIA Mantis Net</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div className="flex items-center justify-between">
+                <span className="text-blue-300 flex items-center gap-1">
+                  <Shield className="h-4 w-4" /> Lockheed Grid
+                </span>
+                <Switch 
+                  checked={settings.lockheedGridVisible} 
+                  onCheckedChange={toggleLockheedGridVisible}
+                />
               </div>
               
-              <div className="flex justify-between items-center">
-                <label className="text-xs text-white">Lockheed Drax Grid</label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0"
-                        onClick={toggleLockheedGrid}
-                      >
-                        {lockheedGridVisible ? 
-                          <Eye className="h-4 w-4 text-blue-400" /> : 
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        }
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="left">
-                      <p className="text-xs">{lockheedGridVisible ? "Hide" : "Show"} Lockheed Grid</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-            </div>
-            
-            {/* Additional toggles visible in expanded mode */}
-            {expanded && (
-              <>
-                <div className="space-y-2">
-                  <h4 className="text-xs text-white/80">Grid Mode</h4>
-                  
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs text-white">Grid Lock</label>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0"
-                            onClick={toggleGridLock}
-                          >
-                            {gridLocked ? 
-                              <Lock className="h-4 w-4 text-orange-400" /> : 
-                              <Unlock className="h-4 w-4 text-gray-400" />
-                            }
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          <p className="text-xs">{gridLocked ? "Unlock" : "Lock"} Grid Orientation</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs text-white">Celestial Merge</label>
-                    <Switch 
-                      checked={celestialMergeView}
-                      onCheckedChange={setCelestialMergeView}
-                      size="sm"
-                    />
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs text-white">Universe Miniature</label>
-                    <Switch 
-                      checked={universeMiniature}
-                      onCheckedChange={setUniverseMiniature}
-                      size="sm"
-                    />
-                  </div>
+              <div className="space-y-1 pt-1">
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>Intensity</span>
+                  <span>{settings.opacity}%</span>
                 </div>
+                <Slider
+                  value={[settings.opacity]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={handleOpacityChange}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-white text-xs flex items-center gap-1">
+                  <Signal className="h-3.5 w-3.5" /> Universe Sync
+                </span>
+                <Switch 
+                  checked={settings.syncWithUniverseView}
+                  onCheckedChange={toggleSyncWithUniverseView}
+                />
+              </div>
+              
+              <div className="space-y-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-yellow-950/20 hover:bg-yellow-900/30 border-yellow-600/30 text-yellow-300"
+                  onClick={handleMantisAnalysis}
+                >
+                  <BarChart4 className="h-4 w-4 mr-2" />
+                  Run Mantis Analysis
+                </Button>
                 
-                <div className="pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs border-blue-400/30"
-                    onClick={onToggleExpanded}
-                  >
-                    <Minimize className="h-3 w-3 mr-2" />
-                    Minimize Grid View
-                  </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="w-full bg-blue-950/20 hover:bg-blue-900/30 border-blue-600/30 text-blue-300"
+                  onClick={() => onToggleExpanded()}
+                >
+                  <Minimize2 className="h-4 w-4 mr-2" />
+                  Minimize Guardian Grid
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        {/* Status panel */}
+        <Card className="absolute bottom-6 left-6 w-64 bg-black/80 border-blue-500/30">
+          <CardContent className="p-4">
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-blue-300">Grid Status</span>
+                <span className="text-green-400 text-sm flex items-center gap-1">
+                  <span className="h-2 w-2 bg-green-400 rounded-full inline-block animate-pulse"></span>
+                  Active
+                </span>
+              </div>
+              
+              <div className="space-y-1 pt-1">
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>Signal Strength</span>
+                  <span>{signalStrength}%</span>
                 </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                <div className="w-full h-1.5 bg-gray-800 rounded">
+                  <div 
+                    className="h-full bg-blue-500 rounded"
+                    style={{ width: `${signalStrength}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="space-y-1 pt-1">
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <span>Sensor Config</span>
+                  <span>{visibilityLevel}%</span>
+                </div>
+                <div className="w-full h-1.5 bg-gray-800 rounded">
+                  <div 
+                    className="h-full bg-yellow-500 rounded"
+                    style={{ width: `${visibilityLevel}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="text-xs text-gray-400 pt-2">
+                <div className="flex justify-between items-center mb-1">
+                  <span>Dimensional Protection</span>
+                  <span className="text-green-400">Secure</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span>Anomaly Detection</span>
+                  <span className="text-green-400">Active</span>
+                </div>
+                <div className="flex justify-between items-center mb-1">
+                  <span>Quantum Firewall</span>
+                  <span className="text-yellow-400">Partial</span>
+                </div>
+              </div>
+              
+              {showDetailedAnalysis && (
+                <div className="bg-black/60 p-2 rounded text-xs border border-blue-500/20">
+                  <p className="text-blue-300 mb-1">Analysis Results:</p>
+                  <p className="text-white/80">• Zero dimensional breaches</p>
+                  <p className="text-white/80">• Quantum signature stable</p>
+                  <p className="text-white/80">• Earth containment secure</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
